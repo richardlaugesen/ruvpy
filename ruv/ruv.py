@@ -44,8 +44,6 @@ def likelihoods(ens, thresholds):
  
 # Expected utility summation
 def expected_utility(likelihoods, net_expenses, risk_aversion, utility_function):
-    if risk_aversion == 0.0:
-        return np.sum(np.multiply(likelihoods, net_expenses))
     return np.sum(np.multiply(likelihoods, utility_function(risk_aversion, net_expenses)))
 
 

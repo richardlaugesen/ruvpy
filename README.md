@@ -28,9 +28,11 @@ Reference implementation of the Relative Utility Value metric (RUV) and a small 
 
 The RUV method has a foundation in Expected Utility Theory and as such requires a Utility function to be specified by the user. This maps an outcome from the economic model to decision-maker utility. Any custom function can be provided, and the following standard damage functions are implemented in the library:
 
-- Constant absolute risk aversion (CARA)
-- Constant relative risk aversion (CRRA)
-- Risk neutral (linear)
+- Exponential utility
+- Isoelastic utility
+- Hyperbolic absolute risk aversion
+
+These can, for example, be used to model constant absolute risk aversion (CARA), constant relative risk aversion (CRRA), and neurtral risk aversion.
 
 ### Damage functions
 
