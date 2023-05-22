@@ -40,7 +40,7 @@ def isoelastic_utility(eta, c):
     if eta == 1:
         return np.log(c)
     else:        
-        return np.divide(np.subtract(np.power(c, np.subtract(1, eta)), 1), np.subtract(1, eta))
+        return np.divide(np.power(c, np.subtract(1, eta)), np.subtract(1, eta))
 
 
 # Hyperbolic absolute risk aversion (https://en.wikipedia.org/wiki/Hyperbolic_absolute_risk_aversion)
