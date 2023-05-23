@@ -29,8 +29,8 @@ def test_cara():
 
 def test_crra():
     for risk_aversion in np.arange(0, 10, 0.5):
-        crra_ut = cara({'eta': risk_aversion})
-        iso_ut = exponential_utility({'eta': risk_aversion})
+        crra_ut = crra({'eta': risk_aversion})
+        iso_ut = isoelastic_utility({'eta': risk_aversion})
 
         for outcome in np.arange(0, 10, 0.5):
             assert np.equal(crra_ut(outcome), iso_ut(outcome))
