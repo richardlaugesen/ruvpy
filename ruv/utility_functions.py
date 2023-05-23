@@ -44,8 +44,18 @@ def isoelastic_utility(eta, c):
 
 
 # Hyperbolic absolute risk aversion (https://en.wikipedia.org/wiki/Hyperbolic_absolute_risk_aversion)
-def hyperbolic_utility(gamma, a, b, W):
-    assert a > 0
-    assert np.add(b, np.divide(np.multiply(a, W), np.subtract(1, gamma))) > 0
+def hyperbolic_utility(g, a, b, W):
+    if g == 0 or g == 1:
+        raise Exception('g cannot be 0 or 1')
 
-    return np.multiple(np.divide(np.subtract(1, gamma), gamma), np.power(np.add(np.divide(np.multiply(a, W), np.subtract(1, gamma), b)), gamma))
+    if a <= 0:
+        raise Exception('a > 0')
+    
+    if np.any(W < 0):
+        raise Exception('W must be positive')
+
+    if np.any(b + (a * W) / (1 - g) <= 0):
+        raise Exception('b + (a * W) / (1 - g) > 0')
+
+    return np.multiply(np.divide(np.subtract(1, g), g), np.power(np.add(np.divide(np.multiply(a, W), np.subtract(1, g)), b), g))
+
