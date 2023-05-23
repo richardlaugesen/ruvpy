@@ -34,6 +34,9 @@ def likelihoods(ens, thresholds):
     if thresholds is None:
         return np.full(ens.shape, 1/ens.shape[0])
 
+    if np.any(np.isnan(ens)):
+        raise ValueError('Cannot calculate likelihood of ensemble with missing values')
+
     # finite flow classes
     probs_above = ecdf_numpy(ens, thresholds)
     adjustment = np.roll(probs_above, -1)
@@ -41,7 +44,31 @@ def likelihoods(ens, thresholds):
     probs_between = np.subtract(probs_above, adjustment)
     return probs_between
 
+
+# which flow class is the value in
+def realised_threshold(value, thresholds):
+    # continuous flow classes
+    if thresholds is None:
+        return value
+
+    # finite flow classes
+    vals = np.subtract(value, thresholds)
+    idx = np.argmin(vals[vals >= 0.0])
+    return thresholds[idx]
+
  
+# 'event frequency' reference distribution for each timestep 
+# is simply the obs record with any missing values dropped
+def event_freq_ref(obs):
+    return np.tile(obs[~np.isnan(obs)], (obs.shape[0], 1))
+
+
+# convert probablisitic forecast into deterministic according to some 
+# decision level defined by a critical probability threshold
+def probabilistic_to_deterministic_forecast(fcst_ensemble, decision_level):
+    return np.nanquantile(fcst_ensemble, 1 - decision_level, axis=0)
+
+
 # Expected utility summation
 def expected_utility(likelihoods, net_expenses, risk_aversion, utility_function):
     return np.sum(np.multiply(likelihoods, utility_function(risk_aversion, net_expenses)))
@@ -56,22 +83,10 @@ def ex_ante_utility(spend, likelihoods, thresholds, risk_aversion, alpha, econom
 # ex post expected utility for single timestep
 def ex_post_utility(occured, spend, risk_aversion, alpha, economic_model, damage_function, utility_function):
     net_expense = economic_model(occured, spend, alpha, damage_function)
-    if risk_aversion == 0.0:
+    if risk_aversion == 0.0:    # TODO: remove this because utility function should handle it
         return net_expense
     else:
-        return utility_function(risk_aversion, net_expense)
-
-
-# which flow class is the value in
-def realised_threshold(value, thresholds):
-    # continuous flow classes
-    if thresholds is None:
-        return value
-
-    # finite flow classes
-    vals = np.subtract(value, thresholds)
-    idx = np.argmin(vals[vals >= 0.0])
-    return thresholds[idx]
+        return utility_function(risk_aversion, net_expense) # TODO: these utility functions should be pre-parameterised just like the damage functions
 
 
 # Amount to spend for a single timestep
@@ -90,18 +105,6 @@ def optimal_spend(likelihoods, thresholds, risk_aversion, alpha, economic_model,
     def minimise_this(spend):
         return -ex_ante_utility(spend, likelihoods, thresholds, risk_aversion, alpha, economic_model, damage_function, utility_function)
     return minimize_scalar(minimise_this, method='brent').x  # TODO: experiment with other methods
-
-
-# 'event frequency' reference distribution for each timestep is the obs record
-def event_freq_ref(obs):
-    ref = np.tile(obs, (obs.shape[0], 1))
-    ref[np.isnan(ref)] = np.nanmean(ref)  # TODO: replace this with an asset that there are no nan values in reference, can't have them when thresholds=None
-
-    return ref
-
-
-def probabilistic_to_deterministic_forecast(fcst_ensemble, decision_level):
-    return np.nanquantile(fcst_ensemble, 1 - decision_level, axis=0)
 
 
 # TODO: do all this inplace on an aligned numpy array for efficiency, rather than functionally
