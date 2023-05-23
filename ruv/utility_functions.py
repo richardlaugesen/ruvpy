@@ -17,45 +17,61 @@
 
 import numpy as np
 
+# Functional currying is used to allow a pre-paramterised utility functions to be passed into RUV
+
 # Constant Absolute Risk Aversion utility function
-def cara(risk_aversion, outcome):
-    return exponential_utility(risk_aversion, outcome)
+def cara(params):
+    return exponential_utility(params)
 
 
 # Constant Relaive Risk Aversion utility function
-def crra(risk_aversion, outcome):
-    return isoelastic_utility(risk_aversion, outcome)
+def crra(params):
+    return isoelastic_utility(params)
 
 
 # Exponential utility (https://en.wikipedia.org/wiki/Exponential_utility)
-def exponential_utility(alpha, c):
-    if alpha == 0:
-        return c
-    else:
-        return np.divide(-np.exp(np.multiply(-alpha, c)), alpha)
+def exponential_utility(params):
+    A = params['A']
+
+    def utility(c):
+        if A == 0:
+            return c
+        else:
+            return np.divide(-np.exp(np.multiply(-A, c)), A)
+
+    return utility
 
 
 # Isoelastic utility (https://en.wikipedia.org/wiki/Isoelastic_utility)
-def isoelastic_utility(eta, c):
-    if eta == 1:
-        return np.log(c)
-    else:        
-        return np.divide(np.power(c, np.subtract(1, eta)), np.subtract(1, eta))
+def isoelastic_utility(params):
+    eta = params['eta']
+
+    def utility(c):    
+        if eta == 1:
+            return np.log(c)
+        else:        
+            return np.divide(np.power(c, np.subtract(1, eta)), np.subtract(1, eta))
+
+    return utility
 
 
 # Hyperbolic absolute risk aversion (https://en.wikipedia.org/wiki/Hyperbolic_absolute_risk_aversion)
-def hyperbolic_utility(g, a, b, W):
-    if g == 0 or g == 1:
-        raise Exception('g cannot be 0 or 1')
+def hyperbolic_utility(params):
+    g, a, b = params['g'], params['a'], params['b']
 
-    if a <= 0:
-        raise Exception('a > 0')
-    
-    if np.any(W < 0):
-        raise Exception('W must be positive')
+    def utility(W):        
+        if g == 0 or g == 1:
+            raise Exception('g cannot be 0 or 1')
 
-    if np.any(b + (a * W) / (1 - g) <= 0):
-        raise Exception('b + (a * W) / (1 - g) > 0')
+        if a <= 0:
+            raise Exception('a > 0')
+        
+        if np.any(W < 0):
+            raise Exception('W must be positive')
 
-    return np.multiply(np.divide(np.subtract(1, g), g), np.power(np.add(np.divide(np.multiply(a, W), np.subtract(1, g)), b), g))
+        if np.any(b + (a * W) / (1 - g) <= 0):
+            raise Exception('b + (a * W) / (1 - g) > 0')
 
+        return np.multiply(np.divide(np.subtract(1, g), g), np.power(np.add(np.divide(np.multiply(a, W), np.subtract(1, g)), b), g))
+
+    return utility
