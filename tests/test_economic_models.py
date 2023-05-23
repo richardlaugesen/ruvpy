@@ -20,13 +20,14 @@ from ruv.damage_functions import logistic_zero
 
 def test_cost_loss_analytical_spend():
 
-    threshold = 0.5; alpha = 0.2
-    params = {'A': 1, 'k': 0.5, 'threshold': threshold}
+    params = {'A': 1, 'k': 0.5, 'threshold': 0.5}
     damage_func = logistic_zero(params)
 
+    decision_threshold = 0.7; alpha = 0.2
+
     assert np.equal(
-        cost_loss_analytical_spend(threshold, alpha, damage_func),
-        damage_func(threshold) * alpha)
+        cost_loss_analytical_spend(decision_threshold, alpha, damage_func),
+        damage_func(decision_threshold) * alpha)
 
 
 def test_cost_loss():
