@@ -69,42 +69,36 @@ def probabilistic_to_deterministic_forecast(fcst_ensemble, decision_level):
     return np.nanquantile(fcst_ensemble, 1 - decision_level, axis=0)
 
 
-# Expected utility summation
-def expected_utility(likelihoods, net_expenses, risk_aversion, utility_function):
-    return np.sum(np.multiply(likelihoods, utility_function(risk_aversion, net_expenses)))
-
-
 # ex ante expected utility for single timestep
 def ex_ante_utility(spend, likelihoods, thresholds, risk_aversion, alpha, economic_model, damage_function, utility_function):
     net_expenses = economic_model(thresholds, spend, alpha, damage_function)
-    return expected_utility(likelihoods, net_expenses, risk_aversion, utility_function)
+    expected_utility = np.sum(np.multiply(likelihoods, utility_function(risk_aversion, net_expenses)))
+    return expected_utility
 
 
 # ex post expected utility for single timestep
 def ex_post_utility(occured, spend, risk_aversion, alpha, economic_model, damage_function, utility_function):
     net_expense = economic_model(occured, spend, alpha, damage_function)
-    if risk_aversion == 0.0:    # TODO: remove this because utility function should handle it
-        return net_expense
-    else:
-        return utility_function(risk_aversion, net_expense) # TODO: these utility functions should be pre-parameterised just like the damage functions
+    return utility_function(risk_aversion, net_expense) # TODO: these utility functions should be pre-parameterised just like the damage functions
 
 
 # Amount to spend for a single timestep
-# Use fast analytical method if its a single value
+# Fast analytical method for deterministic forecast, pre-calculated likelihood for probabilistic
 def find_spend(fcst, likelihoods, thresholds, risk_aversion, alpha, economic_model, analytical_spend, damage_function, utility_function):
+    
+    # deterministic
     if type(fcst) is np.float64 or len(fcst) == 1:
         return analytical_spend(realised_threshold(fcst, thresholds), alpha, damage_function)
+    
+    # probabilistic
     else:
         thresholds = fcst if thresholds is None else thresholds    # Continuous flow decision
-        return optimal_spend(likelihoods, thresholds, risk_aversion, alpha, economic_model, damage_function, utility_function)
 
+        # Find optimial spend amount
+        def minimise_this(spend):
+            return -ex_ante_utility(spend, likelihoods, thresholds, risk_aversion, alpha, economic_model, damage_function, utility_function)        
 
-# Find optimial spend amount for single timestep with an ensemble of values 
-# (pre-calculated likelihood of occurence for each threshold)
-def optimal_spend(likelihoods, thresholds, risk_aversion, alpha, economic_model, damage_function, utility_function):
-    def minimise_this(spend):
-        return -ex_ante_utility(spend, likelihoods, thresholds, risk_aversion, alpha, economic_model, damage_function, utility_function)
-    return minimize_scalar(minimise_this, method='brent').x  # TODO: experiment with other methods
+        return minimize_scalar(minimise_this, method='brent').x  # TODO: experiment with other methods        
 
 
 # TODO: do all this inplace on an aligned numpy array for efficiency, rather than functionally
