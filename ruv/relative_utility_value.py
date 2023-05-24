@@ -70,21 +70,21 @@ def probabilistic_to_deterministic_forecast(fcst_ensemble, decision_level):
 
 
 # ex ante expected utility for single timestep
-def ex_ante_utility(spend, likelihoods, thresholds, risk_aversion, alpha, economic_model, damage_function, utility_function):
+def ex_ante_utility(spend, likelihoods, thresholds, alpha, economic_model, damage_function, utility_function):
     net_expenses = economic_model(thresholds, spend, alpha, damage_function)
-    expected_utility = np.sum(np.multiply(likelihoods, utility_function(risk_aversion, net_expenses)))
+    expected_utility = np.sum(np.multiply(likelihoods, utility_function(net_expenses)))
     return expected_utility
 
 
 # ex post expected utility for single timestep
-def ex_post_utility(occured, spend, risk_aversion, alpha, economic_model, damage_function, utility_function):
+def ex_post_utility(occured, spend, alpha, economic_model, damage_function, utility_function):
     net_expense = economic_model(occured, spend, alpha, damage_function)
-    return utility_function(risk_aversion, net_expense) # TODO: these utility functions should be pre-parameterised just like the damage functions
+    return utility_function(net_expense)
 
 
 # Amount to spend for a single timestep
 # Fast analytical method for deterministic forecast, pre-calculated likelihood for probabilistic
-def find_spend(fcst, likelihoods, thresholds, risk_aversion, alpha, economic_model, analytical_spend, damage_function, utility_function):
+def find_spend(fcst, likelihoods, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function):
     
     # deterministic
     if type(fcst) is np.float64 or len(fcst) == 1:
@@ -96,35 +96,35 @@ def find_spend(fcst, likelihoods, thresholds, risk_aversion, alpha, economic_mod
 
         # Find optimial spend amount
         def minimise_this(spend):
-            return -ex_ante_utility(spend, likelihoods, thresholds, risk_aversion, alpha, economic_model, damage_function, utility_function)        
+            return -ex_ante_utility(spend, likelihoods, thresholds, alpha, economic_model, damage_function, utility_function)        
 
         return minimize_scalar(minimise_this, method='brent').x  # TODO: experiment with other methods        
 
 
 # TODO: do all this inplace on an aligned numpy array for efficiency, rather than functionally
-def single_timestep(t, ob, thresholds, risk_aversion, alpha, economic_model, analytical_spend, damage_function, utility_function, fcst, fcst_likelihoods, ref, ref_likelihoods):
+def single_timestep(t, ob, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function, fcst, fcst_likelihoods, ref, ref_likelihoods):
 
     # threshold that occurred
     ob_threshold = realised_threshold(ob, thresholds)
 
     # perfect
-    obs_spends = find_spend(ob, None, thresholds, risk_aversion, alpha, economic_model, analytical_spend, damage_function, utility_function)
-    obs_ex_post = ex_post_utility(ob_threshold, obs_spends, risk_aversion, alpha, economic_model, damage_function, utility_function)
+    obs_spends = find_spend(ob, None, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function)
+    obs_ex_post = ex_post_utility(ob_threshold, obs_spends, alpha, economic_model, damage_function, utility_function)
     
     # forecast
-    fcst_spends = find_spend(fcst, fcst_likelihoods, thresholds, risk_aversion, alpha, economic_model, analytical_spend, damage_function, utility_function)
-    fcst_ex_post = ex_post_utility(ob_threshold, fcst_spends, risk_aversion, alpha, economic_model, damage_function, utility_function)
+    fcst_spends = find_spend(fcst, fcst_likelihoods, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function)
+    fcst_ex_post = ex_post_utility(ob_threshold, fcst_spends, alpha, economic_model, damage_function, utility_function)
 
     # reference
-    ref_spends = find_spend(ref, ref_likelihoods, thresholds, risk_aversion, alpha, economic_model, analytical_spend, damage_function, utility_function)
-    ref_ex_post = ex_post_utility(ob_threshold, ref_spends, risk_aversion, alpha, economic_model, damage_function, utility_function)
+    ref_spends = find_spend(ref, ref_likelihoods, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function)
+    ref_ex_post = ex_post_utility(ob_threshold, ref_spends, alpha, economic_model, damage_function, utility_function)
 
     return t, obs_spends, obs_ex_post, fcst_spends, fcst_ex_post, ref_spends, ref_ex_post
 
 
 # Calculate RUV for a single alpha value by finding spend amounts and utilities for all timesteps
 # Timesteps are parallelised over multiple CPU cores
-def single_alpha(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, risk_aversion, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose):
+def single_alpha(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose):
 
     fcst_ex_post = 0.0
     obs_ex_post = 0.0
@@ -140,7 +140,7 @@ def single_alpha(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thres
     args = []
     for t, ob in enumerate(obs):
         if not np.isnan(ob):
-            args.append((t, ob, thresholds, risk_aversion, alpha, economic_model, analytical_spend, damage_function, utility_function, fcst[t], fcst_likelihoods[t], ref[t], ref_likelihoods[t]))
+            args.append((t, ob, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function, fcst[t], fcst_likelihoods[t], ref[t], ref_likelihoods[t]))
 
     with Pool(cpus) as pool:
         pool_results = pool.starmap(single_timestep, args)
@@ -169,7 +169,7 @@ def single_alpha(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thres
 # Relative Economic Model metric
 #   thresholds = None means to run for continuous flow
 #   ref = None means to use 'event frequency'
-def calc_ruv(obs, fcst, ref, thresholds, alphas, risk_aversion, economic_model, analytical_spend, damage_function, utility_function, cpus=1, fcst_threshold_equals_alpha=False, verbose=False):
+def calc_ruv(obs, fcst, ref, thresholds, alphas, economic_model, analytical_spend, damage_function, utility_function, cpus=1, fcst_threshold_equals_alpha=False, verbose=False):
 
     # handle event frequency reference
     if ref is None:
@@ -214,7 +214,7 @@ def calc_ruv(obs, fcst, ref, thresholds, alphas, risk_aversion, economic_model, 
                 using_ref = probabilistic_to_deterministic_forecast(ref.T, alpha)   # TODO: avoid this transpose
                 using_ref = np.reshape(using_ref, (1, len(using_ref)))[0]  
 
-        single_alpha_result = single_alpha(alpha, obs, using_fcst, using_ref, fcst_likelihoods, ref_likelihoods, thresholds, risk_aversion, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose)
+        single_alpha_result = single_alpha(alpha, obs, using_fcst, using_ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose)
 
         ruvs[a] = single_alpha_result[0]
         fcst_avg_ex_post[a] = single_alpha_result[1]
@@ -242,17 +242,20 @@ def calc_ruv(obs, fcst, ref, thresholds, alphas, risk_aversion, economic_model, 
     return result
 
 
-def relative_utility_value(obs, fcst, ref, decision_def, step=0.01, alphas = None, threshold_eq_alpha=False, cpus=4, verbose=False):
+def relative_utility_value(obs, fcst, ref, decision_def, step=0.01, alphas=None, threshold_eq_alpha=False, cpus=4, verbose=False):
     alphas = np.arange(step, 1, step) if alphas is None else alphas
     
-    decisions = decision_def['decision_thresholds']
-    aversion = decision_def['risk_aversion']
-    utility_fnc = decision_def['utility_function']
     damage_fnc_mth = decision_def['damage_function'][0]
     damage_fnc_params = decision_def['damage_function'][1]
+    damage_fnc = damage_fnc_mth(damage_fnc_params)
+
+    utility_fnc_mth = decision_def['utility_function'][0]
+    utility_fnc_params = decision_def['utility_function'][1]
+    utility_fnc = utility_fnc_mth(utility_fnc_params)
+
+    decisions = decision_def['decision_thresholds']
     econ_model, fast_spend = decision_def['economic_model']
 
-    damage_fnc = damage_fnc_mth(damage_fnc_params)
-    result = calc_ruv(obs, fcst, ref, decisions, alphas, aversion, econ_model, fast_spend, damage_fnc, utility_fnc, cpus, threshold_eq_alpha, verbose=verbose)
+    result = calc_ruv(obs, fcst, ref, decisions, alphas, econ_model, fast_spend, damage_fnc, utility_fnc, cpus, threshold_eq_alpha, verbose=verbose)
     
     return result['ruv'], result, alphas
