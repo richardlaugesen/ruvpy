@@ -106,9 +106,10 @@ def ex_post_utility(occured, spend, alpha, economic_model, damage_function, util
 # Fast analytical method for deterministic forecast, pre-calculated likelihood for probabilistic
 def find_spend(fcst, likelihoods, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function):
     
-    # deterministic
+    # deterministic    
+    spend_amount = np.nan
     if isinstance(fcst, (int, float)) or len(fcst) == 1:
-        return analytical_spend(realised_threshold(fcst, thresholds), alpha, damage_function)
+        spend_amount = analytical_spend(realised_threshold(fcst, thresholds), alpha, damage_function)
     
     # probabilistic
     else:
@@ -118,10 +119,12 @@ def find_spend(fcst, likelihoods, thresholds, alpha, economic_model, analytical_
         def minimise_this(spend):
             return -ex_ante_utility(spend, likelihoods, thresholds, alpha, economic_model, damage_function, utility_function)        
 
-        return minimize_scalar(minimise_this, method='brent').x  # TODO: experiment with other methods        
+        spend_amount = minimize_scalar(minimise_this, method='brent').x  # TODO: experiment with other methods        
+
+    return spend_amount
 
 
-# TODO: do all this inplace on an aligned numpy array for efficiency, rather than functionally
+# TODO: do all this inplace on an aligned numpy array or xarray for efficiency, rather than functionally
 def single_timestep(t, ob, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function, fcst, fcst_likelihoods, ref, ref_likelihoods):
 
     # threshold that occurred
@@ -145,6 +148,8 @@ def single_timestep(t, ob, thresholds, alpha, economic_model, analytical_spend, 
 # Calculate RUV for a single alpha value by finding spend amounts and utilities for all timesteps
 # Timesteps are parallelised over multiple CPU cores
 def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose):
+    
+    # TODO: could we use xarray to store all this and simplify the code?
     fcst_spends = np.full(obs.shape[0], np.nan)
     obs_spends = np.full(obs.shape[0], np.nan)
     ref_spends = np.full(obs.shape[0], np.nan)
@@ -159,7 +164,7 @@ def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods,
     args = list(map(list, zip(*args)))
 
     with Pool(nodes=cpus) as pool:
-        results = pool.map(single_timestep, *args)
+        results = pool.map(single_timestep, *args)  # TODO: try the different map functions to see which is fastest
 
     for completed_result in results:
         t = completed_result[0]
@@ -173,7 +178,6 @@ def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods,
     fcst_avg_ex_post = np.nanmean(fcst_ex_post)
     obs_avg_ex_post = np.nanmean(obs_ex_post)
     ref_avg_ex_post = np.nanmean(ref_ex_post)
-
     ruv = (ref_avg_ex_post - fcst_avg_ex_post) / (ref_avg_ex_post - obs_avg_ex_post)
 
     if verbose:
