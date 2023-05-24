@@ -240,7 +240,7 @@ def test_multiple_timesteps():
 
     result = multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, 1, False)
 
-    assert np.isclose(result[0], 0.0445, 1e-2)
-    assert np.isclose(result[1], -3.399, 1e-2)
-    assert np.isclose(result[2], -3.340, 1e-2)
-    assert np.isclose(result[3], -3.402, 1e-2)
+    assert np.isclose(result['ruv'], 0.0445, 1e-2)
+    assert np.isclose(result['fcst_avg_ex_post'], -3.399, 1e-2)
+    assert np.isclose(result['obs_avg_ex_post'], -3.340, 1e-2)
+    assert np.isclose(result['ref_avg_ex_post'], -3.402, 1e-2)

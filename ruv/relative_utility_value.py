@@ -149,7 +149,6 @@ def single_timestep(t, ob, thresholds, alpha, economic_model, analytical_spend, 
 # Timesteps are parallelised over multiple CPU cores
 def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose):
     
-    # TODO: could we use xarray to store all this and simplify the code?
     fcst_spends = np.full(obs.shape[0], np.nan)
     obs_spends = np.full(obs.shape[0], np.nan)
     ref_spends = np.full(obs.shape[0], np.nan)
@@ -182,8 +181,21 @@ def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods,
 
     if verbose:
         print('Alpha: %.3f   RUV: %.2f' % (alpha, ruv))
-        
-    return [ruv, fcst_avg_ex_post, obs_avg_ex_post, ref_avg_ex_post, fcst_spends, obs_spends, ref_spends, fcst_ex_post, obs_ex_post, ref_ex_post]
+
+    result = {
+        'ruv': ruv,
+        'fcst_avg_ex_post': fcst_avg_ex_post,
+        'obs_avg_ex_post': obs_avg_ex_post,
+        'ref_avg_ex_post': ref_avg_ex_post,
+        'fcst_spends': fcst_spends,
+        'obs_spends': obs_spends,
+        'ref_spends': ref_spends,
+        'fcst_ex_post': fcst_ex_post,
+        'obs_ex_post': obs_ex_post,
+        'ref_ex_post': ref_ex_post
+    }
+
+    return result        
 
 
 # TODO: replace this function with a multiple_alpha and move everything else into api function
@@ -233,6 +245,7 @@ def calc_ruv(obs, fcst, ref, thresholds, alphas, economic_model, analytical_spen
 
         single_alpha_result = multiple_timesteps(alpha, obs, using_fcst, using_ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose)
 
+        # TODO: replace all these with dictionary key lookups
         ruvs[a] = single_alpha_result[0]
         fcst_avg_ex_post[a] = single_alpha_result[1]
         obs_avg_ex_post[a] = single_alpha_result[2]
