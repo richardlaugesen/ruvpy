@@ -144,11 +144,7 @@ def single_timestep(t, ob, thresholds, alpha, economic_model, analytical_spend, 
 
 # Calculate RUV for a single alpha value by finding spend amounts and utilities for all timesteps
 # Timesteps are parallelised over multiple CPU cores
-def single_alpha(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose):
-
-    fcst_ex_post = 0.0
-    obs_ex_post = 0.0
-    ref_ex_post = 0.0
+def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose):
     fcst_spends = np.full(obs.shape[0], np.nan)
     obs_spends = np.full(obs.shape[0], np.nan)
     ref_spends = np.full(obs.shape[0], np.nan)
@@ -185,6 +181,8 @@ def single_alpha(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thres
         
     return [ruv, fcst_avg_ex_post, obs_avg_ex_post, ref_avg_ex_post, fcst_spends, obs_spends, ref_spends, fcst_ex_post, obs_ex_post, ref_ex_post]
 
+
+# TODO: replace this function with a multiple_alpha and move everything else into api function
 
 # Relative Economic Model metric
 #   thresholds = None means to run for continuous flow
@@ -229,7 +227,7 @@ def calc_ruv(obs, fcst, ref, thresholds, alphas, economic_model, analytical_spen
                 using_ref = probabilistic_to_deterministic_forecast(ref, alpha)
                 using_ref = np.reshape(using_ref, (1, len(using_ref)))[0]  
 
-        single_alpha_result = single_alpha(alpha, obs, using_fcst, using_ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose)
+        single_alpha_result = multiple_timesteps(alpha, obs, using_fcst, using_ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose)
 
         ruvs[a] = single_alpha_result[0]
         fcst_avg_ex_post[a] = single_alpha_result[1]
