@@ -24,16 +24,6 @@ from ruv.economic_models import *
 from ruv.utility_functions import *
 
 
-def setup():
-    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 0.5})
-    decision_threshold = 0.3; 
-    alpha = 0.1; 
-    value = 0.7; 
-    spend = 0.052
-    economic_model = cost_loss
-    utility_func = cara
-
-
 def test_ecdf_numpy():
     ens = np.array([])
     thresholds = np.array([])
@@ -122,3 +112,50 @@ def test_event_freq_ref():
     ref = event_freq_ref(obs)
     assert np.isclose(np.mean(ref), np.nanmean(obs), 1e-5)
     assert np.array_equal(ref.shape, (obs.shape[0], obs.shape[0] - np.sum(np.isnan(obs))))
+
+
+def test_ex_ante_utility():
+    thresholds = np.arange(5, 20, 1)
+    economic_model = cost_loss
+    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
+    utility_func = cara({'A': 0.3})
+    np.random.seed(42)
+    ens = np.random.normal(10, 1, 100)
+    probs = likelihoods(ens, thresholds)
+
+    alpha = 0.1; spend = 0.052
+    assert np.isclose(
+        ex_ante_utility(spend, probs, thresholds, alpha, economic_model, damage_func, utility_func),
+        -3.386, 1e-2)
+    
+    alpha = 0.7; spend = 0.052
+    assert np.isclose(
+        ex_ante_utility(spend, probs, thresholds, alpha, economic_model, damage_func, utility_func),
+        -3.386, 1e-2)
+    
+    alpha = 0.1; spend = 3
+    assert np.isclose(
+        ex_ante_utility(spend, probs, thresholds, alpha, economic_model, damage_func, utility_func),
+        -8.199, 1e-2)    
+
+
+def test_ex_post_utility():
+    thresholds = np.arange(5, 20, 1)
+    economic_model = cost_loss
+    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
+    utility_func = cara({'A': 0.3})
+    
+    occured = thresholds[10]; alpha = 0.1; spend = 0.052
+    assert np.isclose(
+        ex_post_utility(occured, spend, alpha, economic_model, damage_func, utility_func),
+        -3.386, 1e-2)
+    
+    occured = thresholds[10]; alpha = 0.7; spend = 0.052
+    assert np.isclose(
+        ex_post_utility(occured, spend, alpha, economic_model, damage_func, utility_func),
+        -3.847, 1e-2)
+    
+    occured = thresholds[10]; alpha = 0.1; spend = 3
+    assert np.isclose(
+        ex_post_utility(occured, spend, alpha, economic_model, damage_func, utility_func),
+        -8.199, 1e-2)    
