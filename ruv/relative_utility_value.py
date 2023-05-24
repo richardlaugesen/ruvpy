@@ -17,7 +17,7 @@
 
 import numpy as np
 from scipy.optimize import minimize_scalar
-from multiprocessing import Pool
+from pathos.pools import ProcessPool as Pool
 
 
 # 5 times faster then statsmodels ecdf
@@ -29,13 +29,16 @@ def ecdf_numpy(ens, thresholds):
 
 
 # Forecast probability of an ensemble within each flow class for single timestep
-def likelihoods(ens, thresholds):
+def calc_likelihoods(ens, thresholds):
     # continuous flow classes
     if thresholds is None:
         return np.full(ens.shape, 1/ens.shape[0])
 
     if np.any(np.isnan(ens)):
         raise ValueError('Cannot calculate likelihood of ensemble with missing values')
+
+    if isinstance(ens, (int, float)) or len(ens) == 1:
+        raise ValueError('Likelihood for deterministic forecast (single value) not implemented')
 
     # finite flow classes
     probs_above = ecdf_numpy(ens, thresholds)
@@ -45,15 +48,32 @@ def likelihoods(ens, thresholds):
     return probs_between
 
 
+# Forecast probability of a series ensemble within each flow class for set of timesteps
+# Number of timesteps defined by the prodived obs series
+# TODO: why is it NA for timesteps where obs is NA? just a perfomance thing? If so then lets remove it
+def all_likelihoods(obs, ensembles, thresholds):
+    likelihoods = np.full((obs.shape[0], ensembles.shape[1] if thresholds is None else thresholds.shape[0]), np.nan)
+
+    for t, ob in enumerate(obs):
+        if not np.isnan(ob):
+            likelihoods[t] = calc_likelihoods(ensembles[t], thresholds)
+
+    return likelihoods
+
+
 # which flow class is the value in
 def realised_threshold(value, thresholds):
     # continuous flow classes
     if thresholds is None:
         return value
 
+    if value < np.min(thresholds):
+        raise ValueError('Value is less than smallest threshold')
+
     # finite flow classes
     vals = np.subtract(value, thresholds)
     idx = np.argmin(vals[vals >= 0.0])
+
     return thresholds[idx]
 
  
@@ -66,7 +86,7 @@ def event_freq_ref(obs):
 # convert probablisitic forecast into deterministic according to some 
 # decision level defined by a critical probability threshold
 def probabilistic_to_deterministic_forecast(fcst_ensemble, decision_level):
-    return np.nanquantile(fcst_ensemble, 1 - decision_level, axis=0)
+    return np.nanquantile(fcst_ensemble, 1 - decision_level, axis=1)
 
 
 # ex ante expected utility for single timestep
@@ -87,7 +107,7 @@ def ex_post_utility(occured, spend, alpha, economic_model, damage_function, util
 def find_spend(fcst, likelihoods, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function):
     
     # deterministic
-    if type(fcst) is np.float64 or len(fcst) == 1:
+    if isinstance(fcst, (int, float)) or len(fcst) == 1:
         return analytical_spend(realised_threshold(fcst, thresholds), alpha, damage_function)
     
     # probabilistic
@@ -136,16 +156,16 @@ def single_alpha(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thres
     obs_ex_post = np.full(obs.shape[0], np.nan)
     ref_ex_post = np.full(obs.shape[0], np.nan)
 
-    # Spend amounts and utilities for each timestep
     args = []
     for t, ob in enumerate(obs):
         if not np.isnan(ob):
-            args.append((t, ob, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function, fcst[t], fcst_likelihoods[t], ref[t], ref_likelihoods[t]))
+            args.append([t, ob, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function, fcst[t], fcst_likelihoods[t], ref[t], ref_likelihoods[t]])
+    args = list(map(list, zip(*args)))
 
-    with Pool(cpus) as pool:
-        pool_results = pool.starmap(single_timestep, args)
+    with Pool(nodes=cpus) as pool:
+        results = pool.map(single_timestep, *args)
 
-    for completed_result in pool_results:
+    for completed_result in results:
         t = completed_result[0]
         obs_spends[t] = completed_result[1]
         obs_ex_post[t] = completed_result[2]
@@ -190,14 +210,9 @@ def calc_ruv(obs, fcst, ref, thresholds, alphas, economic_model, analytical_spen
     fcst_ex_post = {}
     obs_ex_post = {}
     ref_ex_post = {}
-    fcst_likelihoods = np.full((obs.shape[0], fcst.shape[1] if thresholds is None else thresholds.shape[0]), np.nan)
-    ref_likelihoods = np.full((obs.shape[0], ref.shape[1] if thresholds is None else thresholds.shape[0]), np.nan)
 
-    # pre-calculate forecast prob in each flow class
-    for t, ob in enumerate(obs):
-        if not np.isnan(ob):
-            fcst_likelihoods[t] = likelihoods(fcst[t], thresholds)
-            ref_likelihoods[t] = likelihoods(ref[t], thresholds)
+    fcst_likelihoods = all_likelihoods(obs, fcst, thresholds)
+    ref_likelihoods = all_likelihoods(obs, ref, thresholds)
 
     # calc RUV for each alpha value (over multiple CPU cores)
     for a, alpha in enumerate(alphas):
@@ -206,12 +221,12 @@ def calc_ruv(obs, fcst, ref, thresholds, alphas, economic_model, analytical_spen
 
         # convert prob forecast to det using critical forecast threshold set to alpha
         if fcst_threshold_equals_alpha:
-            using_fcst = probabilistic_to_deterministic_forecast(fcst.T, alpha)     # TODO: avoid this transpose
+            using_fcst = probabilistic_to_deterministic_forecast(fcst, alpha)
             using_fcst = np.reshape(using_fcst, (1, len(using_fcst)))[0]  
 
             # only adjust the ref distribution if its not the event frequency
             if not using_event_freq_ref:
-                using_ref = probabilistic_to_deterministic_forecast(ref.T, alpha)   # TODO: avoid this transpose
+                using_ref = probabilistic_to_deterministic_forecast(ref, alpha)
                 using_ref = np.reshape(using_ref, (1, len(using_ref)))[0]  
 
         single_alpha_result = single_alpha(alpha, obs, using_fcst, using_ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose)
