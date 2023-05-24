@@ -219,7 +219,7 @@ def test_single_timestep():
     assert np.isclose(ref_spends, 0.0076, 1e-2) 
 
 
-def test_single_alpha():
+def test_multiple_timesteps():
     alpha = 0.1
     thresholds = np.arange(0, 20, 1)
     economic_model = cost_loss
@@ -238,7 +238,7 @@ def test_single_alpha():
     ref = np.random.normal(5, 3, (num_steps, ens_size))
     ref_likelihoods = all_likelihoods(obs, ref, thresholds)
 
-    result = single_alpha(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, 1, False)
+    result = multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, 1, False)
 
     assert np.isclose(result[0], 0.0445, 1e-2)
     assert np.isclose(result[1], -3.399, 1e-2)
