@@ -47,23 +47,32 @@ def test_ecdf_numpy():
                       np.subtract(1, ECDF(ens, 'left')(thresholds)), 1e-3)
 
 
-def test_likelihoods():
+def test_calc_likelihoods():
     np.random.seed(42)
     ens = np.random.normal(10, 1, 100)
     
     thresholds = np.arange(5, 15, 1)
-    assert np.allclose(likelihoods(ens, thresholds),
+    assert np.allclose(calc_likelihoods(ens, thresholds),
                        np.array([0, 0, 0.01, 0.16, 0.37, 0.35, 0.11, 0, 0, 0]), 1e-1)
+
+    with pytest.raises(ValueError):
+        calc_likelihoods(3, thresholds)
+
+    with pytest.raises(ValueError):
+        calc_likelihoods(3.2, thresholds)
+
+    with pytest.raises(ValueError):
+        calc_likelihoods([3], thresholds)
 
     with pytest.raises(ValueError):
         ens[20:60] = np.nan
         #ens = ens[~np.isnan(ens)]
-        likelihoods(ens, thresholds)
+        calc_likelihoods(ens, thresholds)
 
     thresholds = None
-    assert np.array_equal(likelihoods(ens, thresholds),
+    assert np.array_equal(calc_likelihoods(ens, thresholds),
                           np.full(100, 1e-2))
-
+    
 
 def test_realised_threshold():
     thresholds = np.array([0, 3, 6])
@@ -74,6 +83,9 @@ def test_realised_threshold():
     assert np.equal(realised_threshold(7, thresholds), 6)
 
     with pytest.raises(ValueError):
+        realised_threshold(0.1, [1, 2, 3])
+
+    with pytest.raises(ValueError):
         values = [0.5, 3, 3.5, 6, 7]
         realised_threshold(values, thresholds)
 
@@ -82,11 +94,11 @@ def test_realised_threshold():
 
 def test_probabilistic_to_deterministic_forecast():
     np.random.seed(42)
-    fcst_ens = np.random.normal(10, 1, (1000, 5))  # (ens_members, timesteps)
+    fcst_ens = np.random.normal(10, 1, (5, 1000))  # (timesteps, ens_members)
 
     assert np.allclose(
         probabilistic_to_deterministic_forecast(fcst_ens, 0.5),
-        np.array([10.02788548, 9.96583783, 10.02239477, 10.06476768, 9.99314539]), 1e-5)
+        np.array([10.02530061, 10.06307713,  9.99974924, 10.00018457,  9.98175801]), 1e-5)
     
     with pytest.raises(ValueError):
         probabilistic_to_deterministic_forecast(fcst_ens, -1)
@@ -94,15 +106,15 @@ def test_probabilistic_to_deterministic_forecast():
     with pytest.raises(ValueError):
         probabilistic_to_deterministic_forecast(fcst_ens, 2)
 
-    fcst_ens = np.random.normal(10, 1, (1000, 1))
+    fcst_ens = np.random.normal(10, 1, (1, 1000))
     assert np.allclose(
         probabilistic_to_deterministic_forecast(fcst_ens, 0.5),
         np.array([9.95717293]), 1e-5)
     
-    fcst_ens = np.random.normal(10, 1, (1, 10))
+    fcst_ens = np.random.normal(10, 1, (10, 1))
     assert np.allclose(
         probabilistic_to_deterministic_forecast(fcst_ens, 0.5),
-        fcst_ens[0], 1e-5)
+        fcst_ens.T, 1e-5)
 
 
 def test_event_freq_ref():
@@ -121,7 +133,7 @@ def test_ex_ante_utility():
     utility_func = cara({'A': 0.3})
     np.random.seed(42)
     ens = np.random.normal(10, 1, 100)
-    probs = likelihoods(ens, thresholds)
+    probs = calc_likelihoods(ens, thresholds)
 
     alpha = 0.1; spend = 0.052
     assert np.isclose(
@@ -159,3 +171,76 @@ def test_ex_post_utility():
     assert np.isclose(
         ex_post_utility(occured, spend, alpha, economic_model, damage_func, utility_func),
         -8.199, 1e-2)    
+
+
+def test_find_spend():
+    thresholds = np.arange(5, 20, 1)
+    economic_model = cost_loss
+    analytical_spend = cost_loss_analytical_spend
+    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
+    utility_func = cara({'A': 0.3})
+
+    np.random.seed(42)
+    ens = np.random.normal(10, 1, 100)
+    probs = calc_likelihoods(ens, thresholds)
+    alpha = 0.1
+    assert np.isclose(
+        find_spend(ens, probs, thresholds, alpha, economic_model, analytical_spend, damage_func, utility_func),
+        0.012, 1e-1)
+
+    det = 7.2
+    probs = None
+    alpha = 0.1
+    assert np.isclose(
+        find_spend(det, probs, thresholds, alpha, economic_model, analytical_spend, damage_func, utility_func),
+        0.0018, 1e-3)
+
+
+def test_single_timestep():
+    t = 1
+    ob = 10
+    alpha = 0.1    
+    thresholds = np.arange(5, 20, 1)
+    economic_model = cost_loss
+    analytical_spend = cost_loss_analytical_spend
+    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
+    utility_func = cara({'A': 0.3})
+
+    np.random.seed(42)    
+    fcst = np.random.normal(10, 1, 100)
+    fcst_probs = calc_likelihoods(fcst, thresholds)
+
+    ref = np.random.normal(5, 3, 100)
+    ref_probs = calc_likelihoods(ref, thresholds)
+
+    t, obs_spends, obs_ex_post, fcst_spends, fcst_ex_post, ref_spends, ref_ex_post = single_timestep(t, ob, thresholds, alpha, economic_model, analytical_spend, damage_func, utility_func, fcst, fcst_probs, ref, ref_probs)
+    assert np.isclose(obs_spends, 0.0076, 1e-2) 
+    assert np.isclose(fcst_spends, 0.012, 1e-2) 
+    assert np.isclose(ref_spends, 0.0076, 1e-2) 
+
+
+def test_single_alpha():
+    alpha = 0.1
+    thresholds = np.arange(0, 20, 1)
+    economic_model = cost_loss
+    analytical_spend = cost_loss_analytical_spend
+    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
+    utility_func = cara({'A': 0.3})
+
+    np.random.seed(42)
+    num_steps = 20
+    ens_size = 100
+
+    # (timesteps, ens_members)
+    obs = np.random.gamma(1, 5, (num_steps, 1))
+    fcst = np.random.normal(10, 1, (num_steps, ens_size))
+    fcst_likelihoods = all_likelihoods(obs, fcst, thresholds)
+    ref = np.random.normal(5, 3, (num_steps, ens_size))
+    ref_likelihoods = all_likelihoods(obs, ref, thresholds)
+
+    result = single_alpha(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, 1, False)
+
+    assert np.isclose(result[0], 0.0445, 1e-2)
+    assert np.isclose(result[1], -3.399, 1e-2)
+    assert np.isclose(result[2], -3.340, 1e-2)
+    assert np.isclose(result[3], -3.402, 1e-2)
