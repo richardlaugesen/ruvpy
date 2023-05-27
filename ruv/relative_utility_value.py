@@ -125,7 +125,7 @@ def single_timestep(t, ob, thresholds, alpha, economic_model, analytical_spend, 
     ref_spends = find_spend(ref, ref_likelihoods, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function)
     ref_ex_post = ex_post_utility(ob_threshold, ref_spends, alpha, economic_model, damage_function, utility_function)
 
-    result = {
+    return {
         't': t,
         'obs_spends': obs_spends,
         'obs_ex_post': obs_ex_post,
@@ -134,12 +134,11 @@ def single_timestep(t, ob, thresholds, alpha, economic_model, analytical_spend, 
         'ref_spends': ref_spends,
         'ref_ex_post': ref_ex_post
     }
-    return result
 
 
 # Calculate RUV for a single alpha value by finding spend amounts and utilities for all timesteps
 # Timesteps are parallelised over multiple CPU cores
-def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose):
+def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, parallel_nodes):
     fcst_spends, obs_spends, ref_spends, fcst_ex_post, obs_ex_post, ref_ex_post = np.full((6, obs.shape[0]), np.nan)
 
     args = []
@@ -148,7 +147,7 @@ def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods,
             args.append([t, ob, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function, fcst[t], fcst_likelihoods[t], ref[t], ref_likelihoods[t]])
     args = list(map(list, zip(*args)))
 
-    with Pool(nodes=cpus) as pool:
+    with Pool(nodes=parallel_nodes) as pool:
         results = pool.map(single_timestep, *args)  # TODO: try the different map functions to see which is fastest
 
     for result in results:
@@ -165,10 +164,10 @@ def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods,
     ref_avg_ex_post = np.nanmean(ref_ex_post)
     ruv = (ref_avg_ex_post - fcst_avg_ex_post) / (ref_avg_ex_post - obs_avg_ex_post)
 
-    if verbose:
-        print('Alpha: %.3f   RUV: %.2f' % (alpha, ruv))
+    # TODO: replace this with a logger
+    print('Alpha: %.3f   RUV: %.2f' % (alpha, ruv))
 
-    result = {
+    return {
         'ruv': ruv,
         'fcst_avg_ex_post': fcst_avg_ex_post,
         'obs_avg_ex_post': obs_avg_ex_post,
@@ -179,13 +178,12 @@ def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods,
         'fcst_ex_post': fcst_ex_post,
         'obs_ex_post': obs_ex_post,
         'ref_ex_post': ref_ex_post,
-        'alpha': alpha
+        'fcst_likelihoods': fcst_likelihoods,
+        'ref_likelihoods': ref_likelihoods
     }
-    return result
 
 
-# TODO: get rid of these super long function signatures
-def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, crit_prob_eq_alpha, cpus, verbose):
+def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, crit_prob_eq_alpha, parallel_nodes):
     ruvs, fcst_avg_ex_post, obs_avg_ex_post, ref_avg_ex_post = np.full((4, alphas.shape[0]), np.nan)
     fcst_spends = {}; obs_spends = {}; ref_spends = {}; fcst_ex_post = {}; obs_ex_post = {}; ref_ex_post = {}
 
@@ -199,8 +197,9 @@ def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, 
             fcst_likelihoods = all_likelihoods(obs, curr_fcsts, thresholds)
             ref_likelihoods = all_likelihoods(obs, curr_refs, thresholds)
 
-        # calculate results
-        results = multiple_timesteps(alpha, obs, curr_fcsts, curr_refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose)
+        # calculate RUV and store results
+        results = multiple_timesteps(alpha, obs, curr_fcsts, curr_refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, parallel_nodes)
+        
         ruvs[a] = results['ruv']
         fcst_avg_ex_post[a] = results['fcst_avg_ex_post']
         obs_avg_ex_post[a] = results['obs_avg_ex_post']
@@ -212,7 +211,7 @@ def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, 
         obs_ex_post[a] = results['obs_ex_post']
         ref_ex_post[a] = results['ref_ex_post']
 
-    result = {
+    return {
         'ruv': ruvs,
         'fcst_avg_ex_post': fcst_avg_ex_post,
         'obs_avg_ex_post': obs_avg_ex_post,
@@ -220,58 +219,70 @@ def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, 
         'fcst_spends': fcst_spends,
         'obs_spends': obs_spends,
         'ref_spends': ref_spends,
-        'fcst_likelihoods': fcst_likelihoods,
-        'ref_likelihoods': ref_likelihoods,
-        'alphas': alphas
-    }
-    return result
-
-
-# Relative Economic Model metric
-#   thresholds = None means to run for continuous flow
-#   ref = None means to use 'event frequency'
-def calc_ruv(obs, fcsts, refs, thresholds, alphas, economic_model, analytical_spend, damage_function, utility_function, cpus, crit_prob_eq_alpha, verbose):
-
-    if refs is None:
-        refs = event_freq_ref(obs)
-        event_freq_ref = True
-    else:
-        event_freq_ref = False
-    
-    fcst_likelihoods = all_likelihoods(obs, fcsts, thresholds)
-    ref_likelihoods = all_likelihoods(obs, refs, thresholds)
-
-    results = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, cpus, verbose, crit_prob_eq_alpha, event_freq_ref)
-
-    result = {
-        'ruv': ruvs,
-        'fcst_avg_ex_post': fcst_avg_ex_post,
-        'obs_avg_ex_post': obs_avg_ex_post,
-        'ref_avg_ex_post': ref_avg_ex_post,
-        'fcst_spends': fcst_spends,
-        'obs_spends': obs_spends,
-        'ref_spends': ref_spends,
+        'fcst_ex_post': fcst_ex_post,
+        'obs_ex_post': obs_ex_post,
+        'ref_ex_post': ref_ex_post,        
         'fcst_likelihoods': fcst_likelihoods,
         'ref_likelihoods': ref_likelihoods
     }
 
-    return result
 
+# TODO: get rid of these super long function signatures, could use Data Classes from Py 3.7
 
-def relative_utility_value(obs, fcst, ref, decision_def, step=0.01, alphas=None, crit_prob_eq_alpha=False, cpus=4, verbose=False):
-    alphas = np.arange(step, 1, step) if alphas is None else alphas
-    
-    damage_fnc_mth = decision_def['damage_function'][0]
-    damage_fnc_params = decision_def['damage_function'][1]
+#   thresholds = None means to run for continuous flow
+#   refs = None means to use 'event frequency'
+#   alphas = None means generate 
+def relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=4):
+
+    alphas = decision_definition['alphas']
+
+    # construct damage, utility, and economic functions
+    damage_fnc_mth = decision_definition['damage_function'][0]
+    damage_fnc_params = decision_definition['damage_function'][1]
     damage_fnc = damage_fnc_mth(damage_fnc_params)
 
-    utility_fnc_mth = decision_def['utility_function'][0]
-    utility_fnc_params = decision_def['utility_function'][1]
+    utility_fnc_mth = decision_definition['utility_function'][0]
+    utility_fnc_params = decision_definition['utility_function'][1]
     utility_fnc = utility_fnc_mth(utility_fnc_params)
 
-    decisions = decision_def['decision_thresholds']     # TODO: define the crit_prob_eq_alpha method by setting these to something? None for continuou, nan for crit_prob_eq_alpha?
-    econ_model, fast_spend = decision_def['economic_model']
+    decision_thresholds = decision_definition['decision_thresholds']
+    econ_model, fast_spend = decision_definition['economic_model']
 
-    result = calc_ruv(obs, fcst, ref, decisions, alphas, econ_model, fast_spend, damage_fnc, utility_fnc, cpus, crit_prob_eq_alpha, verbose=verbose)
-    
-    return result['ruv'], result, alphas
+    # what decision making method shall we use
+    if decision_definition['decision_method'] is 'critical_probability_threshold_fixed':
+
+        # convert probabilistic forecasts to deterministic
+        critical_prob_threshold = decision_definition['critical_probability_threshold']
+        fcsts = probabilistic_to_deterministic_forecast(fcsts, critical_prob_threshold)
+        refs = probabilistic_to_deterministic_forecast(refs, critical_prob_threshold)
+        crit_prob_eq_alpha = False
+
+    elif decision_definition['decision_method'] is 'critical_probability_threshold_equals_alpha':
+        crit_prob_eq_alpha = True
+
+    elif decision_definition['decision_method'] is 'optimise_over_forecast_distribution':
+        crit_prob_eq_alpha = False
+
+    # Pre-calculate the forecast likelihoods for each threshold class
+    fcst_likelihoods = all_likelihoods(obs, fcsts, decision_thresholds)
+    refs = generate_event_freq_ref(obs) if refs is None else refs
+    ref_likelihoods = all_likelihoods(obs, refs, decision_thresholds)
+
+    # Calculate RUV
+    results = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, decision_thresholds, econ_model, fast_spend, damage_fnc, utility_fnc, crit_prob_eq_alpha, parallel_nodes)
+
+    return {
+        'ruv': results['ruv'],
+        'fcst_avg_ex_post': results['fcst_avg_ex_post'],
+        'obs_avg_ex_post': results['obs_avg_ex_post'],
+        'ref_avg_ex_post': results['ref_avg_ex_post'],
+        'fcst_spends': results['fcst_spends'],
+        'obs_spends': results['obs_spends'],
+        'ref_spends': results['ref_spends'],
+        'fcst_likelihoods': results['fcst_likelihoods'],
+        'ref_likelihoods': results['ref_likelihoods'],
+        'fcst_ex_post': results['fcst_ex_post'],
+        'obs_ex_post': results['obs_ex_post'],
+        'ref_ex_post': results['ref_ex_post'],
+        'decision_definition': decision_definition
+    }
