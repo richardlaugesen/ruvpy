@@ -70,7 +70,7 @@ To calculate RUV it must simulate decision making at each timestep, there are th
 - Free and Open Source Software licence
 - Community code of conduct
 - Python v3 with standard code conventions
-- Only two dependencies (numpy, scipy)
+- Only three dependencies (numpy, scipy, pathos)
 - Sane versioning and DOI
 
 ### Conventions
