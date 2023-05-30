@@ -23,6 +23,7 @@ from ruv.damage_functions import *
 from ruv.economic_models import *
 from ruv.utility_functions import *
 
+# TODO: Now tests are written, confirm that the numbers in here are actually what we excpect, could calculate manually
 
 def test_ecdf_numpy():
     ens = np.array([])
@@ -73,6 +74,12 @@ def test_calc_likelihoods():
         ens[20:60] = np.nan
         #ens = ens[~np.isnan(ens)]
         calc_likelihoods(ens, thresholds)
+
+    with pytest.raises(ValueError):
+        calc_likelihoods(None, thresholds)
+
+    with pytest.raises(ValueError):
+        calc_likelihoods(None, None)
 
     thresholds = None
     assert np.array_equal(calc_likelihoods(ens, thresholds),
@@ -279,14 +286,16 @@ def test_multiple_alpha():
     refs[refs < 0] = 0
     ref_likelihoods = all_likelihoods(obs, refs, thresholds)    
 
-    crit_prob_eq_alpha = False
-    result = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, crit_prob_eq_alpha, 1)
+    # TODO: update this test so results discriminate between the decision_method cases
+
+    decision_method = 'optimise_over_forecast_distribution'
+    result = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
     assert np.allclose(
         result['ruv'],
         [0.184053111, -0.0742971672, -0.467401918, -1.65026591, -117.108686], 1e-3)
 
-    crit_prob_eq_alpha = True
-    result = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, crit_prob_eq_alpha, 1)
+    decision_method = 'critical_probability_threshold_equals_alpha'
+    result = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
     assert np.allclose(
         result['ruv'],
         [0.184053111, -0.0742971672, -0.467401918, -1.65026591, -117.108686], 1e-3)
@@ -294,33 +303,33 @@ def test_multiple_alpha():
     refs = generate_event_freq_ref(obs)
     ref_likelihoods = all_likelihoods(obs, refs, thresholds)    
 
-    crit_prob_eq_alpha = False
-    result = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, crit_prob_eq_alpha, 1)
+    decision_method = 'optimise_over_forecast_distribution'
+    result = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
     assert np.allclose(
         result['ruv'],
         [-74.0584681, -0.0742971679, -0.472369878, -1.71864364, -117.108684], 1e-3)
 
-    crit_prob_eq_alpha = True
-    result = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, crit_prob_eq_alpha, 1)
+    decision_method = 'critical_probability_threshold_equals_alpha'
+    result = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
     assert np.allclose(
         result['ruv'],
         [-74.0584681, -0.0742971679, -0.472369878, -1.71864364, -117.108684], 1e-3)
 
     # two methods are equivilent when risk aversion is small
     utility_func = cara({'A': 0.1})
-    crit_prob_eq_alpha = False
-    result_1 = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, crit_prob_eq_alpha, 1)
+    decision_method = 'optimise_over_forecast_distribution'
+    result_1 = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
     result_1 = result_1
-    crit_prob_eq_alpha = True
-    result_2 = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, crit_prob_eq_alpha, 1)
+    decision_method = 'critical_probability_threshold_equals_alpha'
+    result_2 = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
     assert np.allclose(result_1['ruv'], result_2['ruv'], 1e-3)    
 
     # two methods not equivilent when risk aversion is high
     utility_func = cara({'A': 5})
-    crit_prob_eq_alpha = False
-    result_1 = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, crit_prob_eq_alpha, 1)
-    crit_prob_eq_alpha = True
-    result_2 = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, crit_prob_eq_alpha, 1)
+    decision_method = 'optimise_over_forecast_distribution'
+    result_1 = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
+    decision_method = 'critical_probability_threshold_equals_alpha'
+    result_2 = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
     assert not np.allclose(result_1['ruv'], result_2['ruv'], 1e-3)
 
 
@@ -373,3 +382,16 @@ def test_relative_utility_value():
     assert np.allclose(
         results['ruv'],
         [-74.0584681, -0.0742971679, -0.472369878, -1.71864364, -117.108684], 1e-3)
+    
+    decision_definition = {
+        'alphas': np.array([0.001, 0.25, 0.5, 0.75, 0.999]),
+        'damage_function': [logistic_zero, {'A': 1, 'k': 0.5, 'threshold': 15}],
+        'utility_function': [cara, {'A': 0.3}],
+        'economic_model': [cost_loss, cost_loss_analytical_spend],
+        'decision_thresholds': np.arange(0, 20, 3)
+    }
+    results_default_method = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
+
+    decision_definition['decision_method'] = 'optimise_over_forecast_distribution'
+    results_defined_method = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
+    assert np.array_equal(results_default_method['ruv'], results_defined_method['ruv'])
