@@ -30,6 +30,9 @@ def ecdf_numpy(ens, thresholds):
 
 # Forecast probability of an ensemble within each flow class for single timestep
 def calc_likelihoods(ens, thresholds):
+    if ens is None:
+        raise ValueError('Ensemble cannot be None, use generate_event_freq_ref() if using event frequency as reference forecast')
+
     if thresholds is None:  # continuous flow classes
         return np.full(ens.shape, 1/ens.shape[0])
 
@@ -53,7 +56,11 @@ def calc_likelihoods(ens, thresholds):
 # Forecast probability of a series ensemble within each flow class for set of timesteps
 # Number of timesteps defined by the prodived obs series
 # TODO: why is it NA for timesteps where obs is NA? just a perfomance thing? If so then lets remove it
+# TODO: need test for this
 def all_likelihoods(obs, ensembles, thresholds):
+    if ensembles is None:
+        raise ValueError('Ensemble cannot be None, use generate_event_freq_ref() if using event frequency as reference forecast')
+
     likelihoods = np.full((obs.shape[0], ensembles.shape[1] if thresholds is None else thresholds.shape[0]), np.nan)
 
     for t, ob in enumerate(obs):
@@ -85,7 +92,10 @@ def generate_event_freq_ref(obs):
 # convert probablisitic forecast into deterministic according to some 
 # decision level defined by a critical probability threshold
 def probabilistic_to_deterministic_forecast(fcst_ensemble, decision_level):
-    return np.nanquantile(fcst_ensemble, 1 - decision_level, axis=1)
+    if fcst_ensemble is None:   # handle edge case when using event frequency reference distribution
+        return None
+    else:
+        return np.nanquantile(fcst_ensemble, 1 - decision_level, axis=1)
 
 
 # ex ante expected utility for single timestep
@@ -183,15 +193,18 @@ def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods,
     }
 
 
-def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, crit_prob_eq_alpha, parallel_nodes):
+def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, decision_method, parallel_nodes):
     ruvs, fcst_avg_ex_post, obs_avg_ex_post, ref_avg_ex_post = np.full((4, alphas.shape[0]), np.nan)
     fcst_spends = {}; obs_spends = {}; ref_spends = {}; fcst_ex_post = {}; obs_ex_post = {}; ref_ex_post = {}
+
+    if decision_method == 'critical_probability_threshold_max_value':
+        raise NotImplementedError('critical_probability_threshold_max_value method is not implemented yet')
 
     for a, alpha in enumerate(alphas):
 
         # Use "critical probability threshold equals alpha" method
         curr_fcsts = fcsts; curr_refs = refs
-        if crit_prob_eq_alpha:
+        if decision_method == 'critical_probability_threshold_equals_alpha':
             curr_fcsts = probabilistic_to_deterministic_forecast(fcsts, alpha)
             curr_refs = probabilistic_to_deterministic_forecast(refs, alpha)
             fcst_likelihoods = all_likelihoods(obs, curr_fcsts, thresholds)
@@ -249,19 +262,25 @@ def relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes
     econ_model, fast_spend = decision_definition['economic_model']
 
     # what decision making method shall we use
-    if decision_definition['decision_method'] is 'critical_probability_threshold_fixed':
+    if 'decision_method' not in decision_definition.keys():
+        decision_definition['decision_method'] = 'optimise_over_forecast_distribution'
+
+    if decision_definition['decision_method'] == 'critical_probability_threshold_fixed':
+        decision_method = 'critical_probability_threshold_fixed'
 
         # convert probabilistic forecasts to deterministic
         critical_prob_threshold = decision_definition['critical_probability_threshold']
         fcsts = probabilistic_to_deterministic_forecast(fcsts, critical_prob_threshold)
         refs = probabilistic_to_deterministic_forecast(refs, critical_prob_threshold)
-        crit_prob_eq_alpha = False
 
-    elif decision_definition['decision_method'] is 'critical_probability_threshold_equals_alpha':
-        crit_prob_eq_alpha = True
+    elif decision_definition['decision_method'] == 'critical_probability_threshold_equals_alpha':
+        decision_method = 'critical_probability_threshold_equals_alpha'
 
-    elif decision_definition['decision_method'] is 'optimise_over_forecast_distribution':
-        crit_prob_eq_alpha = False
+    elif decision_definition['decision_method'] == 'critical_probability_threshold_max_value':
+        decision_method = 'critical_probability_threshold_max_value'
+
+    elif decision_definition['decision_method'] == 'optimise_over_forecast_distribution':
+        decision_method = 'optimise_over_forecast_distribution'
 
     # Pre-calculate the forecast likelihoods for each threshold class
     fcst_likelihoods = all_likelihoods(obs, fcsts, decision_thresholds)
@@ -269,7 +288,7 @@ def relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes
     ref_likelihoods = all_likelihoods(obs, refs, decision_thresholds)
 
     # Calculate RUV
-    results = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, decision_thresholds, econ_model, fast_spend, damage_fnc, utility_fnc, crit_prob_eq_alpha, parallel_nodes)
+    results = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, decision_thresholds, econ_model, fast_spend, damage_fnc, utility_fnc, decision_method, parallel_nodes)
 
     return {
         'ruv': results['ruv'],
