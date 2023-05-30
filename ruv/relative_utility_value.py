@@ -56,7 +56,7 @@ def calc_likelihoods(ens, thresholds):
 # Forecast probability of a series ensemble within each flow class for set of timesteps
 # Number of timesteps defined by the prodived obs series
 # TODO: why is it NA for timesteps where obs is NA? just a perfomance thing? If so then lets remove it
-# TODO: need test for this
+# TODO: need test for this new function
 def all_likelihoods(obs, ensembles, thresholds):
     if ensembles is None:
         raise ValueError('Ensemble cannot be None, use generate_event_freq_ref() if using event frequency as reference forecast')
@@ -244,7 +244,6 @@ def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, 
 
 #   thresholds = None means to run for continuous flow
 #   refs = None means to use 'event frequency'
-#   alphas = None means generate 
 def relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=4):
 
     alphas = decision_definition['alphas']

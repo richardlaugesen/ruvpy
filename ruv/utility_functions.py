@@ -41,6 +41,7 @@ def exponential_utility(params):
 
     return utility
 
+# TODO: add little helper functions to convert between risk premium and CARA risk aversion coef
 
 # Isoelastic utility (https://en.wikipedia.org/wiki/Isoelastic_utility)
 def isoelastic_utility(params):
