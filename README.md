@@ -50,7 +50,15 @@ The RUV method also requires an economic model to be specified. This returns the
 
 ### Decision types
 
-The RUV method can quantify forecast value for binary, multi-categorical, or continuous-value decisions through user defined decision thresholds. A continuous-value decision type is specified by setting the decision threshold to None. 
+The RUV method can quantify forecast value for binary, multi-categorical, or continuous-value decisions through user defined decision thresholds. A continuous-value decision type is specified by setting the decision threshold to None.
+
+### Decision making methods
+
+To calculate RUV it must simulate decision making at each timestep, there are three methods implemented:
+
+- optimise_over_forecast_distribution
+- critical_probability_threshold_fixed
+- critical_probability_threshold_equals_alpha
 
 ## Software
 
