@@ -148,7 +148,7 @@ def single_timestep(t, ob, thresholds, alpha, economic_model, analytical_spend, 
 
 # Calculate RUV for a single alpha value by finding spend amounts and utilities for all timesteps
 # Timesteps are parallelised over multiple CPU cores
-def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, parallel_nodes):
+def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, parallel_nodes, verbose=False):
     fcst_spends, obs_spends, ref_spends, fcst_ex_post, obs_ex_post, ref_ex_post = np.full((6, obs.shape[0]), np.nan)
 
     args = []
@@ -175,7 +175,8 @@ def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods,
     ruv = (ref_avg_ex_post - fcst_avg_ex_post) / (ref_avg_ex_post - obs_avg_ex_post)
 
     # TODO: replace this with a logger
-    print('Alpha: %.3f   RUV: %.2f' % (alpha, ruv))
+    if verbose:
+        print('Alpha: %.3f   RUV: %.2f' % (alpha, ruv))
 
     return {
         'ruv': ruv,
@@ -193,7 +194,7 @@ def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods,
     }
 
 
-def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, decision_method, parallel_nodes):
+def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, decision_method, parallel_nodes, verbose=False):
     ruvs, fcst_avg_ex_post, obs_avg_ex_post, ref_avg_ex_post = np.full((4, alphas.shape[0]), np.nan)
     fcst_spends = {}; obs_spends = {}; ref_spends = {}; fcst_ex_post = {}; obs_ex_post = {}; ref_ex_post = {}
 
@@ -211,7 +212,7 @@ def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, 
             ref_likelihoods = all_likelihoods(obs, curr_refs, thresholds)
 
         # calculate RUV and store results
-        results = multiple_timesteps(alpha, obs, curr_fcsts, curr_refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, parallel_nodes)
+        results = multiple_timesteps(alpha, obs, curr_fcsts, curr_refs, fcst_likelihoods, ref_likelihoods, thresholds, economic_model, analytical_spend, damage_function, utility_function, parallel_nodes, verbose)
         
         ruvs[a] = results['ruv']
         fcst_avg_ex_post[a] = results['fcst_avg_ex_post']
@@ -244,7 +245,7 @@ def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, 
 
 #   thresholds = None means to run for continuous flow
 #   refs = None means to use 'event frequency'
-def relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=4):
+def relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=4, verbose=False):
 
     alphas = decision_definition['alphas']
 
@@ -287,7 +288,7 @@ def relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes
     ref_likelihoods = all_likelihoods(obs, refs, decision_thresholds)
 
     # Calculate RUV
-    results = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, decision_thresholds, econ_model, fast_spend, damage_fnc, utility_fnc, decision_method, parallel_nodes)
+    results = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, decision_thresholds, econ_model, fast_spend, damage_fnc, utility_fnc, decision_method, parallel_nodes, verbose)
 
     return {
         'ruv': results['ruv'],
