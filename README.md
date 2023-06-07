@@ -32,7 +32,9 @@ The RUV method has a foundation in Expected Utility Theory and as such requires 
 - Isoelastic utility
 - Hyperbolic absolute risk aversion
 
-These can, for example, be used to model constant absolute risk aversion (CARA), constant relative risk aversion (CRRA), and neurtral risk aversion.
+These can, for example, be used to model constant absolute risk aversion (CARA), constant relative risk aversion (CRRA), and neurtral risk aversion. 
+
+Helper functions included to convert between CARA risk aversion coefficient, risk premium, and probability premium (Babcock, 1993).
 
 ### Damage functions
 

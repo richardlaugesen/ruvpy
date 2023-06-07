@@ -78,13 +78,13 @@ def hyperbolic_utility(params):
     return utility
 
 
-# Calculate CARA risk premium coefficient from risk aversion coefficient and gamble size (Babcock, 1993. Eq 4)
-def risk_aversion_coef_to_risk_premium_coef(risk_aversion, gamble_size):
+# Calculate CARA risk premium from risk aversion coefficient and gamble size (Babcock, 1993. Eq 4)
+def risk_aversion_coef_to_risk_premium(risk_aversion, gamble_size):
     return np.log(0.5 * (np.exp(-risk_aversion * gamble_size) + np.exp(risk_aversion * gamble_size))) / (risk_aversion * gamble_size)
 
 
-# Calculate CARA risk aversion coefficient from risk premium coefficient and gamble size (Babcock, 1993. Eq 4)
-def risk_premium_coef_to_risk_aversion_coef(risk_premium, gamble_size):
+# Calculate CARA risk aversion coefficient from risk premium and gamble size (Babcock, 1993. Eq 4)
+def risk_premium_to_risk_aversion_coef(risk_premium, gamble_size):
     if risk_premium < 0 or risk_premium > 1:
         raise Exception('risk_premium range is 0 to 1')
 
@@ -93,8 +93,8 @@ def risk_premium_coef_to_risk_aversion_coef(risk_premium, gamble_size):
     return root_scalar(eqn, bracket=[0.0000001, 100]).root
 
 
-# Calculate CARA risk premium probability from CARA risk premium coefficient (Babcock, 1993. Eq 9)
-def risk_premium_coef_to_risk_premium_prob(risk_premium):
+# Calculate CARA probability premium from risk premium (Babcock, 1993. Eq 9)
+def risk_premium_to_prob_premium(risk_premium):
     if risk_premium < 0 or risk_premium > 1:
         raise Exception('risk_premium range is 0 to 1')
 
@@ -106,8 +106,8 @@ def risk_premium_coef_to_risk_premium_prob(risk_premium):
     return root_scalar(eqn, bracket=[0.0000001, 0.49999]).root
 
 
-# Calculate CARA risk aversion coefficient from risk premium probability (Babcock, 1993. Eq 4, 9)
-def risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size):
+# Calculate CARA risk aversion coefficient from probability premium (Babcock, 1993. Eq 4, 9)
+def prob_premium_to_risk_aversion_coef(risk_premium_prob, gamble_size):
     if risk_premium_prob < 0 or risk_premium_prob > 0.5:
         raise Exception('risk_premium_prob range is 0 to 0.5')
 
