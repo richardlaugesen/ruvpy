@@ -1,28 +1,15 @@
 # Relative Utility Value (RUV)
 
-[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
-[![An ethical open source project](https://img.shields.io/badge/ethical-source-%23bb8c3c?labelColor=393162)](https://ethicalsource.dev/definition/)
-
-RUV is a library to quantify the value of forecast information for decision making using the Relative Utility Value metric (Laugesen, 2023). 
 
 [Open Science](https://en.wikipedia.org/wiki/Open_science) infrastructure written in [Python](https://python.org/).
 
-## Status
-
-Under ongoing development and not ready for general use. Don't expect backward compatibility at this stage.
-
-## Installing
-
-Empty
-
-## Publications
+RUV is a library to quantify the value of forecast information for decision making using the Relative Utility Value metric. This reference implementation is reasonably computationally efficient and parallelises timesteps over available CPU cores. It includes a library of core utility functions, damage functions, and economic models. It does not include any figure generation, data loading and saving, other metrics, or analysis functionality.
 
 Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27, 873–893, https://doi.org/10.5194/hess-27-873-2023, 2023.
 
 ## Functionality
-
-Reference implementation of the Relative Utility Value metric (RUV) and a small library of utility functions, damage functions, and economic models. It does not include any plotting, other metrics, data loading and saving, or analysis.
 
 ### Utility functions
 
@@ -67,7 +54,7 @@ To calculate RUV it must simulate decision making at each timestep, there are th
 ### Features
 
 - Simple front end
-- Unit tests with 100% coverage
+- Unit tests with close to 100% coverage
 - Examples as Jupyter notebooks
 - Free and Open Source Software licence
 - Community code of conduct
@@ -77,7 +64,7 @@ To calculate RUV it must simulate decision making at each timestep, there are th
 
 ### Conventions
 
-- Functional style programming
+- Functional programming style
 - Clarity over cleverness
 - DRY and YAGNI
 - Vanilla python and numpy arrays
@@ -91,22 +78,6 @@ Sufficiently modern version of python 3, numpy, scipy.
 ## Code of conduct
 
 We encourage you to contribute! Everyone interacting with this project is expected to follow the [Code of Conduct](code_of_conduct.md). 
-
-## Copyright and licence
-
-Copyright 2023 Richard Laugesen
-
-RUV is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-VOF is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-See [COPYING](COPYING) and [COPYING.LESSER](COPYING.LESSER)
 
 ## Contact
 
