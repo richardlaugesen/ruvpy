@@ -43,36 +43,6 @@ def exponential_utility(params):
     return utility
 
 
-# Calculate CARA risk premium coefficient from risk aversion coefficient and gamble size (Babcock, 1993. Eq 4)
-def risk_aversion_coef_to_risk_premium_coef(risk_aversion, gamble_size):
-    return np.log(0.5 * (np.exp(-risk_aversion * gamble_size) + np.exp(risk_aversion * gamble_size))) / (risk_aversion * gamble_size)
-
-
-# Calculate CARA risk aversion coefficient from risk premium coefficient and gamble size (Babcock, 1993. Eq 4)
-def risk_premium_coef_to_risk_aversion_coef(risk_premium, gamble_size):
-    def eqn(A):
-        return np.log(0.5 * (np.exp(-A * gamble_size) + np.exp(A * gamble_size))) / (A * gamble_size) - risk_premium
-    return root_scalar(eqn, bracket=[0.0000001, 100]).root
-
-
-# Calculate CARA risk premium probability from CARA risk premium coefficient (Babcock, 1993. Eq 9)
-def risk_premium_coef_to_risk_premium_prob(risk_premium):
-    def eqn(prob):
-        return  np.log((1 + 4 * np.power(prob, 2)) / (1 - 4 * np.power(prob, 2))) / np.log((1 + 2 * prob) / (1 - 2 * prob)) - risk_premium
-    return root_scalar(eqn, bracket=[0.0000001, 0.4999999]).root
-
-
-# Calculate CARA risk aversion coefficient from risk premium probability (Babcock, 1993. Eq 4, 9)
-def risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size):
-    def eqn(A):
-        return (
-            np.log((1 + 4 * np.power(risk_premium_prob, 2)) / (1 - 4 * np.power(risk_premium_prob, 2))) /
-            np.log((1 + 2 * risk_premium_prob) / (1 - 2 * risk_premium_prob)) -
-            np.log(0.5 * (np.exp(-A * gamble_size) + np.exp(A * gamble_size))) / (A * gamble_size)
-        )
-    return root_scalar(eqn, bracket=[0.0000001, 100]).root
-
-
 # Isoelastic utility (https://en.wikipedia.org/wiki/Isoelastic_utility)
 def isoelastic_utility(params):
     eta = params['eta']
@@ -106,3 +76,33 @@ def hyperbolic_utility(params):
         return np.multiply(np.divide(np.subtract(1, g), g), np.power(np.add(np.divide(np.multiply(a, W), np.subtract(1, g)), b), g))
 
     return utility
+
+
+# Calculate CARA risk premium coefficient from risk aversion coefficient and gamble size (Babcock, 1993. Eq 4)
+def risk_aversion_coef_to_risk_premium_coef(risk_aversion, gamble_size):
+    return np.log(0.5 * (np.exp(-risk_aversion * gamble_size) + np.exp(risk_aversion * gamble_size))) / (risk_aversion * gamble_size)
+
+
+# Calculate CARA risk aversion coefficient from risk premium coefficient and gamble size (Babcock, 1993. Eq 4)
+def risk_premium_coef_to_risk_aversion_coef(risk_premium, gamble_size):
+    def eqn(A):
+        return np.log(0.5 * (np.exp(-A * gamble_size) + np.exp(A * gamble_size))) / (A * gamble_size) - risk_premium
+    return root_scalar(eqn, bracket=[0.0000001, 100]).root
+
+
+# Calculate CARA risk premium probability from CARA risk premium coefficient (Babcock, 1993. Eq 9)
+def risk_premium_coef_to_risk_premium_prob(risk_premium):
+    def eqn(prob):
+        return  np.log((1 + 4 * np.power(prob, 2)) / (1 - 4 * np.power(prob, 2))) / np.log((1 + 2 * prob) / (1 - 2 * prob)) - risk_premium
+    return root_scalar(eqn, bracket=[0.0000001, 0.4999999]).root
+
+
+# Calculate CARA risk aversion coefficient from risk premium probability (Babcock, 1993. Eq 4, 9)
+def risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size):
+    def eqn(A):
+        return (
+            np.log((1 + 4 * np.power(risk_premium_prob, 2)) / (1 - 4 * np.power(risk_premium_prob, 2))) /
+            np.log((1 + 2 * risk_premium_prob) / (1 - 2 * risk_premium_prob)) -
+            np.log(0.5 * (np.exp(-A * gamble_size) + np.exp(A * gamble_size))) / (A * gamble_size)
+        )
+    return root_scalar(eqn, bracket=[0.0000001, 100]).root
