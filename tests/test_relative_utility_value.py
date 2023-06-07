@@ -436,11 +436,13 @@ def test_risk_premium_coef_to_risk_premium_prob():
     for i, risk_premium_prob in enumerate(risk_premium_probs):
         assert np.isclose(risk_premium_coef_to_risk_premium_prob(risk_premium_prob), expected_result[i], 1e-3)  
 
-    # Fails because its too close to the 0.5 bound and scipy root_scalar cant handle it
-    # risk_premium_probs = [0.7698, 0.9307, 0.98614]
-    # expected_result = [0.452574, 0.499955, 0.5]
-    # for i, risk_premium_prob in enumerate(risk_premium_probs):
-    #     assert np.isclose(risk_premium_coef_to_risk_premium_prob(risk_premium_prob), expected_result[i], 1e-3)  
+    risk_premium_prob = 0.7698
+    expected_result = 0.452574
+    assert np.isclose(risk_premium_coef_to_risk_premium_prob(risk_premium_prob), expected_result, 1e-3)  
+
+    risk_premium_prob = 0.9999
+    with pytest.raises(Exception):
+        risk_premium_coef_to_risk_premium_prob(risk_premium_prob)
 
 
 def test_risk_premium_prob_to_risk_aversion_coef():
@@ -456,9 +458,7 @@ def test_risk_premium_prob_to_risk_aversion_coef():
     for i, risk_premium_prob in enumerate(risk_premium_probs):
         assert np.isclose(risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size), expected_result[i], 1e-3)   
 
-    # Fails because its too close to the 0.5 bound and scipy root_scalar cant handle it
-    # risk_premium_probs = [0.7698, 0.9307, 0.98614]
-    # gamble_size = 10
-    # expected_result = [0.3, 1, 5]
-    # for i, risk_premium_prob in enumerate(risk_premium_probs):
-    #     assert np.isclose(risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size), expected_result[i], 1e-3)
+    risk_premium_prob = 0.93
+    gamble_size = 10
+    with pytest.raises(Exception):
+        risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size)

@@ -85,6 +85,9 @@ def risk_aversion_coef_to_risk_premium_coef(risk_aversion, gamble_size):
 
 # Calculate CARA risk aversion coefficient from risk premium coefficient and gamble size (Babcock, 1993. Eq 4)
 def risk_premium_coef_to_risk_aversion_coef(risk_premium, gamble_size):
+    if risk_premium < 0 or risk_premium > 1:
+        raise Exception('risk_premium range is 0 to 1')
+
     def eqn(A):
         return np.log(0.5 * (np.exp(-A * gamble_size) + np.exp(A * gamble_size))) / (A * gamble_size) - risk_premium
     return root_scalar(eqn, bracket=[0.0000001, 100]).root
@@ -92,13 +95,25 @@ def risk_premium_coef_to_risk_aversion_coef(risk_premium, gamble_size):
 
 # Calculate CARA risk premium probability from CARA risk premium coefficient (Babcock, 1993. Eq 9)
 def risk_premium_coef_to_risk_premium_prob(risk_premium):
+    if risk_premium < 0 or risk_premium > 1:
+        raise Exception('risk_premium range is 0 to 1')
+
+    if risk_premium > 0.99:
+        raise Exception('scipy optimiser fails when risk_premium > 0.99')
+
     def eqn(prob):
         return  np.log((1 + 4 * np.power(prob, 2)) / (1 - 4 * np.power(prob, 2))) / np.log((1 + 2 * prob) / (1 - 2 * prob)) - risk_premium
-    return root_scalar(eqn, bracket=[0.0000001, 0.4999999]).root
+    return root_scalar(eqn, bracket=[0.0000001, 0.49999]).root
 
 
 # Calculate CARA risk aversion coefficient from risk premium probability (Babcock, 1993. Eq 4, 9)
 def risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size):
+    if risk_premium_prob < 0 or risk_premium_prob > 0.5:
+        raise Exception('risk_premium_prob range is 0 to 0.5')
+
+    if risk_premium_prob > 0.49999:
+        raise Exception('scipy optimiser fails when risk_premium_prob > 0.49999')
+
     def eqn(A):
         return (
             np.log((1 + 4 * np.power(risk_premium_prob, 2)) / (1 - 4 * np.power(risk_premium_prob, 2))) /
