@@ -397,68 +397,68 @@ def test_relative_utility_value():
     assert np.array_equal(results_default_method['ruv'], results_defined_method['ruv'])
 
 
-def test_risk_aversion_coef_to_risk_premium_coef():
+def test_risk_aversion_coef_to_risk_premium():
     risk_aversions = [0.3, 1, 5]
     gamble_size = 1
     expected_result = [0.1478, 0.4338, 0.8614]
     for i, risk_aversion in enumerate(risk_aversions):
-        assert np.isclose(risk_aversion_coef_to_risk_premium_coef(risk_aversion, gamble_size), expected_result[i], 1e-3)
+        assert np.isclose(risk_aversion_coef_to_risk_premium(risk_aversion, gamble_size), expected_result[i], 1e-3)
 
     risk_aversions = [0.3, 1, 5]
     gamble_size = 10
     expected_result = [0.7698, 0.9307, 0.98614]
     for i, risk_aversion in enumerate(risk_aversions):
-        assert np.isclose(risk_aversion_coef_to_risk_premium_coef(risk_aversion, gamble_size), expected_result[i], 1e-3)
+        assert np.isclose(risk_aversion_coef_to_risk_premium(risk_aversion, gamble_size), expected_result[i], 1e-3)
 
 
-def test_risk_premium_coef_to_risk_aversion_coef():
+def test_risk_premium_to_risk_aversion_coef():
     risk_premiums = [0.1478, 0.4338, 0.8614]
     gamble_size = 1
     expected_result = [0.3, 1, 5]
     for i, risk_premium in enumerate(risk_premiums):
-        assert np.isclose(risk_premium_coef_to_risk_aversion_coef(risk_premium, gamble_size), expected_result[i], 1e-3) 
+        assert np.isclose(risk_premium_to_risk_aversion_coef(risk_premium, gamble_size), expected_result[i], 1e-3) 
 
     risk_premiums = [0.7698, 0.9307, 0.98614]
     gamble_size = 10
     expected_result = [0.3, 1, 5]
     for i, risk_premium in enumerate(risk_premiums):
-        assert np.isclose(risk_premium_coef_to_risk_aversion_coef(risk_premium, gamble_size), expected_result[i], 1e-3) 
+        assert np.isclose(risk_premium_to_risk_aversion_coef(risk_premium, gamble_size), expected_result[i], 1e-3) 
 
 
-def test_risk_premium_coef_to_risk_premium_prob():
+def test_risk_premium_to_prob_premium():
     risk_premiums = [0.1478, 0.4338, 0.8614]
     expected_result = [0.0744, 0.2311, 0.4933]
     for i, risk_premium in enumerate(risk_premiums):
-        assert np.isclose(risk_premium_coef_to_risk_premium_prob(risk_premium), expected_result[i], 1e-3)      
+        assert np.isclose(risk_premium_to_prob_premium(risk_premium), expected_result[i], 1e-3)      
 
     risk_premium_probs = [0.283559, 0.662501, 0.930685]
     expected_result = [0.145656, 0.380797, 0.499955]
     for i, risk_premium_prob in enumerate(risk_premium_probs):
-        assert np.isclose(risk_premium_coef_to_risk_premium_prob(risk_premium_prob), expected_result[i], 1e-3)  
+        assert np.isclose(risk_premium_to_prob_premium(risk_premium_prob), expected_result[i], 1e-3)  
 
     risk_premium_prob = 0.7698
     expected_result = 0.452574
-    assert np.isclose(risk_premium_coef_to_risk_premium_prob(risk_premium_prob), expected_result, 1e-3)  
+    assert np.isclose(risk_premium_to_prob_premium(risk_premium_prob), expected_result, 1e-3)  
 
     risk_premium_prob = 0.9999
     with pytest.raises(Exception):
-        risk_premium_coef_to_risk_premium_prob(risk_premium_prob)
+        risk_premium_to_prob_premium(risk_premium_prob)
 
 
-def test_risk_premium_prob_to_risk_aversion_coef():
+def test_prob_premium_to_risk_aversion_coef():
     risk_premium_probs = [0.0744, 0.2311, 0.4933]
     gamble_size = 1
     expected_result = [0.3, 1, 5]
     for i, risk_premium_prob in enumerate(risk_premium_probs):
-        assert np.isclose(risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size), expected_result[i], 1e-3)
+        assert np.isclose(prob_premium_to_risk_aversion_coef(risk_premium_prob, gamble_size), expected_result[i], 1e-3)
      
     risk_premium_probs = [0.145656, 0.380797, 0.499955]
     gamble_size = 2
     expected_result = [0.3, 1, 5]
     for i, risk_premium_prob in enumerate(risk_premium_probs):
-        assert np.isclose(risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size), expected_result[i], 1e-3)   
+        assert np.isclose(prob_premium_to_risk_aversion_coef(risk_premium_prob, gamble_size), expected_result[i], 1e-3)   
 
     risk_premium_prob = 0.93
     gamble_size = 10
     with pytest.raises(Exception):
-        risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size)
+        prob_premium_to_risk_aversion_coef(risk_premium_prob, gamble_size)
