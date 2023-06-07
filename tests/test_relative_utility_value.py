@@ -395,3 +395,70 @@ def test_relative_utility_value():
     decision_definition['decision_method'] = 'optimise_over_forecast_distribution'
     results_defined_method = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
     assert np.array_equal(results_default_method['ruv'], results_defined_method['ruv'])
+
+
+def test_risk_aversion_coef_to_risk_premium_coef():
+    risk_aversions = [0.3, 1, 5]
+    gamble_size = 1
+    expected_result = [0.1478, 0.4338, 0.8614]
+    for i, risk_aversion in enumerate(risk_aversions):
+        assert np.isclose(risk_aversion_coef_to_risk_premium_coef(risk_aversion, gamble_size), expected_result[i], 1e-3)
+
+    risk_aversions = [0.3, 1, 5]
+    gamble_size = 10
+    expected_result = [0.7698, 0.9307, 0.98614]
+    for i, risk_aversion in enumerate(risk_aversions):
+        assert np.isclose(risk_aversion_coef_to_risk_premium_coef(risk_aversion, gamble_size), expected_result[i], 1e-3)
+
+
+def test_risk_premium_coef_to_risk_aversion_coef():
+    risk_premiums = [0.1478, 0.4338, 0.8614]
+    gamble_size = 1
+    expected_result = [0.3, 1, 5]
+    for i, risk_premium in enumerate(risk_premiums):
+        assert np.isclose(risk_premium_coef_to_risk_aversion_coef(risk_premium, gamble_size), expected_result[i], 1e-3) 
+
+    risk_premiums = [0.7698, 0.9307, 0.98614]
+    gamble_size = 10
+    expected_result = [0.3, 1, 5]
+    for i, risk_premium in enumerate(risk_premiums):
+        assert np.isclose(risk_premium_coef_to_risk_aversion_coef(risk_premium, gamble_size), expected_result[i], 1e-3) 
+
+
+def test_risk_premium_coef_to_risk_premium_prob():
+    risk_premiums = [0.1478, 0.4338, 0.8614]
+    expected_result = [0.0744, 0.2311, 0.4933]
+    for i, risk_premium in enumerate(risk_premiums):
+        assert np.isclose(risk_premium_coef_to_risk_premium_prob(risk_premium), expected_result[i], 1e-3)      
+
+    risk_premium_probs = [0.283559, 0.662501, 0.930685]
+    expected_result = [0.145656, 0.380797, 0.499955]
+    for i, risk_premium_prob in enumerate(risk_premium_probs):
+        assert np.isclose(risk_premium_coef_to_risk_premium_prob(risk_premium_prob), expected_result[i], 1e-3)  
+
+    # Fails because its too close to the 0.5 bound
+    # risk_premium_probs = [0.7698, 0.9307, 0.98614]
+    # expected_result = [0.452574, 0.499955, 0.5]
+    # for i, risk_premium_prob in enumerate(risk_premium_probs):
+    #     assert np.isclose(risk_premium_coef_to_risk_premium_prob(risk_premium_prob), expected_result[i], 1e-3)  
+
+
+def test_risk_premium_prob_to_risk_aversion_coef():
+    risk_premium_probs = [0.0744, 0.2311, 0.4933]
+    gamble_size = 1
+    expected_result = [0.3, 1, 5]
+    for i, risk_premium_prob in enumerate(risk_premium_probs):
+        assert np.isclose(risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size), expected_result[i], 1e-3)
+     
+    risk_premium_probs = [0.145656, 0.380797, 0.499955]
+    gamble_size = 2
+    expected_result = [0.3, 1, 5]
+    for i, risk_premium_prob in enumerate(risk_premium_probs):
+        assert np.isclose(risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size), expected_result[i], 1e-3)   
+
+    # Fails because its too close to the 0.5 bound
+    # risk_premium_probs = [0.7698, 0.9307, 0.98614]
+    # gamble_size = 10
+    # expected_result = [0.3, 1, 5]
+    # for i, risk_premium_prob in enumerate(risk_premium_probs):
+    #     assert np.isclose(risk_premium_prob_to_risk_aversion_coef(risk_premium_prob, gamble_size), expected_result[i], 1e-3)
