@@ -18,10 +18,10 @@ from pathos.pools import ProcessPool as Pool
 
 
 # 5 times faster then statsmodels ecdf
-def ecdf_numpy(ens, thresholds):
+def ecdf(ens, thresholds):
     ens_sorted = np.sort(ens)
     idx = np.searchsorted(ens_sorted, thresholds)
-    probs = np.array(np.arange(ens.size + 1))/float(ens.size)  # 3 times fast then linspace
+    probs = np.arange(ens.size + 1)/float(ens.size)  # 3 times fast then linspace
     return 1 - probs[idx]
 
 
@@ -42,7 +42,7 @@ def calc_likelihoods(ens, thresholds):
         probs_between[idx] = 1
 
     else:   # probabilisitc
-        probs_above = ecdf_numpy(ens, thresholds)
+        probs_above = ecdf(ens, thresholds)
         adjustment = np.roll(probs_above, -1)
         adjustment[-1] = 0.0
         probs_between = np.subtract(probs_above, adjustment)

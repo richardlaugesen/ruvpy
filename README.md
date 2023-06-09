@@ -81,4 +81,4 @@ We encourage you to contribute! Everyone interacting with this project is expect
 
 ## Contact
 
-Richard Laugesen - [Web](https://richardlaugesen.com) / [Github](https://github.com/richardlaugesen) / [Twitter](https://twitter.com/richardlaugesen) / [LinkedIn](https://www.linkedin.com/in/richardlaugesen/) / [Email](mailto://ruv@richardlaugesen.com)
+Richard Laugesen - [Web](https://richardlaugesen.com) / [Email](mailto://ruv@richardlaugesen.com)

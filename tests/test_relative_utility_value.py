@@ -22,26 +22,26 @@ from ruv.utility_functions import *
 
 # TODO: Now tests are written, confirm that the numbers in here are actually what we excpect, could calculate manually
 
-def test_ecdf_numpy():
+def test_ecdf():
     ens = np.array([])
     thresholds = np.array([])
-    assert np.array_equal(ecdf_numpy(ens, thresholds), np.array([]))
+    assert np.array_equal(ecdf(ens, thresholds), np.array([]))
 
     ens = np.array([1, 2, 3, 4, 5])
     thresholds = np.array([])
-    assert np.array_equal(ecdf_numpy(ens, thresholds), np.array([]))
+    assert np.array_equal(ecdf(ens, thresholds), np.array([]))
 
     ens = np.array([])
     thresholds = np.array([1, 3, 5])
-    assert np.all(np.isnan(ecdf_numpy(ens, thresholds)))
+    assert np.all(np.isnan(ecdf(ens, thresholds)))
 
     ens = np.array([1, 2, 3, 4, 5])
     thresholds = np.array([0, 3])
-    assert np.array_equal(ecdf_numpy(ens, thresholds), np.array([1, 0.6]))
+    assert np.array_equal(ecdf(ens, thresholds), np.array([1, 0.6]))
 
     ens = np.random.normal(10, 1, 1000)
     thresholds = np.arange(5, 15, 1)
-    assert np.allclose(ecdf_numpy(ens, thresholds),
+    assert np.allclose(ecdf(ens, thresholds),
                       np.subtract(1, ECDF(ens, 'left')(thresholds)), 1e-3)
 
 
