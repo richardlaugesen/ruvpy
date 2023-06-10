@@ -15,6 +15,8 @@
 import numpy as np
 from scipy.optimize import minimize_scalar
 from pathos.pools import ProcessPool as Pool
+from scipy.stats import bootstrap
+import time
 
 
 # 5 times faster then statsmodels ecdf
@@ -302,3 +304,23 @@ def relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes
         'ref_ex_post': results['ref_ex_post'],
         'decision_definition': decision_definition
     }
+
+
+def relative_utility_value_bootstrap(obs, fcst_ens, ref, decision_definition, parallel_nodes=4, verbose=False, bootstrap_samples=100, confidence_level=0.95):
+    start = time.time()
+    complete_results = relative_utility_value(obs, fcst_ens, ref, decision_definition, parallel_nodes, verbose=False)
+    if verbose: 
+        print('Bootstrap will take approximatly %.0f minutes' % ((time.time() - start) * bootstrap_samples / 60))
+
+    global count
+    count = 0
+    def booty(indices):
+        global count; count += 1
+        if verbose and count % 5 == 0:
+            print('Bootstrap sample: %d / %d' % (count, bootstrap_samples))
+        return relative_utility_value(obs[indices], fcst_ens[indices], ref, decision_definition, parallel_nodes, verbose=False)['ruv']
+
+    indices = [np.arange(len(obs))]
+    bootstrap_results = bootstrap(indices, booty, n_resamples=bootstrap_samples, confidence_level=confidence_level, vectorized=False, method='percentile')
+
+    return {'bootstrap': bootstrap_results, 'complete': complete_results }

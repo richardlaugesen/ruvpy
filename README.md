@@ -49,6 +49,10 @@ To calculate RUV it must simulate decision making at each timestep, there are th
 - critical_probability_threshold_fixed
 - critical_probability_threshold_equals_alpha
 
+### Extras
+
+Bootstrap method is implemented and can be used to estimate confidence intervals of the metric.
+
 ## Software
 
 ### Features
