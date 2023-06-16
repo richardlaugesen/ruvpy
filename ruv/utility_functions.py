@@ -35,8 +35,7 @@ def exponential_utility(params):
         if A == 0:
             return c
         else:
-            return np.divide(-np.exp(np.multiply(-A, c)), A)    # TODO: overflows when c is large, could
-                                                                # use float128 but not available on windows
+            return np.divide(-np.exp(np.multiply(-A, c)), A)
 
     return utility
 
@@ -96,7 +95,6 @@ def risk_premium_to_prob_premium(risk_premium):
     if risk_premium < 0 or risk_premium > 1:
         raise Exception('risk_premium range is 0 to 1')
 
-    # TODO: fix this, better optimiser?
     if risk_premium > 0.99:
         raise Exception('scipy optimiser fails when risk_premium > 0.99')
 
@@ -110,7 +108,6 @@ def prob_premium_to_risk_aversion_coef(risk_premium_prob, gamble_size):
     if risk_premium_prob < 0 or risk_premium_prob > 0.5:
         raise Exception('risk_premium_prob range is 0 to 0.5')
 
-    # TODO: fix this, better optimiser?
     if risk_premium_prob > 0.49999:
         raise Exception('scipy optimiser fails when risk_premium_prob > 0.49999')
 
