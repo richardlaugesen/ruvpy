@@ -45,13 +45,13 @@ The RUV method can quantify forecast value for binary, multi-categorical, or con
 
 To calculate RUV it must simulate decision making at each timestep, there are three methods implemented:
 
-- optimise_over_forecast_distribution
+- optimise_over_forecast_distribution calculates an the optimium amount to spend at each timestep 
 - critical_probability_threshold_fixed
 - critical_probability_threshold_equals_alpha
 
 ### Extras
 
-Bootstrap method is implemented and can be used to estimate confidence intervals of the metric.
+Bootstrap method is implemented and can be used to estimate uncertainity of the metric due to sampling error.
 
 ## Software
 
