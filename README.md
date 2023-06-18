@@ -5,7 +5,7 @@
 
 [Open Science](https://en.wikipedia.org/wiki/Open_science) infrastructure written in [Python](https://python.org/).
 
-RUV is a library to quantify the value of forecast information for decision making using the Relative Utility Value metric. This reference implementation is reasonably computationally efficient and parallelises timesteps over available CPU cores. It includes a library of core utility functions, damage functions, and economic models. It does not include any figure generation, data loading and saving, other metrics, or analysis functionality.
+RUV is a library to quantify the value of forecast information for decision making using the Relative Utility Value metric. This reference implementation is reasonably computationally efficient and parallelises timesteps over available CPU cores. It includes a library of core utility functions, damage functions, and economic models. It has a tight scope and does not include any figure generation, data loading and saving, other metrics, or analysis functionality.
 
 Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27, 873–893, https://doi.org/10.5194/hess-27-873-2023, 2023.
 
@@ -13,7 +13,7 @@ Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast valu
 
 ### Utility functions
 
-The RUV method has a foundation in Expected Utility Theory and as such requires a Utility function to be specified by the user. This maps an outcome from the economic model to decision-maker utility. Any custom function can be provided, and the following standard damage functions are implemented in the library:
+The RUV method has a foundation in Expected Utility Theory and as such requires a Utility function to be specified by the user. This maps an outcome from the economic model to decision-maker utility. Any custom function can be provided, and the following utility functions are implemented in the library:
 
 - Exponential utility
 - Isoelastic utility
@@ -45,7 +45,7 @@ The RUV method can quantify forecast value for binary, multi-categorical, or con
 
 To calculate RUV it must simulate decision making at each timestep, there are three methods implemented:
 
-- optimise_over_forecast_distribution calculates an the optimium amount to spend at each timestep 
+- optimise_over_forecast_distribution uses the forecast distribution at each timestep to determine the optimium amount to spend on mitigation to maximise utility
 - critical_probability_threshold_fixed
 - critical_probability_threshold_equals_alpha
 
