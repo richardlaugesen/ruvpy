@@ -82,6 +82,23 @@ def test_calc_likelihoods():
                           np.full(100, 1e-2))
     
 
+def test_all_likelihoods():
+
+    np.random.seed(42)
+    obs = np.random.normal(10, 1, 5)
+    fcst_ens = np.random.normal(10, 1, (5, 1000))  # (timesteps, ens_members)
+
+    thresholds = np.array([0, 3, 6])
+    all_likelihoods(obs, fcst_ens, thresholds)
+    all_likelihoods(obs, obs, thresholds)
+    all_likelihoods(obs, None, thresholds)
+
+    thresholds = None
+    all_likelihoods(obs, fcst_ens, thresholds)
+    all_likelihoods(obs, obs, thresholds)
+    all_likelihoods(obs, None, thresholds)
+    
+
 def test_realised_threshold():
     thresholds = np.array([0, 3, 6])
     assert np.equal(realised_threshold(0.5, thresholds), 0)
