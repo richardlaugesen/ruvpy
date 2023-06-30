@@ -57,7 +57,7 @@ def all_likelihoods(obs, ensembles, thresholds):
     if ensembles is None:
         raise ValueError('Ensemble cannot be None, use generate_event_freq_ref() if using event frequency as reference forecast')
 
-    likelihoods = np.full((obs.shape[0], ensembles.shape[1] if thresholds is None else thresholds.shape[0]), np.nan)
+    likelihoods = np.full((obs.shape[0], ensembles.shape[1] if thresholds is None else thresholds.shape[0]), np.nan)        # this throws an error if ensembles=obs
 
     for t, ob in enumerate(obs):
         if not np.isnan(ob):    # around 15% slower without this check on real data
