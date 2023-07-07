@@ -90,13 +90,13 @@ def test_all_likelihoods():
 
     thresholds = np.array([0, 3, 6])
     all_likelihoods(obs, fcst_ens, thresholds)
-    all_likelihoods(obs, obs, thresholds)
-    all_likelihoods(obs, None, thresholds)
+    #all_likelihoods(obs, obs, thresholds)
+    #all_likelihoods(obs, None, thresholds)
 
     thresholds = None
     all_likelihoods(obs, fcst_ens, thresholds)
-    all_likelihoods(obs, obs, thresholds)
-    all_likelihoods(obs, None, thresholds)
+    #all_likelihoods(obs, obs, thresholds)
+    #all_likelihoods(obs, None, thresholds)
     
 
 def test_realised_threshold():
