@@ -31,11 +31,14 @@ def calc_likelihoods(ens, thresholds):
     if ens is None:
         raise ValueError('Ensemble cannot be None, use generate_event_freq_ref() if using event frequency as reference forecast')
 
-    if thresholds is None:  # continuous flow classes
-        return np.full(ens.shape, 1/ens.shape[0])
-
     if np.any(np.isnan(ens)):
         raise ValueError('Cannot calculate likelihood with missing values')
+
+    if thresholds is None:  # continuous flow classes
+        if isinstance(ens, (int, float)) or len(ens) == 1:  # TODO: this deterministic path is untested and not sure is correct
+            return np.full(ens.shape, 1)
+        else:
+            return np.full(ens.shape, 1/ens.shape[0])
 
     if isinstance(ens, (int, float)) or len(ens) == 1:  # deterministic
         idx = np.where(thresholds == realised_threshold(ens, thresholds))
@@ -57,7 +60,9 @@ def all_likelihoods(obs, ensembles, thresholds):
     if ensembles is None:
         raise ValueError('Ensemble cannot be None, use generate_event_freq_ref() if using event frequency as reference forecast')
 
-    likelihoods = np.full((obs.shape[0], ensembles.shape[1] if thresholds is None else thresholds.shape[0]), np.nan)        # this throws an error if ensembles=obs
+    ens_size = 1 if len(ensembles.shape) == 1 else ensembles.shape[1]  # TODO: this should fix next line throwing an error if ensembles=obs, untested, what if thresholds=None?
+
+    likelihoods = np.full((obs.shape[0], ens_size if thresholds is None else thresholds.shape[0]), np.nan)        
 
     for t, ob in enumerate(obs):
         if not np.isnan(ob):    # around 15% slower without this check on real data
