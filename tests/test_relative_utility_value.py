@@ -52,6 +52,7 @@ def test_calc_likelihoods():
     assert np.allclose(calc_likelihoods(ens, thresholds),
                        np.array([0, 0, 0.01, 0.16, 0.37, 0.35, 0.11, 0, 0, 0]), 1e-1)
 
+    # below smallest threshold
     with pytest.raises(ValueError):
         calc_likelihoods(3, thresholds)
 
@@ -61,26 +62,36 @@ def test_calc_likelihoods():
     with pytest.raises(ValueError):
         calc_likelihoods([3], thresholds)
 
+    # within range of thresholds or greater than
     assert np.array_equal(calc_likelihoods([7], thresholds), [0, 0, 1, 0, 0, 0, 0, 0, 0, 0])
     assert np.array_equal(calc_likelihoods(5, thresholds), [1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     assert np.array_equal(calc_likelihoods(9, thresholds), [0, 0, 0, 0, 1, 0, 0, 0, 0, 0])
     assert np.array_equal(calc_likelihoods(30, thresholds), [0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
 
+    # has missing values
     with pytest.raises(ValueError):
         ens[20:60] = np.nan
         #ens = ens[~np.isnan(ens)]
         calc_likelihoods(ens, thresholds)
 
+    # None ensembles
     with pytest.raises(ValueError):
         calc_likelihoods(None, thresholds)
 
     with pytest.raises(ValueError):
         calc_likelihoods(None, None)
 
+    # Continuous decision with 100 member ensemble forecast
     thresholds = None
+    ens = np.random.normal(10, 1, 100)
     assert np.array_equal(calc_likelihoods(ens, thresholds),
                           np.full(100, 1e-2))
+                          #calc_likelihoods(ens, np.arange(np.nanmin(ens), np.nanmax(ens), 1/len(ens))))
     
+    # Continuous decision with deterministic forecast
+    with pytest.raises(ValueError):
+        calc_likelihoods(5, thresholds)
+
 
 def test_all_likelihoods():
 
@@ -91,12 +102,18 @@ def test_all_likelihoods():
     thresholds = np.array([0, 3, 6])
     all_likelihoods(obs, fcst_ens, thresholds)
     all_likelihoods(obs, obs, thresholds)
-    #all_likelihoods(obs, None, thresholds)
+    
+    with pytest.raises(ValueError):
+        all_likelihoods(obs, None, thresholds)
 
     thresholds = None
     all_likelihoods(obs, fcst_ens, thresholds)
-    all_likelihoods(obs, obs, thresholds)
-    #all_likelihoods(obs, None, thresholds)
+
+    with pytest.raises(ValueError):
+        all_likelihoods(obs, obs, thresholds)
+
+    with pytest.raises(ValueError):        
+        all_likelihoods(obs, None, thresholds)
     
 
 def test_realised_threshold():
@@ -412,6 +429,12 @@ def test_relative_utility_value():
     decision_definition['decision_method'] = 'optimise_over_forecast_distribution'
     results_defined_method = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
     assert np.array_equal(results_default_method['ruv'], results_defined_method['ruv'])
+
+    decision_definition['decision_thresholds'] = np.arange(0, 100, 0.0001)
+    many_thresholds = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
+    decision_definition['decision_thresholds'] = None
+    continuous = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
+    assert np.allclose(many_thresholds['ruv'], continuous['ruv'], 0.01)
 
 
 def test_risk_aversion_coef_to_risk_premium():
