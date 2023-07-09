@@ -26,6 +26,20 @@ def ecdf(ens, thresholds):
     return 1 - probs[idx]
 
 
+def is_deterministic(series):
+    if isinstance(series, (int, float)) or len(series) == 1:
+        return True
+    return False
+
+
+# not used
+def calc_likelihoods_deterministic(det, thresholds):
+    idx = np.where(thresholds == realised_threshold(det, thresholds))
+    probs_between = np.zeros(len(thresholds))
+    probs_between[idx] = 1
+    return probs_between
+
+
 # Forecast probability of an ensemble within each flow class for single timestep
 def calc_likelihoods(ens, thresholds):
     if ens is None:
@@ -34,38 +48,34 @@ def calc_likelihoods(ens, thresholds):
     if np.any(np.isnan(ens)):
         raise ValueError('Cannot calculate likelihood with missing values')
 
+    if is_deterministic(ens):
+        raise ValueError('Likelihoods not needed for deterministic forecasts, use fast path')
+
     if thresholds is None:  # continuous flow classes
-        if isinstance(ens, (int, float)) or len(ens) == 1:
-            raise ValueError('Cannot calculate likelihood of deterministic value in a continuous decision')  # TODO: Just needs to be [0, 0, 0, ..., 1..., 0, 0, 0] for some large size
-        else:
-            return np.full(ens.shape, 1/ens.shape[0])       # TODO: I don't get why this is the case, shouldn't it return the PDF of the ensemble?
-            #return calc_likelihoods(ens, np.arange(np.nanmin(ens), np.nanmax(ens), 1/len(ens)))
+        thresholds = np.linspace(0, np.nanmax(ens), ens.shape[0])
+        #return np.full(ens.shape, 1/ens.shape[0])
 
-    if isinstance(ens, (int, float)) or len(ens) == 1:  # deterministic
-        idx = np.where(thresholds == realised_threshold(ens, thresholds))
-        probs_between = np.zeros(len(thresholds))
-        probs_between[idx] = 1
-
-    else:   # probabilisitc
-        probs_above = ecdf(ens, thresholds)
-        adjustment = np.roll(probs_above, -1)
-        adjustment[-1] = 0.0
-        probs_between = np.subtract(probs_above, adjustment)
+    probs_above = ecdf(ens, thresholds)
+    adjustment = np.roll(probs_above, -1)
+    adjustment[-1] = 0.0
+    probs_between = np.subtract(probs_above, adjustment)
 
     return probs_between
 
 
-# TODO: what to do for the deterministic case? Was working before but why? 
-
 # Forecast probability of a series ensemble within each flow class for set of timesteps
-# Number of timesteps defined by the prodived obs series
-# For a continuous decision then assume number of thresholds is equal to the size of the ensemble
+# Number of timesteps defined by the obs series
 def all_likelihoods(obs, ensembles, thresholds):
     if ensembles is None:
         raise ValueError('Ensemble cannot be None, use generate_event_freq_ref() if using event frequency as reference forecast')
 
-    ens_size = 1 if len(ensembles.shape) == 1 else ensembles.shape[1]  # TODO: this should fix next line throwing an error if ensembles=obs, untested
-    likelihoods = np.full((obs.shape[0], ens_size if thresholds is None else thresholds.shape[0]), np.nan)        
+    # Likelihoods not needed for deterministic forecasts, method has fast analytical solution
+    if is_deterministic(ensembles[0]):
+        return None
+
+    thresholds_size = thresholds.shape[0] if thresholds is not None else ensembles.shape[1]
+
+    likelihoods = np.full((obs.shape[0], thresholds_size), np.nan)
 
     for t, ob in enumerate(obs):
         if not np.isnan(ob):    # around 15% slower without this check on real data
@@ -118,7 +128,7 @@ def ex_post_utility(occured, spend, alpha, economic_model, damage_function, util
 # Amount to spend for a single timestep
 # Fast analytical method for deterministic forecast, pre-calculated likelihood for probabilistic
 def find_spend(fcst, likelihoods, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function):
-    if isinstance(fcst, (int, float)) or len(fcst) == 1:    # deterministric (50% faster for real data with this)
+    if is_deterministic(fcst):    # deterministric fast path (50% faster for real data with this)
        spend_amount = analytical_spend(realised_threshold(fcst, thresholds), alpha, damage_function) 
     
     else:   # probabilistic
@@ -158,7 +168,11 @@ def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods,
     args = []
     for t, ob in enumerate(obs):
         if not np.isnan(ob):
-            args.append([t, ob, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function, fcst[t], fcst_likelihoods[t], ref[t], ref_likelihoods[t], obs_likelihoods[t]])
+            fcst_likelihood = fcst_likelihoods[t] if fcst_likelihoods is not None else None
+            ref_likelihood = ref_likelihoods[t] if ref_likelihoods is not None else None
+            obs_likelihood = obs_likelihoods[t] if obs_likelihoods is not None else None
+            args.append([t, ob, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function, fcst[t], fcst_likelihood, ref[t], ref_likelihood, obs_likelihood])
+
     args = list(map(list, zip(*args)))
 
     with Pool(nodes=parallel_nodes) as pool:
@@ -286,9 +300,17 @@ def relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes
     elif decision_definition['decision_method'] == 'optimise_over_forecast_distribution':
         decision_method = 'optimise_over_forecast_distribution'
 
+    # generate refs if using event freq reference
+    refs = generate_event_freq_ref(obs) if refs is None else refs
+
+    # deal with continuous decisions
+    if decision_thresholds is None:
+        max_val = np.max([np.nanmax(obs), np.nanmax(fcsts), np.nanmax(refs)])
+        thresholds_size = fcsts.shape[1] #np.max([fcsts.shape[1], refs.shape[1]])
+        decision_thresholds = np.linspace(0, max_val, thresholds_size)
+
     # Pre-calculate the forecast likelihoods for each threshold class
     fcst_likelihoods = all_likelihoods(obs, fcsts, decision_thresholds)
-    refs = generate_event_freq_ref(obs) if refs is None else refs
     ref_likelihoods = all_likelihoods(obs, refs, decision_thresholds)
     obs_likelihoods = all_likelihoods(obs, obs, decision_thresholds)
 
