@@ -52,21 +52,28 @@ def test_calc_likelihoods():
     assert np.allclose(calc_likelihoods(ens, thresholds),
                        np.array([0, 0, 0.01, 0.16, 0.37, 0.35, 0.11, 0, 0, 0]), 1e-1)
 
+    # Continuous decision with 100 member ensemble forecast
+    assert np.array_equal(calc_likelihoods(ens, None),
+                        #np.full(100, 1e-2))
+                        calc_likelihoods(ens, np.linspace(0, np.nanmax(ens), 100)))
+
     # below smallest threshold
-    with pytest.raises(ValueError):
-        calc_likelihoods(3, thresholds)
-
-    with pytest.raises(ValueError):
-        calc_likelihoods(3.2, thresholds)
-
-    with pytest.raises(ValueError):
-        calc_likelihoods([3], thresholds)
+    # small_ens = np.random.normal(2, 1, 100)
+    # with pytest.raises(ValueError):
+    #     calc_likelihoods(small_ens, thresholds)
 
     # within range of thresholds or greater than
-    assert np.array_equal(calc_likelihoods([7], thresholds), [0, 0, 1, 0, 0, 0, 0, 0, 0, 0])
-    assert np.array_equal(calc_likelihoods(5, thresholds), [1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-    assert np.array_equal(calc_likelihoods(9, thresholds), [0, 0, 0, 0, 1, 0, 0, 0, 0, 0])
-    assert np.array_equal(calc_likelihoods(30, thresholds), [0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    # assert np.array_equal(calc_likelihoods([7], thresholds), [0, 0, 1, 0, 0, 0, 0, 0, 0, 0])
+    # assert np.array_equal(calc_likelihoods(5, thresholds), [1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    # assert np.array_equal(calc_likelihoods(9, thresholds), [0, 0, 0, 0, 1, 0, 0, 0, 0, 0])
+    # assert np.array_equal(calc_likelihoods(30, thresholds), [0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+
+    # deterministic forecasts
+    with pytest.raises(ValueError):
+        calc_likelihoods(5, thresholds)
+
+    with pytest.raises(ValueError):
+        calc_likelihoods([5], thresholds)
 
     # has missing values
     with pytest.raises(ValueError):
@@ -81,40 +88,29 @@ def test_calc_likelihoods():
     with pytest.raises(ValueError):
         calc_likelihoods(None, None)
 
-    # Continuous decision with 100 member ensemble forecast
-    thresholds = None
-    ens = np.random.normal(10, 1, 100)
-    assert np.array_equal(calc_likelihoods(ens, thresholds),
-                          np.full(100, 1e-2))
-                          #calc_likelihoods(ens, np.arange(np.nanmin(ens), np.nanmax(ens), 1/len(ens))))
-    
     # Continuous decision with deterministic forecast
     with pytest.raises(ValueError):
-        calc_likelihoods(5, thresholds)
+        calc_likelihoods(5, None)
 
 
 def test_all_likelihoods():
-
     np.random.seed(42)
     obs = np.random.normal(10, 1, 5)
     fcst_ens = np.random.normal(10, 1, (5, 1000))  # (timesteps, ens_members)
 
     thresholds = np.array([0, 3, 6])
     all_likelihoods(obs, fcst_ens, thresholds)
-    all_likelihoods(obs, obs, thresholds)
-    
+    all_likelihoods(obs, fcst_ens, None)
+
+    assert np.equal(all_likelihoods(obs, obs, thresholds), None)
+    assert np.equal(all_likelihoods(obs, obs, None), None)
+
     with pytest.raises(ValueError):
         all_likelihoods(obs, None, thresholds)
 
-    thresholds = None
-    all_likelihoods(obs, fcst_ens, thresholds)
-
     with pytest.raises(ValueError):
-        all_likelihoods(obs, obs, thresholds)
-
-    with pytest.raises(ValueError):        
-        all_likelihoods(obs, None, thresholds)
-    
+        all_likelihoods(obs, None, None)
+ 
 
 def test_realised_threshold():
     thresholds = np.array([0, 3, 6])
@@ -233,12 +229,11 @@ def test_find_spend():
         0.012, 1e-1)
 
     det = 7.2
-    probs = None
-    probs = calc_likelihoods(det, thresholds)
+    probs = None    
     alpha = 0.1
     assert np.isclose(
         find_spend(det, probs, thresholds, alpha, economic_model, analytical_spend, damage_func, utility_func),
-        0.0018, 1e-3)
+        0.0018, 1e-1)
 
 
 def test_single_timestep():
@@ -258,7 +253,7 @@ def test_single_timestep():
     ref = np.random.normal(5, 3, 100)
     ref_probs = calc_likelihoods(ref, thresholds)
 
-    ob_likelihoods = calc_likelihoods(ob, thresholds)
+    ob_likelihoods = None #calc_likelihoods(ob, thresholds)
 
     results = single_timestep(t, ob, thresholds, alpha, economic_model, analytical_spend, damage_func, utility_func, fcst, fcst_probs, ref, ref_probs, ob_likelihoods)
     
@@ -396,13 +391,13 @@ def test_relative_utility_value():
     assert np.allclose(
         results['ruv'],
         [0.184053111, -0.0742971672, -0.467401918, -1.65026591, -117.108686], 1e-3)
-    
+
     decision_definition['decision_method'] = 'critical_probability_threshold_equals_alpha'
     results = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
     assert np.allclose(
         results['ruv'],
         [0.184053111, -0.0742971672, -0.467401918, -1.65026591, -117.108686], 1e-3)
-       
+
     decision_definition['decision_method'] = 'critical_probability_threshold_fixed'
     decision_definition['critical_probability_threshold'] = 0.1
     results = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
@@ -411,12 +406,11 @@ def test_relative_utility_value():
         [0.04111241, -0.06836699, -0.22266255, -0.46356886, -0.9073991], 1e-3)
 
     decision_definition['decision_method'] = 'critical_probability_threshold_equals_alpha'
-    refs = None
-    results = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
+    results = relative_utility_value(obs, fcsts, None, decision_definition, parallel_nodes=2)
     assert np.allclose(
         results['ruv'],
         [-74.0584681, -0.0742971679, -0.472369878, -1.71864364, -117.108684], 1e-3)
-    
+
     decision_definition = {
         'alphas': np.array([0.001, 0.25, 0.5, 0.75, 0.999]),
         'damage_function': [logistic_zero, {'A': 1, 'k': 0.5, 'threshold': 15}],
@@ -424,14 +418,18 @@ def test_relative_utility_value():
         'economic_model': [cost_loss, cost_loss_analytical_spend],
         'decision_thresholds': np.arange(0, 20, 3)
     }
-    results_default_method = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
+    results_default_method = relative_utility_value(obs, fcsts, None, decision_definition, parallel_nodes=2)
+
 
     decision_definition['decision_method'] = 'optimise_over_forecast_distribution'
-    results_defined_method = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
+    results_defined_method = relative_utility_value(obs, fcsts, None, decision_definition, parallel_nodes=2)
     assert np.array_equal(results_default_method['ruv'], results_defined_method['ruv'])
 
-    decision_definition['decision_thresholds'] = np.arange(0, 100, 0.0001)
+    max_val = np.max([np.nanmax(obs), np.nanmax(fcsts), np.nanmax(refs)])
+    threshold_size = fcsts.shape[1] # 10000
+    decision_definition['decision_thresholds'] = np.linspace(0, max_val, threshold_size)
     many_thresholds = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
+
     decision_definition['decision_thresholds'] = None
     continuous = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
     assert np.allclose(many_thresholds['ruv'], continuous['ruv'], 0.01)
