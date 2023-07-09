@@ -35,10 +35,11 @@ def calc_likelihoods(ens, thresholds):
         raise ValueError('Cannot calculate likelihood with missing values')
 
     if thresholds is None:  # continuous flow classes
-        if isinstance(ens, (int, float)) or len(ens) == 1:  # TODO: this deterministic path is untested and not sure is correct
-            return np.full(ens.shape, 1)
+        if isinstance(ens, (int, float)) or len(ens) == 1:
+            raise ValueError('Cannot calculate likelihood of deterministic value in a continuous decision')  # TODO: Just needs to be [0, 0, 0, ..., 1..., 0, 0, 0] for some large size
         else:
-            return np.full(ens.shape, 1/ens.shape[0])
+            return np.full(ens.shape, 1/ens.shape[0])       # TODO: I don't get why this is the case, shouldn't it return the PDF of the ensemble?
+            #return calc_likelihoods(ens, np.arange(np.nanmin(ens), np.nanmax(ens), 1/len(ens)))
 
     if isinstance(ens, (int, float)) or len(ens) == 1:  # deterministic
         idx = np.where(thresholds == realised_threshold(ens, thresholds))
@@ -54,14 +55,16 @@ def calc_likelihoods(ens, thresholds):
     return probs_between
 
 
+# TODO: what to do for the deterministic case? Was working before but why? 
+
 # Forecast probability of a series ensemble within each flow class for set of timesteps
 # Number of timesteps defined by the prodived obs series
+# For a continuous decision then assume number of thresholds is equal to the size of the ensemble
 def all_likelihoods(obs, ensembles, thresholds):
     if ensembles is None:
         raise ValueError('Ensemble cannot be None, use generate_event_freq_ref() if using event frequency as reference forecast')
 
-    ens_size = 1 if len(ensembles.shape) == 1 else ensembles.shape[1]  # TODO: this should fix next line throwing an error if ensembles=obs, untested, what if thresholds=None?
-
+    ens_size = 1 if len(ensembles.shape) == 1 else ensembles.shape[1]  # TODO: this should fix next line throwing an error if ensembles=obs, untested
     likelihoods = np.full((obs.shape[0], ens_size if thresholds is None else thresholds.shape[0]), np.nan)        
 
     for t, ob in enumerate(obs):
