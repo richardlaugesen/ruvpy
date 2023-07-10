@@ -130,7 +130,7 @@ def find_spend(fcst, likelihoods, thresholds, alpha, economic_model, analytical_
        spend_amount = analytical_spend(realised_threshold(fcst, thresholds), alpha, damage_function) 
     
     else:   # probabilistic
-        thresholds = np.sort(fcst) if thresholds is None else thresholds    # Continuous flow decision
+        thresholds = fcst if thresholds is None else thresholds    # Continuous flow decision, unsorted is fine as all members equally likely
 
         def minimise_this(spend):
             return -ex_ante_utility(spend, likelihoods, thresholds, alpha, economic_model, damage_function, utility_function)        
