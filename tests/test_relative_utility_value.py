@@ -53,19 +53,7 @@ def test_calc_likelihoods():
                        np.array([0, 0, 0.01, 0.16, 0.37, 0.35, 0.11, 0, 0, 0]), 1e-1)
 
     # Continuous decision with 100 member ensemble forecast
-    assert np.array_equal(calc_likelihoods(ens, None),
-                        np.full(100, 1e-2))
-
-    # below smallest threshold
-    # small_ens = np.random.normal(2, 1, 100)
-    # with pytest.raises(ValueError):
-    #     calc_likelihoods(small_ens, thresholds)
-
-    # within range of thresholds or greater than
-    # assert np.array_equal(calc_likelihoods([7], thresholds), [0, 0, 1, 0, 0, 0, 0, 0, 0, 0])
-    # assert np.array_equal(calc_likelihoods(5, thresholds), [1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-    # assert np.array_equal(calc_likelihoods(9, thresholds), [0, 0, 0, 0, 1, 0, 0, 0, 0, 0])
-    # assert np.array_equal(calc_likelihoods(30, thresholds), [0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    assert np.array_equal(calc_likelihoods(ens, None), np.full(100, 1e-2))
 
     # deterministic forecasts
     with pytest.raises(ValueError):
@@ -98,8 +86,9 @@ def test_all_likelihoods():
     fcst_ens = np.random.normal(10, 1, (5, 1000))  # (timesteps, ens_members)
 
     thresholds = np.array([0, 3, 6])
-    all_likelihoods(obs, fcst_ens, thresholds)
-    all_likelihoods(obs, fcst_ens, None)
+    assert np.array_equal(all_likelihoods(obs, fcst_ens, thresholds).shape, (5, 3))
+    assert np.array_equal(all_likelihoods(obs, fcst_ens, thresholds)[0], [0, 0, 1])
+    assert np.array_equal(all_likelihoods(obs, fcst_ens, None), np.full((5, 1000), 1e-3))
 
     assert np.equal(all_likelihoods(obs, obs, thresholds), None)
     assert np.equal(all_likelihoods(obs, obs, None), None)
