@@ -15,7 +15,6 @@
 import numpy as np
 from scipy.optimize import minimize_scalar
 from pathos.pools import ProcessPool as Pool
-import time
 
 
 # 5 times faster then statsmodels ecdf
@@ -52,8 +51,7 @@ def calc_likelihoods(ens, thresholds):
         raise ValueError('Likelihoods not needed for deterministic forecasts, use fast path')
 
     if thresholds is None:  # continuous flow classes
-        thresholds = np.linspace(0, np.nanmax(ens), ens.shape[0])
-        #return np.full(ens.shape, 1/ens.shape[0])
+        return np.full(ens.shape, 1/ens.shape[0])   # limit is 1/num_classes for large num_classes
 
     probs_above = ecdf(ens, thresholds)
     adjustment = np.roll(probs_above, -1)
@@ -132,7 +130,8 @@ def find_spend(fcst, likelihoods, thresholds, alpha, economic_model, analytical_
        spend_amount = analytical_spend(realised_threshold(fcst, thresholds), alpha, damage_function) 
     
     else:   # probabilistic
-        thresholds = fcst if thresholds is None else thresholds    # Continuous flow decision
+        thresholds = np.sort(fcst) if thresholds is None else thresholds    # Continuous flow decision
+
         def minimise_this(spend):
             return -ex_ante_utility(spend, likelihoods, thresholds, alpha, economic_model, damage_function, utility_function)        
         spend_amount = minimize_scalar(minimise_this, method='brent').x      
@@ -302,12 +301,6 @@ def relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes
 
     # generate refs if using event freq reference
     refs = generate_event_freq_ref(obs) if refs is None else refs
-
-    # deal with continuous decisions
-    if decision_thresholds is None:
-        max_val = np.max([np.nanmax(obs), np.nanmax(fcsts), np.nanmax(refs)])
-        thresholds_size = fcsts.shape[1] #np.max([fcsts.shape[1], refs.shape[1]])
-        decision_thresholds = np.linspace(0, max_val, thresholds_size)
 
     # Pre-calculate the forecast likelihoods for each threshold class
     fcst_likelihoods = all_likelihoods(obs, fcsts, decision_thresholds)
