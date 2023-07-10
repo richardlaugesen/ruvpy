@@ -116,17 +116,17 @@ def ex_post_utility(occured, spend, alpha, economic_model, damage_function, util
 
 
 # Amount to spend for a single timestep
-# Fast analytical method for deterministic forecast, pre-calculated likelihood for probabilistic
 def find_spend(fcst, likelihoods, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function):
-    if is_deterministic(fcst):    # deterministric fast path (50% faster for real data with this)
-       spend_amount = analytical_spend(realised_threshold(fcst, thresholds), alpha, damage_function) 
     
-    else:   # probabilistic
-        thresholds = fcst if thresholds is None else thresholds    # Continuous flow decision, unsorted is fine as all members equally likely
+    # fast path for deterministic forecasts (50% faster for real data with this)
+    if is_deterministic(fcst):    
+       return analytical_spend(realised_threshold(fcst, thresholds), alpha, damage_function)
+    
+    thresholds = fcst if thresholds is None else thresholds    # Continuous flow decision, unsorted is fine as all members equally likely
 
-        def minimise_this(spend):
-            return -ex_ante_utility(spend, likelihoods, thresholds, alpha, economic_model, damage_function, utility_function)        
-        spend_amount = minimize_scalar(minimise_this, method='brent').x      
+    def minimise_this(spend):
+        return -ex_ante_utility(spend, likelihoods, thresholds, alpha, economic_model, damage_function, utility_function)        
+    spend_amount = minimize_scalar(minimise_this, method='brent').x      
 
     return spend_amount
 
@@ -159,9 +159,12 @@ def multiple_timesteps(alpha, obs, fcst, ref, fcst_likelihoods, ref_likelihoods,
     args = []
     for t, ob in enumerate(obs):
         if not np.isnan(ob):
+
+            # use pre-calculated likelihoods for performance, None if deterministic (not needed)
             fcst_likelihood = fcst_likelihoods[t] if fcst_likelihoods is not None else None
             ref_likelihood = ref_likelihoods[t] if ref_likelihoods is not None else None
             obs_likelihood = obs_likelihoods[t] if obs_likelihoods is not None else None
+
             args.append([t, ob, thresholds, alpha, economic_model, analytical_spend, damage_function, utility_function, fcst[t], fcst_likelihood, ref[t], ref_likelihood, obs_likelihood])
 
     args = list(map(list, zip(*args)))
@@ -213,6 +216,7 @@ def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, 
     for a, alpha in enumerate(alphas):
 
         # Use "critical probability threshold equals alpha" method
+        # Convert to deterministic forecasts and pre-calculate likelihoods again
         curr_fcsts = fcsts; curr_refs = refs
         if decision_method == 'critical_probability_threshold_equals_alpha':
             curr_fcsts = probabilistic_to_deterministic_forecast(fcsts, alpha)
@@ -252,8 +256,9 @@ def multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, 
     }
 
 
-#   thresholds = None means to run for continuous flow
-#   refs = None means to use 'event frequency'
+# Main entry function to calculate RUV
+#   decision_definition['decision_thresholds']=None means to run for continuous flow
+#   refs=None means to use 'event frequency' like in REV
 def relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=4, verbose=False):
 
     alphas = decision_definition['alphas']
@@ -294,7 +299,7 @@ def relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes
     # generate refs if using event freq reference
     refs = generate_event_freq_ref(obs) if refs is None else refs
 
-    # Pre-calculate the forecast likelihoods for each threshold class
+    # Pre-calculate the forecast likelihoods for each threshold class (None if deterministic, not needed)
     fcst_likelihoods = all_likelihoods(obs, fcsts, decision_thresholds)
     ref_likelihoods = all_likelihoods(obs, refs, decision_thresholds)
     obs_likelihoods = all_likelihoods(obs, obs, decision_thresholds)
