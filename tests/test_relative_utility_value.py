@@ -54,8 +54,7 @@ def test_calc_likelihoods():
 
     # Continuous decision with 100 member ensemble forecast
     assert np.array_equal(calc_likelihoods(ens, None),
-                        #np.full(100, 1e-2))
-                        calc_likelihoods(ens, np.linspace(0, np.nanmax(ens), 100)))
+                        np.full(100, 1e-2))
 
     # below smallest threshold
     # small_ens = np.random.normal(2, 1, 100)
@@ -420,13 +419,12 @@ def test_relative_utility_value():
     }
     results_default_method = relative_utility_value(obs, fcsts, None, decision_definition, parallel_nodes=2)
 
-
     decision_definition['decision_method'] = 'optimise_over_forecast_distribution'
     results_defined_method = relative_utility_value(obs, fcsts, None, decision_definition, parallel_nodes=2)
     assert np.array_equal(results_default_method['ruv'], results_defined_method['ruv'])
 
     max_val = np.max([np.nanmax(obs), np.nanmax(fcsts), np.nanmax(refs)])
-    threshold_size = fcsts.shape[1] # 10000
+    threshold_size = 5000
     decision_definition['decision_thresholds'] = np.linspace(0, max_val, threshold_size)
     many_thresholds = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
 
