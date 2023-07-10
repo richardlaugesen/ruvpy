@@ -31,14 +31,6 @@ def is_deterministic(series):
     return False
 
 
-# not used
-def calc_likelihoods_deterministic(det, thresholds):
-    idx = np.where(thresholds == realised_threshold(det, thresholds))
-    probs_between = np.zeros(len(thresholds))
-    probs_between[idx] = 1
-    return probs_between
-
-
 # Forecast probability of an ensemble within each flow class for single timestep
 def calc_likelihoods(ens, thresholds):
     if ens is None:
