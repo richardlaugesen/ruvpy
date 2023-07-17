@@ -43,7 +43,7 @@ def test_exponential_utility():
     assert np.isclose(exponential_utility({'A': 50})(1000), 0, 1e-1)
     assert np.isclose(exponential_utility({'A': 0.1})(100000), 0, 1e-1)
 
-    outcomes = np.array([-10, 0.5, 0, 0.5, 10, 1000])
+    outcomes = np.array([-10, 0.5, 0, 0.5, 10, 1000, 1e10])
 
     risk_aversion = 0
     assert np.allclose(
@@ -53,18 +53,19 @@ def test_exponential_utility():
     risk_aversion = 0.1
     assert np.allclose(
         exponential_utility({'A': risk_aversion})(outcomes),
-        np.array([-27.2, -9.5, -10, -9.5, -3.7, 0]), 1e-1)
+        np.array([-27.2, -9.5, -10, -9.5, -3.7, 0, 0]), 1e-1)
     
     risk_aversion = 5
     assert np.allclose(
         exponential_utility({'A': risk_aversion})(outcomes),
-        np.array([-1.04e+21, -0.017, -0.2, -0.017, 0, 0]), 1e-1)
+        np.array([-1.04e+21, -0.017, -0.2, -0.017, 0, 0, 0]), 1e-1)
 
 
 def test_isoelastic_utility():
     with pytest.raises(KeyError):
         isoelastic_utility({'B': 0.1})
 
+    assert np.isneginf(isoelastic_utility({'eta': 5})(0))
     assert np.isclose(isoelastic_utility({'eta': 0.1})(10), 8.8, 1e-1)
     assert np.isclose(isoelastic_utility({'eta': 0})(10), 10, 1e-1)
     assert np.isclose(isoelastic_utility({'eta': 1})(10), np.log(10), 1e-1)
@@ -89,8 +90,8 @@ def test_isoelastic_utility():
     risk_aversion = 0.1
     assert np.allclose(
         isoelastic_utility({'eta': risk_aversion})(outcomes),
-        np.array([0.6, 0, 0.6, 8.8, 556.9]), 1e-1)
-    
+        np.array([0.6, 0, 0.6, 8.8, 556.9]), 1e-1)    
+
     risk_aversion = 5
     assert np.allclose(
         isoelastic_utility({'eta': risk_aversion})(outcomes),

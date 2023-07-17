@@ -35,19 +35,26 @@ def exponential_utility(params):
         if A == 0:
             return c
         else:
-            return np.divide(-np.exp(np.multiply(-A, c)), A)
+            return np.divide(np.subtract(-1, np.expm1(np.multiply(-A, c))), A)      # using expm1 to reduce chance of overflows
 
     return utility
 
 
+
+def ensure_float(input_data):
+    return input_data.astype(float) if isinstance(input_data, np.ndarray) else float(input_data)
+
+
 # Isoelastic utility (https://en.wikipedia.org/wiki/Isoelastic_utility)
 def isoelastic_utility(params):
-    eta = params['eta']
+    eta = float(params['eta'])
 
-    def utility(c):    
+    def utility(c):
+        c = ensure_float(c)
+
         if eta == 1:
             return np.log(c)
-        else:        
+        else: 
             return np.divide(np.power(c, np.subtract(1, eta)), np.subtract(1, eta))
 
     return utility
