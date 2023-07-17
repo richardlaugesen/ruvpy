@@ -52,6 +52,8 @@ def test_calc_likelihoods():
     assert np.allclose(calc_likelihoods(ens, thresholds),
                        np.array([0, 0, 0.01, 0.16, 0.37, 0.35, 0.11, 0, 0, 0]), 1e-1)
 
+    assert np.equal(np.sum(calc_likelihoods(ens, thresholds)), 1)
+
     # Continuous decision with 100 member ensemble forecast
     assert np.array_equal(calc_likelihoods(ens, None), np.full(100, 1e-2))
 
@@ -177,6 +179,14 @@ def test_ex_ante_utility():
     assert np.isclose(
         ex_ante_utility(spend, probs, thresholds, alpha, economic_model, damage_func, utility_func),
         -8.199, 1e-2)    
+
+    alpha = 0.1; spend = 3
+    thresholds = np.arange(1, 100000, 1)
+    ens = np.random.normal(50000, 10000, 100000)
+    probs = calc_likelihoods(ens, thresholds)   # tiny likelihoods
+    assert np.isclose(
+        ex_ante_utility(spend, probs, thresholds, alpha, economic_model, damage_func, utility_func),
+        -8.199, 1e-2)
 
 
 def test_ex_post_utility():
