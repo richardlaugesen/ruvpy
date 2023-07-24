@@ -12,65 +12,128 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict, Callable, Union
 import numpy as np
-from scipy.optimize import root_scalar
 
-# Functional currying is used to allow a pre-paramterised utility functions to be passed into RUV
 
-# Constant Absolute Risk Aversion utility function
-def cara(params):
+def cara(params: Dict[str, Union[int, float]]) -> Callable[[float], float]:
+    """
+    Constant Absolute Risk Aversion utility function.
+
+    Parameters:
+    - params: A dictionary containing the absolute risk aversion parameter 'A' for the utility function.
+
+    Returns:
+    - utility: A function that calculates the utility given a consumption value 'c'.
+
+    Notes:
+    - Functional currying is used to allow a pre-paramterised damage functions to be passed into RUV.    
+    """
     return exponential_utility(params)
 
 
-# Constant Relaive Risk Aversion utility function
-def crra(params):
+def crra(params: Dict[str, Union[int, float]]) -> Callable[[float], float]:
+    """
+    Constant Relative Risk Aversion utility function.
+
+    Parameters:
+    - params: A dictionary containing the relative risk aversion 'eta' for the utility function.
+
+    Returns:
+    - utility: A function that calculates the utility given a consumption value 'c'.
+
+    Notes:
+    - Functional currying is used to allow a pre-paramterised damage functions to be passed into RUV.    
+    """
     return isoelastic_utility(params)
 
 
-# Exponential utility (https://en.wikipedia.org/wiki/Exponential_utility)
-def exponential_utility(params):
+def exponential_utility(params: Dict[str, Union[int, float]]) -> Callable[[float], float]:
+    """
+    Exponential utility function (https://en.wikipedia.org/wiki/Exponential_utility).
+
+    Parameters:
+    - params: A dictionary containing the absolute risk aversion parameter 'A' for the utility function.
+
+    Returns:
+    - utility: A function that calculates the utility given a consumption value 'c'.
+
+    Notes:
+    - Functional currying is used to allow a pre-paramterised damage functions to be passed into RUV.    
+    """
     A = params['A']
 
-    def utility(c):
+    def utility(c: float) -> float:
         if A == 0:
             return c
         else:
-            return np.divide(np.subtract(-1, np.expm1(np.multiply(-A, c))), A)      # using expm1 to reduce chance of overflows
+            # using expm1 to reduce chance of overflows
+            return np.divide(np.subtract(-1, np.expm1(np.multiply(-A, c))), A)
 
     return utility
 
 
+def ensure_float(input_data: Union[float, np.ndarray]) -> float:
+    """
+    Ensures that the input data is of type float.
 
-def ensure_float(input_data):
+    Parameters:
+    - input_data: The input data.
+
+    Returns:
+    - The input data as a float.
+    """
     return input_data.astype(float) if isinstance(input_data, np.ndarray) else float(input_data)
 
 
-# Isoelastic utility (https://en.wikipedia.org/wiki/Isoelastic_utility)
-def isoelastic_utility(params):
+def isoelastic_utility(params: Dict[str, Union[int, float]]) -> Callable[[float], float]:
+    """
+    Isoelastic utility function (https://en.wikipedia.org/wiki/Isoelastic_utility).
+
+    Parameters:
+    - params: A dictionary containing the relative risk aversion parameter 'eta' for the utility function.
+
+    Returns:
+    - utility: A function that calculates the utility given a consumption value 'c'.
+
+    Notes:
+    - Functional currying is used to allow a pre-paramterised damage functions to be passed into RUV.    
+    """
     eta = float(params['eta'])
 
-    def utility(c):
+    def utility(c: float) -> float:
         c = ensure_float(c)
 
         if eta == 1:
             return np.log(c)
-        else: 
+        else:
             return np.divide(np.power(c, np.subtract(1, eta)), np.subtract(1, eta))
 
     return utility
 
 
-# Hyperbolic absolute risk aversion (https://en.wikipedia.org/wiki/Hyperbolic_absolute_risk_aversion)
-def hyperbolic_utility(params):
+def hyperbolic_utility(params: Dict[str, Union[int, float]]) -> Callable[[float], float]:
+    """
+    Hyperbolic absolute risk aversion utility function (https://en.wikipedia.org/wiki/Hyperbolic_absolute_risk_aversion).
+
+    Parameters:
+    - params: A dictionary containing the parameters 'g', 'a', and 'b' for the utility function.
+
+    Returns:
+    - utility: A function that calculates the utility given a wealth value 'W'.
+
+    Notes:
+    - Functional currying is used to allow a pre-paramterised damage functions to be passed into RUV.
+    """
     g, a, b = params['g'], params['a'], params['b']
 
-    def utility(W):        
+    def utility(W: float) -> float:
         if g == 0 or g == 1:
             raise Exception('g cannot be 0 or 1')
 
         if a <= 0:
             raise Exception('a > 0')
-        
+
         if np.any(W < 0):
             raise Exception('W must be positive')
 
@@ -80,48 +143,3 @@ def hyperbolic_utility(params):
         return np.multiply(np.divide(np.subtract(1, g), g), np.power(np.add(np.divide(np.multiply(a, W), np.subtract(1, g)), b), g))
 
     return utility
-
-
-# Calculate CARA risk premium from risk aversion coefficient and gamble size (Babcock, 1993. Eq 4)
-def risk_aversion_coef_to_risk_premium(risk_aversion, gamble_size):
-    return np.log(0.5 * (np.exp(-risk_aversion * gamble_size) + np.exp(risk_aversion * gamble_size))) / (risk_aversion * gamble_size)
-
-
-# Calculate CARA risk aversion coefficient from risk premium and gamble size (Babcock, 1993. Eq 4)
-def risk_premium_to_risk_aversion_coef(risk_premium, gamble_size):
-    if risk_premium < 0 or risk_premium > 1:
-        raise Exception('risk_premium range is 0 to 1')
-
-    def eqn(A):
-        return np.log(0.5 * (np.exp(-A * gamble_size) + np.exp(A * gamble_size))) / (A * gamble_size) - risk_premium
-    return root_scalar(eqn, bracket=[0.0000001, 100]).root
-
-
-# Calculate CARA probability premium from risk premium (Babcock, 1993. Eq 9)
-def risk_premium_to_prob_premium(risk_premium):
-    if risk_premium < 0 or risk_premium > 1:
-        raise Exception('risk_premium range is 0 to 1')
-
-    if risk_premium > 0.99:
-        raise Exception('scipy optimiser fails when risk_premium > 0.99')
-
-    def eqn(prob):
-        return  np.log((1 + 4 * np.power(prob, 2)) / (1 - 4 * np.power(prob, 2))) / np.log((1 + 2 * prob) / (1 - 2 * prob)) - risk_premium
-    return root_scalar(eqn, bracket=[0.0000001, 0.49999]).root
-
-
-# Calculate CARA risk aversion coefficient from probability premium (Babcock, 1993. Eq 4, 9)
-def prob_premium_to_risk_aversion_coef(risk_premium_prob, gamble_size):
-    if risk_premium_prob < 0 or risk_premium_prob > 0.5:
-        raise Exception('risk_premium_prob range is 0 to 0.5')
-
-    if risk_premium_prob > 0.49999:
-        raise Exception('scipy optimiser fails when risk_premium_prob > 0.49999')
-
-    def eqn(A):
-        return (
-            np.log((1 + 4 * np.power(risk_premium_prob, 2)) / (1 - 4 * np.power(risk_premium_prob, 2))) /
-            np.log((1 + 2 * risk_premium_prob) / (1 - 2 * risk_premium_prob)) -
-            np.log(0.5 * (np.exp(-A * gamble_size) + np.exp(A * gamble_size))) / (A * gamble_size)
-        )
-    return root_scalar(eqn, bracket=[0.0000001, 100]).root

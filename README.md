@@ -11,6 +11,46 @@ Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast valu
 
 ## Functionality
 
+### Input data
+
+The following data over a historical period is required, all are numpy arrays and can be either deterministic or ensemble:
+
+- Forecasts under evaluation
+- Reference forecasts
+- Observations
+
+The decision context needs to be fully defined:
+
+- Utility function
+- Damage function
+- Economic model
+- Decision making method
+- Decision type and thresholds
+- Alpha values
+
+This is identical to REV(Richardson, 2000) when a specific decision context is used.
+
+### Output data
+
+A Python dictionary with the following keys, all values are numpy arrays:
+
+- decision_definition
+- fcst_likelihoods
+- ref_likelihoods
+- obs_likelihoods
+- fcst_avg_ex_post
+- obs_avg_ex_post
+- ref_avg_ex_post
+- fcst_spends
+- obs_spends
+- ref_spends
+- fcst_ex_post
+- obs_ex_post
+- ref_ex_post
+- ruv
+
+RUV values are returned for each alpha value requested in the decision context. Other values are returned for every combination of alpha and timestep defined by the observation data.
+
 ### Utility functions
 
 The RUV method has a foundation in Expected Utility Theory and as such requires a Utility function to be specified by the user. This maps an outcome from the economic model to utility of the decision-maker. Any custom function can be provided, and the following utility functions are implemented in the library:
@@ -20,8 +60,6 @@ The RUV method has a foundation in Expected Utility Theory and as such requires 
 - Hyperbolic absolute risk aversion
 
 These can, for example, be used to model constant absolute risk aversion (CARA), constant relative risk aversion (CRRA), and neutral risk aversion. 
-
-Helper functions included to convert between CARA risk aversion coefficient, risk premium, and probability premium (Babcock, 1993).
 
 ### Damage functions
 
@@ -48,6 +86,14 @@ To calculate RUV it must simulate decision making at each timestep, there are th
 - optimise_over_forecast_distribution uses the forecast distribution at each timestep to determine the optimium amount to spend on mitigation to maximise utility
 - critical_probability_threshold_fixed
 - critical_probability_threshold_equals_alpha
+- critical_probability_threshold_max_ruv
+
+### Helper functions
+
+- Generate reference forecasts to replicate REV event frequency approach.
+- Convert between CARA risk aversion coefficient, risk premium, and probability premium (Babcock, 1993).
+- Check if forecasts are deterministic or ensemble.
+- Calculate emperical cummulative probability distribution function efficiently.
 
 ## Software
 
@@ -65,15 +111,15 @@ To calculate RUV it must simulate decision making at each timestep, there are th
 ### Conventions
 
 - Functional programming style
+- Data Classes used to pass between functions
 - Clarity over cleverness
 - DRY and YAGNI
 - Vanilla python and numpy arrays
-- Functions return dictionaries with descriptively named keys when needed
 - Function and variable naming is unambiguous
 
 ### Dependencies
 
-Sufficiently modern version of python 3, numpy, scipy.
+Python 3.7+, numpy, scipy.
 
 ## Code of conduct
 
