@@ -18,23 +18,6 @@ import numpy as np
 from scipy.optimize import minimize_scalar
 
 
-# TODO: dont see why we need this
-def calc_likelihood_deterministic(det: float, thresholds: np.ndarray) -> np.ndarray:
-    if thresholds is None:  # continuous
-        return np.array([1])
-
-    likelihoods = np.zeros_like(thresholds)
-
-    if det > np.max(thresholds):
-        likelihoods[-1] = 1
-        return likelihoods
-
-    idx = np.argmin(np.abs(det - thresholds))
-    likelihoods[idx] = 1
-
-    return likelihoods
-
-
 def calc_likelihood_ensemble(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     
     # limit is just 1/num_classes for large num_classes (continuous)
