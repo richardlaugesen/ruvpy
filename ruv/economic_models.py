@@ -16,33 +16,10 @@ import numpy as np
 
 
 def cost_loss(alpha: float, values: np.ndarray, spend: float, damage_function: callable) -> np.ndarray:
-    """
-    Calculates the net expenses using the cost-loss model.
-
-    Parameters:
-    alpha (float): The alpha value.
-    values (np.ndarray): An array of values.
-    spend (float): The spend amount.
-    damage_function (callable): A function that calculates the damages.
-
-    Returns:
-    np.ndarray: An array of net expenses.
-    """
     damages = damage_function(values)
     benefits = np.minimum(np.divide(spend, alpha), damages)
     return np.subtract(np.subtract(benefits, damages), spend)
 
 
 def cost_loss_analytical_spend(alpha: float, threshold: float, damage_function: callable) -> float:
-    """
-    Calculates the optimal cost-loss spend amount when forecast probability is entirely in a single flow class.
-
-    Parameters:
-    alpha (float): The alpha value.
-    threshold (float): The threshold value.
-    damage_function (callable): A function that calculates the damages.
-
-    Returns:
-    float: The optimal cost-loss spend amount.
-    """
     return damage_function(threshold) * alpha

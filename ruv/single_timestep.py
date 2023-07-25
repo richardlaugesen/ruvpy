@@ -18,30 +18,27 @@ import numpy as np
 from scipy.optimize import minimize_scalar
 
 
+# Calculate RUV for a single alpha and single timestep
 def single_timestep(t: int, alpha: float, data: InputData, context: DecisionContext) -> tuple:
     ob = data.obs[t]
     fcst = data.fcsts[t]
     ref = data.refs[t]
 
-    # find obs spend amount
     ob_threshold = realised_threshold(ob, context.decision_thresholds)
     obs_spends = context.analytical_spend(alpha, ob_threshold, context.damage_function)
 
-    # find fcst spend amount
-    if is_deterministic_timestep(fcst):
+    if is_deterministic(fcst):
         fcst_spends = context.analytical_spend(alpha, realised_threshold(fcst, context.decision_thresholds), context.damage_function)
     else:
         fcst_likelihoods = calc_likelihood(fcst, context.decision_thresholds)   # not pre-calculating these because code difficult to
-        fcst_spends = find_spend(alpha, fcst, fcst_likelihoods, context)                 # maintain even though it is 30% faster
+        fcst_spends = find_spend(alpha, fcst, fcst_likelihoods, context)        # maintain even though it is 30% faster
     
-    # find ref spend amount
-    if is_deterministic_timestep(ref):
+    if is_deterministic(ref):
         ref_spends = context.analytical_spend(alpha, realised_threshold(ref, context.decision_thresholds), context.damage_function)        
     else:
         ref_likelihoods = calc_likelihood(ref, context.decision_thresholds)
         ref_spends = find_spend(alpha, ref, ref_likelihoods, context)     
 
-    # calculate ex post utilities using the spend amounts
     obs_ex_post = ex_post_utility(alpha, ob_threshold, obs_spends, context)
     fcst_ex_post = ex_post_utility(alpha, ob_threshold, fcst_spends, context)
     ref_ex_post = ex_post_utility(alpha, ob_threshold, ref_spends, context)
@@ -49,10 +46,9 @@ def single_timestep(t: int, alpha: float, data: InputData, context: DecisionCont
     return (t, obs_spends, obs_ex_post, fcst_spends, fcst_ex_post, ref_spends, ref_ex_post)
 
 
-def find_spend(alpha: float, fcst: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:
-    # if continuous decision then all members equally likely
+def find_spend(alpha: float, fcst: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:    
     if context.decision_thresholds is None:
-        thresholds = fcst
+        thresholds = fcst   # if continuous decision then all members equally likely
         curr_context = DecisionContext(context.alphas, context.damage_function, context.utility_function, thresholds, context.economic_model, context.analytical_spend, context.crit_prob_thres)
     else:
         curr_context = context
@@ -60,6 +56,7 @@ def find_spend(alpha: float, fcst: np.ndarray, likelihoods: np.ndarray, context:
     def minimise_this(spend):
         return -ex_ante_utility(alpha, spend, likelihoods, curr_context)
     spend_amount = minimize_scalar(minimise_this, method='brent').x
+
     return spend_amount
 
 
@@ -74,19 +71,15 @@ def ex_post_utility(alpha: float, occured: float, spend: float, context: Decisio
     return context.utility_function(net_expense)
 
 
-def calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
-    
-    # limit is just 1/num_classes for large num_classes (continuous)
+def calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:    
     if thresholds is None:
-        return np.full(ens.shape, 1/ens.shape[0])    
+        return np.full(ens.shape, 1/ens.shape[0])   # continuous decision limit is 1/num_classes
 
     probs_above = ecdf(ens, thresholds)
     adjustment = np.roll(probs_above, -1)
     adjustment[-1] = 0.0
     probs_between = np.subtract(probs_above, adjustment)
-
-    # normalise to ensure small probs are handled correctly
-    probs_between /= np.sum(probs_between)
+    probs_between /= np.sum(probs_between)  # normalise to ensure small probs are handled correctly
 
     return probs_between
 

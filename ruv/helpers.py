@@ -16,77 +16,15 @@ import numpy as np
 from scipy.optimize import root_scalar
 
 
-def generate_event_freq_ref(obs: np.ndarray) -> np.ndarray:
-    """
-    Generate an 'event frequency' reference distribution for each timestep.
-    The reference distribution is simply the observed record with any missing values dropped.
-    This is then tiled to match the original observation shape.
-
-    Parameters
-    ----------
-    obs : np.ndarray
-        The observed data as a 1D numpy array.
-
-    Returns
-    -------
-    np.ndarray
-        A 2D numpy array where each row is the observed data with missing values dropped.
-        The number of rows is equal to the number of elements in the input array.
-
-    Notes
-    -----
-    NaN values in the input array are considered as missing values and are dropped.
-    """
-    return np.tile(obs[~np.isnan(obs)], (obs.shape[0], 1))
-
-
+# Around 5 times faster then statsmodels ECDF
 def ecdf(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
-    """
-    Compute the empirical cumulative distribution function (ECDF) for a given ensemble 
-    and set of thresholds. The ECDF represents the probability that a random variable 
-    is less than or equal to a certain value.
-
-    Parameters
-    ----------
-    ens : ndarray
-        The ensemble for which to compute the ECDF. This should be a 1D numpy array 
-        of ensemble members.
-
-    thresholds : ndarray
-        The thresholds at which to compute the ECDF. This should be a 1D numpy array 
-        of values.
-
-    Returns
-    -------
-    ndarray
-        A numpy array of the same shape as `thresholds`, where each element is the 
-        probability that a randomly chosen member of `ens` is less than or equal to 
-        the corresponding value in `thresholds`.
-
-    Notes
-    -----
-    This implementation is around 5 times faster then statsmodels ECDF
-    """
     ens_sorted = np.sort(ens)
-    idx = np.searchsorted(ens_sorted, thresholds)
-    # 3 times fast then linspace
+    idx = np.searchsorted(ens_sorted, thresholds)   # 3 times faster then linspace
     probs = np.arange(ens.size + 1)/float(ens.size)
     return 1 - probs[idx]
 
 
-def is_deterministic_timestep(series) -> bool:
-    """
-    Check if the given series represents a deterministic timestep.
-
-    Args:
-        series: The series to check.
-
-    Returns:
-        bool: True if the series represents a deterministic timestep, False otherwise.
-
-    Raises:
-        ValueError: If the series is a 2D array.
-    """
+def is_deterministic(series) -> bool:
     if isinstance(series, np.ndarray) and len(series.shape) > 1:
         raise ValueError(
             'Forecast used for timestep should be a single value (deterministic) or a 1D array (ensemble)')
@@ -97,34 +35,13 @@ def is_deterministic_timestep(series) -> bool:
     return False
 
 
+# Calculate CARA risk premium from risk aversion coefficient and gamble size (Babcock, 1993. Eq 4)
 def risk_aversion_coef_to_risk_premium(risk_aversion: float, gamble_size: float) -> float:
-    """
-    Calculate CARA risk premium from risk aversion coefficient and gamble size (Babcock, 1993. Eq 4)
-
-    Args:
-        risk_aversion (float): Risk aversion coefficient
-        gamble_size (float): Gamble size
-
-    Returns:
-        float: Risk premium
-    """
     return np.log(0.5 * (np.exp(-risk_aversion * gamble_size) + np.exp(risk_aversion * gamble_size))) / (risk_aversion * gamble_size)
 
 
+# Calculate CARA risk aversion coefficient from risk premium and gamble size (Babcock, 1993. Eq 4)
 def risk_premium_to_risk_aversion_coef(risk_premium: float, gamble_size: float) -> float:
-    """
-    Calculate CARA risk aversion coefficient from risk premium and gamble size (Babcock, 1993. Eq 4)
-
-    Args:
-        risk_premium (float): Risk premium
-        gamble_size (float): Gamble size
-
-    Raises:
-        Exception: If risk_premium is not in the range of 0 to 1
-
-    Returns:
-        float: Risk aversion coefficient
-    """
     if risk_premium < 0 or risk_premium > 1:
         raise Exception('risk_premium range is 0 to 1')
 
@@ -134,20 +51,8 @@ def risk_premium_to_risk_aversion_coef(risk_premium: float, gamble_size: float) 
     return root_scalar(eqn, bracket=[0.0000001, 100]).root
 
 
+# Calculate CARA probability premium from risk premium (Babcock, 1993. Eq 9)
 def risk_premium_to_prob_premium(risk_premium: float) -> float:
-    """
-    Calculate CARA probability premium from risk premium (Babcock, 1993. Eq 9)
-
-    Args:
-        risk_premium (float): Risk premium
-
-    Raises:
-        Exception: If risk_premium is not in the range of 0 to 1
-        Exception: If risk_premium is greater than 0.99
-
-    Returns:
-        float: Probability premium
-    """
     if risk_premium < 0 or risk_premium > 1:
         raise Exception('risk_premium range is 0 to 1')
 
@@ -160,21 +65,8 @@ def risk_premium_to_prob_premium(risk_premium: float) -> float:
     return root_scalar(eqn, bracket=[0.0000001, 0.49999]).root
 
 
+# Calculate CARA risk aversion coefficient from probability premium (Babcock, 1993. Eq 4, 9)
 def prob_premium_to_risk_aversion_coef(risk_premium_prob: float, gamble_size: float) -> float:
-    """
-    Calculate CARA risk aversion coefficient from probability premium (Babcock, 1993. Eq 4, 9)
-
-    Args:
-        risk_premium_prob (float): Probability premium
-        gamble_size (float): Gamble size
-
-    Raises:
-        Exception: If risk_premium_prob is not in the range of 0 to 0.5
-        Exception: If risk_premium_prob is greater than 0.49999
-
-    Returns:
-        float: Risk aversion coefficient
-    """
     if risk_premium_prob < 0 or risk_premium_prob > 0.5:
         raise Exception('risk_premium_prob range is 0 to 0.5')
 

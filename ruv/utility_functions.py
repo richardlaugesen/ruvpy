@@ -12,55 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, Callable, Union
+from typing import Callable
 import numpy as np
 
 
-def cara(params: Dict[str, Union[int, float]]) -> Callable[[float], float]:
-    """
-    Constant Absolute Risk Aversion utility function.
-
-    Parameters:
-    - params: A dictionary containing the absolute risk aversion parameter 'A' for the utility function.
-
-    Returns:
-    - utility: A function that calculates the utility given a consumption value 'c'.
-
-    Notes:
-    - Functional currying is used to allow a pre-paramterised damage functions to be passed into RUV.    
-    """
+# Constant Absolute Risk Aversion utility function
+def cara(params: dict) -> Callable:
     return exponential_utility(params)
 
 
-def crra(params: Dict[str, Union[int, float]]) -> Callable[[float], float]:
-    """
-    Constant Relative Risk Aversion utility function.
-
-    Parameters:
-    - params: A dictionary containing the relative risk aversion 'eta' for the utility function.
-
-    Returns:
-    - utility: A function that calculates the utility given a consumption value 'c'.
-
-    Notes:
-    - Functional currying is used to allow a pre-paramterised damage functions to be passed into RUV.    
-    """
+# Constant Relative Risk Aversion utility function
+def crra(params: dict) -> Callable:
     return isoelastic_utility(params)
 
 
-def exponential_utility(params: Dict[str, Union[int, float]]) -> Callable[[float], float]:
-    """
-    Exponential utility function (https://en.wikipedia.org/wiki/Exponential_utility).
-
-    Parameters:
-    - params: A dictionary containing the absolute risk aversion parameter 'A' for the utility function.
-
-    Returns:
-    - utility: A function that calculates the utility given a consumption value 'c'.
-
-    Notes:
-    - Functional currying is used to allow a pre-paramterised damage functions to be passed into RUV.    
-    """
+# Exponential utility function (https://en.wikipedia.org/wiki/Exponential_utility)
+def exponential_utility(params: dict) -> Callable:
     A = params['A']
 
     def utility(c: float) -> float:
@@ -73,32 +40,12 @@ def exponential_utility(params: Dict[str, Union[int, float]]) -> Callable[[float
     return utility
 
 
-def ensure_float(input_data: Union[float, np.ndarray]) -> float:
-    """
-    Ensures that the input data is of type float.
-
-    Parameters:
-    - input_data: The input data.
-
-    Returns:
-    - The input data as a float.
-    """
+def ensure_float(input_data: np.ndarray) -> float:
     return input_data.astype(float) if isinstance(input_data, np.ndarray) else float(input_data)
 
 
-def isoelastic_utility(params: Dict[str, Union[int, float]]) -> Callable[[float], float]:
-    """
-    Isoelastic utility function (https://en.wikipedia.org/wiki/Isoelastic_utility).
-
-    Parameters:
-    - params: A dictionary containing the relative risk aversion parameter 'eta' for the utility function.
-
-    Returns:
-    - utility: A function that calculates the utility given a consumption value 'c'.
-
-    Notes:
-    - Functional currying is used to allow a pre-paramterised damage functions to be passed into RUV.    
-    """
+# Isoelastic utility function (https://en.wikipedia.org/wiki/Isoelastic_utility)
+def isoelastic_utility(params: dict) -> Callable:
     eta = float(params['eta'])
 
     def utility(c: float) -> float:
@@ -112,19 +59,8 @@ def isoelastic_utility(params: Dict[str, Union[int, float]]) -> Callable[[float]
     return utility
 
 
-def hyperbolic_utility(params: Dict[str, Union[int, float]]) -> Callable[[float], float]:
-    """
-    Hyperbolic absolute risk aversion utility function (https://en.wikipedia.org/wiki/Hyperbolic_absolute_risk_aversion).
-
-    Parameters:
-    - params: A dictionary containing the parameters 'g', 'a', and 'b' for the utility function.
-
-    Returns:
-    - utility: A function that calculates the utility given a wealth value 'W'.
-
-    Notes:
-    - Functional currying is used to allow a pre-paramterised damage functions to be passed into RUV.
-    """
+# Hyperbolic absolute risk aversion utility function (https://en.wikipedia.org/wiki/Hyperbolic_absolute_risk_aversion)
+def hyperbolic_utility(params: dict) -> Callable:
     g, a, b = params['g'], params['a'], params['b']
 
     def utility(W: float) -> float:

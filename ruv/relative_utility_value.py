@@ -17,9 +17,9 @@ from ruv.data_classes import *
 import numpy as np
 
 
+# main entry function for RUV calculation
 def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, decision_definition: dict, parallel_nodes: int=4, verbose: bool=False) -> dict:
     data = InputData(obs, fcsts, refs)
-
 
     alphas = decision_definition['alphas']
     damage_fnc_mth = decision_definition['damage_function'][0]
@@ -33,7 +33,8 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     crit_prob_thres = decision_definition['critical_probability_threshold'] if 'critical_probability_threshold' in decision_definition.keys() else None
     decision_method = decision_definition['decision_method'] if 'decision_method' in decision_definition.keys() else 'optimise_over_forecast_distribution'
     decision_making_fnc = globals()[decision_method]
-    context = DecisionContext(alphas, damage_function, utility_function, decision_thresholds, economic_model, analytical_spend, crit_prob_thres)
+    event_freq_ref = decision_definition['event_freq_ref']
+    context = DecisionContext(alphas, damage_function, utility_function, decision_thresholds, economic_model, analytical_spend, crit_prob_thres, event_freq_ref)
 
     check_inputs(data, context)
     return to_dict(decision_making_fnc(data, context, parallel_nodes, verbose))
