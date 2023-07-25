@@ -33,7 +33,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     crit_prob_thres = decision_definition['critical_probability_threshold'] if 'critical_probability_threshold' in decision_definition.keys() else None
     decision_method = decision_definition['decision_method'] if 'decision_method' in decision_definition.keys() else 'optimise_over_forecast_distribution'
     decision_making_fnc = globals()[decision_method]
-    event_freq_ref = decision_definition['event_freq_ref']
+    event_freq_ref = decision_definition['event_freq_ref'] if 'decision_method' in decision_definition.keys() else False
     context = DecisionContext(alphas, damage_function, utility_function, decision_thresholds, economic_model, analytical_spend, crit_prob_thres, event_freq_ref)
 
     check_inputs(data, context)
