@@ -85,16 +85,13 @@ def is_deterministic_timestep(series) -> bool:
         bool: True if the series represents a deterministic timestep, False otherwise.
 
     Raises:
-        ValueError: If the series is a 2D numpy array.
+        ValueError: If the series is a 2D array.
     """
     if isinstance(series, np.ndarray) and len(series.shape) > 1:
         raise ValueError(
-            'Ensemble used for timestep should be a 1D array or single value')
+            'Forecast used for timestep should be a single value (deterministic) or a 1D array (ensemble)')
 
-    if isinstance(series, (int, float)):
-        return True
-
-    if len(series) == 1:
+    if isinstance(series, (int, float)) or len(series) == 1:
         return True
 
     return False

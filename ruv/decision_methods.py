@@ -16,20 +16,27 @@ from ruv.multi_timestep import *
 from ruv.data_classes import *
 
 
+def probabilistic_to_deterministic_forecast(ensembles: np.ndarray, crit_thres: float) -> np.ndarray:
+    if is_deterministic_timestep(ensembles[0]):
+        raise ValueError('Cannot convert deterministic forecast to deterministic forecast')
+    return np.nanquantile(ensembles, 1 - crit_thres, axis=1)
+
+# binary - fine
+# continuous - maybe okay
 def optimise_over_forecast_distribution(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
     outputs = MultiAlphaOutput()
     for alpha in context.alphas:
         outputs.insert(alpha, multiple_timesteps(alpha, data, context, parallel_nodes, verbose))
     return outputs
 
-
+# binary - broken unless curr_refs = data.refs
 def critical_probability_threshold_fixed(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
     curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, context.crit_prob_thres)
     curr_refs = probabilistic_to_deterministic_forecast(data.refs, context.crit_prob_thres)
     curr_data = InputData(data.obs, curr_fcsts, curr_refs)
     return optimise_over_forecast_distribution(curr_data, context, parallel_nodes, verbose)
 
-
+# binary - broken unless curr_refs = data.refs
 def critical_probability_threshold_max_value(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
     outputs = MultiAlphaOutput()
     for alpha in context.alphas:
@@ -46,12 +53,13 @@ def critical_probability_threshold_max_value(data: InputData, context: DecisionC
         outputs.insert(alpha, multiple_timesteps(alpha, max_data, context, parallel_nodes, verbose))
     return outputs
 
-
+# binary - fine
+# continuous - maybe okay
 def critical_probability_threshold_equals_alpha(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
     outputs = MultiAlphaOutput()
     for alpha in context.alphas:
-        curr_fcst = probabilistic_to_deterministic_forecast(data.fcsts, alpha)
-        curr_ref = probabilistic_to_deterministic_forecast(data.refs, alpha)
-        curr_data = InputData(data.obs, curr_fcst, curr_ref)
+        curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, alpha)
+        curr_refs = probabilistic_to_deterministic_forecast(data.refs, alpha)
+        curr_data = InputData(data.obs, curr_fcsts, curr_refs)
         outputs.insert(alpha, multiple_timesteps(alpha, curr_data, context, parallel_nodes, verbose))    
     return outputs
