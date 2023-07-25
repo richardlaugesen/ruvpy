@@ -33,6 +33,7 @@ class DecisionContext:
     economic_model: Callable
     analytical_spend: Callable
     crit_prob_thres: Optional[float] = None
+    event_freq_ref: bool = False
 
 
 @dataclass
@@ -73,7 +74,7 @@ class MultiAlphaOutput:
         self.data[alpha] = output
         self.data = {alpha: self.data[alpha] for alpha in sorted(self.data)}
 
-    # return either a 1D or 2D numpy array for a SingleAlphaOutput field that is stored in the data dict
+    # return either a 1D or 2D numpy array depending on the type of SingleAlphaOutput field that is stored in the data dict
     def get_series(self, field):
         return np.array([getattr(v, field).tolist() if isinstance(getattr(v, field), np.ndarray) else getattr(v, field) for a, v in self.data.items()])
         

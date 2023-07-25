@@ -17,8 +17,8 @@ from ruv.data_classes import *
 from pathos.multiprocessing import ProcessPool as Pool      # pathos.pools
 
 
-def multiple_timesteps(alpha: float, data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> SingleAlphaOutput:
-    
+# Calculate RUV for a single alpha value, parallelises over timesteps
+def multiple_timesteps(alpha: float, data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> SingleAlphaOutput:    
     if parallel_nodes == 1:
         results = []
         for t, ob in enumerate(data.obs):
