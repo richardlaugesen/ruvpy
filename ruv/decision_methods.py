@@ -66,8 +66,8 @@ def probabilistic_to_deterministic_forecast(ensembles: np.ndarray, crit_thres: f
 
 
 # Can reproduce the behaviour of event frequency reference used in REV 
-# using this expected utility approach with an ensemble for each timestep 
+# using the RUV expected utility approach with an ensemble for each timestep 
 # which is simply the observation record. NA are dropped to simplify
-# calculating forecast likelihoods
+# calculation of forecast likelihoods
 def generate_event_freq_ref(obs: np.ndarray) -> np.ndarray:
     return np.tile(obs[~np.isnan(obs)], (obs.shape[0], 1))
