@@ -17,8 +17,8 @@ import numpy as np
 
 def cost_loss(alpha: float, values: np.ndarray, spend: float, damage_function: callable) -> np.ndarray:
     damages = damage_function(values)
-    benefits = np.minimum(np.divide(spend, alpha), damages)
-    return np.subtract(np.subtract(benefits, damages), spend)
+    benefits = np.minimum(spend/alpha, damages)
+    return benefits - damages - spend
 
 
 def cost_loss_analytical_spend(alpha: float, threshold: float, damage_function: callable) -> float:

@@ -78,8 +78,7 @@ def prob_premium_to_risk_aversion_coef(risk_premium_prob: float, gamble_size: fl
         return (
             np.log((1 + 4 * np.power(risk_premium_prob, 2)) / (1 - 4 * np.power(risk_premium_prob, 2))) /
             np.log((1 + 2 * risk_premium_prob) / (1 - 2 * risk_premium_prob)) -
-            np.log(0.5 * (np.exp(-A * gamble_size) +
-                   np.exp(A * gamble_size))) / (A * gamble_size)
+            np.log(0.5 * (np.exp(-A * gamble_size) + np.exp(A * gamble_size))) / (A * gamble_size)
         )
 
     return root_scalar(eqn, bracket=[0.0000001, 100]).root

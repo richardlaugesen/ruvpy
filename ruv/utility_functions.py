@@ -35,7 +35,7 @@ def exponential_utility(params: dict) -> Callable:
             return c
         else:
             # using expm1 to reduce chance of overflows
-            return np.divide(np.subtract(-1, np.expm1(np.multiply(-A, c))), A)
+            return (-1 - math.expm1(-A * c)) / A
 
     return utility
 
@@ -54,7 +54,7 @@ def isoelastic_utility(params: dict) -> Callable:
         if eta == 1:
             return np.log(c)
         else:
-            return np.divide(np.power(c, np.subtract(1, eta)), np.subtract(1, eta))
+            return np.power(c, 1 - eta) / (1 - eta)
 
     return utility
 
@@ -76,6 +76,6 @@ def hyperbolic_utility(params: dict) -> Callable:
         if np.any(b + (a * W) / (1 - g) <= 0):
             raise Exception('b + (a * W) / (1 - g) > 0')
 
-        return np.multiply(np.divide(np.subtract(1, g), g), np.power(np.add(np.divide(np.multiply(a, W), np.subtract(1, g)), b), g))
+        return ((1 - g) / g) * np.power(((a * W) / (1 - g) + b), g)
 
     return utility
