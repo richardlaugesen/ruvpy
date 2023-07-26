@@ -15,6 +15,7 @@
 from ruv.multi_timestep import *
 from ruv.data_classes import *
 
+# only average 5% speedup moving generate_event_freq_ref outside loop in these functions
 
 def optimise_over_forecast_distribution(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
     outputs = MultiAlphaOutput()
@@ -29,7 +30,10 @@ def critical_probability_threshold_fixed(data: InputData, context: DecisionConte
     curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, context.crit_prob_thres)   
     curr_refs = probabilistic_to_deterministic_forecast(data.refs, context.crit_prob_thres) if not context.event_freq_ref else generate_event_freq_ref(data.obs)
     curr_data = InputData(data.obs, curr_fcsts, curr_refs)
-    return optimise_over_forecast_distribution(curr_data, context, parallel_nodes, verbose)
+    outputs = MultiAlphaOutput()
+    for alpha in context.alphas:        
+        outputs.insert(alpha, multiple_timesteps(alpha, curr_data, context, parallel_nodes, verbose))
+    return outputs
 
 
 def critical_probability_threshold_max_value(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:

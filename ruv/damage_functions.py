@@ -23,7 +23,7 @@ def logistic(params: dict) -> Callable:
     threshold = params['threshold']
 
     def damages(magnitude: np.ndarray) -> np.ndarray:
-        return np.divide(A, np.add(1, np.exp(np.multiply(-k, np.subtract(magnitude, threshold)))))
+        return A / (1 + np.exp(-k * (magnitude - threshold)))
 
     return damages
 

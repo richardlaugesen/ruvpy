@@ -30,8 +30,8 @@ def single_timestep(t: int, alpha: float, data: InputData, context: DecisionCont
     if is_deterministic(fcst):
         fcst_spends = context.analytical_spend(alpha, realised_threshold(fcst, context.decision_thresholds), context.damage_function)
     else:
-        fcst_likelihoods = calc_likelihood(fcst, context.decision_thresholds)   # not pre-calculating these because code difficult to
-        fcst_spends = find_spend(alpha, fcst, fcst_likelihoods, context)        # maintain even though it is 30% faster
+        fcst_likelihoods = calc_likelihood(fcst, context.decision_thresholds)   # not pre-calculating these because code becomes
+        fcst_spends = find_spend(alpha, fcst, fcst_likelihoods, context)        # difficult to maintain even though it is 30% speedup
     
     if is_deterministic(ref):
         ref_spends = context.analytical_spend(alpha, realised_threshold(ref, context.decision_thresholds), context.damage_function)        
@@ -62,7 +62,7 @@ def find_spend(alpha: float, fcst: np.ndarray, likelihoods: np.ndarray, context:
 
 def ex_ante_utility(alpha: float, spend: float, likelihoods: np.ndarray, context: DecisionContext) -> float:
     net_expenses = context.economic_model(alpha, context.decision_thresholds, spend, context.damage_function)
-    expected_utility = np.sum(np.multiply(likelihoods, context.utility_function(net_expenses)))
+    expected_utility = np.sum(likelihoods * context.utility_function(net_expenses))
     return expected_utility
 
 
@@ -78,7 +78,7 @@ def calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     probs_above = ecdf(ens, thresholds)
     adjustment = np.roll(probs_above, -1)
     adjustment[-1] = 0.0
-    probs_between = np.subtract(probs_above, adjustment)
+    probs_between = probs_above - adjustment
     probs_between /= np.sum(probs_between)  # normalise to ensure small probs are handled correctly
 
     return probs_between
@@ -91,6 +91,7 @@ def realised_threshold(value: float, thresholds: np.ndarray) -> float:
     if np.isnan(value):
         return np.nan
 
-    vals = np.subtract(value, thresholds)
+    #vals = np.subtract(value, thresholds)
+    vals = value - thresholds
     idx = np.argmin(vals[vals >= 0.0])
     return thresholds[idx]
