@@ -35,7 +35,7 @@ def exponential_utility(params: dict) -> Callable:
             return c
         else:
             # using expm1 to reduce chance of overflows
-            return (-1 - math.expm1(-A * c)) / A
+            return (-1 - np.expm1(-A * c)) / A
 
     return utility
 

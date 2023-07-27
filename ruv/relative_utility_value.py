@@ -37,8 +37,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     context = DecisionContext(alphas, damage_function, utility_function, decision_thresholds, economic_model, analytical_spend, crit_prob_thres, event_freq_ref)
 
     check_inputs(data, context)
-    results = decision_making_fnc(data, context, parallel_nodes, verbose)
-    
+    results = decision_making_fnc(data, context, parallel_nodes, verbose)    
     return to_dict(results)
 
 
