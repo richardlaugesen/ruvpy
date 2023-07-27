@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ruv.decision_methods import *
+import ruv.decision_methods
 from ruv.data_classes import *
 import numpy as np
 
@@ -32,12 +32,14 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     economic_model, analytical_spend = decision_definition['economic_model']
     crit_prob_thres = decision_definition['critical_probability_threshold'] if 'critical_probability_threshold' in decision_definition.keys() else None
     decision_method = decision_definition['decision_method'] if 'decision_method' in decision_definition.keys() else 'optimise_over_forecast_distribution'
-    decision_making_fnc = globals()[decision_method]
+    decision_making_fnc = getattr(ruv.decision_methods, decision_method)
     event_freq_ref = decision_definition['event_freq_ref'] if 'event_freq_ref' in decision_definition.keys() else False
     context = DecisionContext(alphas, damage_function, utility_function, decision_thresholds, economic_model, analytical_spend, crit_prob_thres, event_freq_ref)
 
     check_inputs(data, context)
-    return to_dict(decision_making_fnc(data, context, parallel_nodes, verbose))
+    results = decision_making_fnc(data, context, parallel_nodes, verbose)
+    
+    return to_dict(results)
 
 
 def check_inputs(data: InputData, context: DecisionContext) -> None:  
