@@ -15,51 +15,61 @@
 from ruv.multi_timestep import *
 from ruv.data_classes import *
 
-# only average 5% speedup moving generate_event_freq_ref outside loop in these functions
+# generate event frequency refs if requested, otherwise leave refs as supplied 
+# so impact on value from decision making method depends on forecasts alone
 
 def optimise_over_forecast_distribution(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
+
+    refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
+    updated_data = InputData(data.obs, data.fcsts, refs)
+
     outputs = MultiAlphaOutput()
     for alpha in context.alphas:
-        curr_refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
-        curr_data = InputData(data.obs, data.fcsts, curr_refs)
-        outputs.insert(alpha, multiple_timesteps(alpha, curr_data, context, parallel_nodes, verbose))
+        outputs.insert(alpha, multiple_timesteps(alpha, updated_data, context, parallel_nodes, verbose))
     return outputs
 
 
 def critical_probability_threshold_fixed(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
-    curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, context.crit_prob_thres)   
-    curr_refs = probabilistic_to_deterministic_forecast(data.refs, context.crit_prob_thres) if not context.event_freq_ref else generate_event_freq_ref(data.obs)
-    curr_data = InputData(data.obs, curr_fcsts, curr_refs)
+
+    refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
+    fcsts = probabilistic_to_deterministic_forecast(data.fcsts, context.crit_prob_thres)
+    updated_data = InputData(data.obs, fcsts, refs)        
+
     outputs = MultiAlphaOutput()
-    for alpha in context.alphas:        
-        outputs.insert(alpha, multiple_timesteps(alpha, curr_data, context, parallel_nodes, verbose))
+    for alpha in context.alphas:
+        outputs.insert(alpha, multiple_timesteps(alpha, updated_data, context, parallel_nodes, verbose))
     return outputs
 
 
-def critical_probability_threshold_max_value(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
-    outputs = MultiAlphaOutput()
-    for alpha in context.alphas:
+def critical_probability_threshold_max_value(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:      
+    
+    refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
+
+    outputs = MultiAlphaOutput()            
+    for alpha in context.alphas:       
         def minimise_this(crit_prob_thres):
-            curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, crit_prob_thres)
-            curr_refs = probabilistic_to_deterministic_forecast(data.refs, crit_prob_thres) if not context.event_freq_ref else generate_event_freq_ref(data.obs)
-            curr_data = InputData(data.obs, curr_fcsts, curr_refs)
+            curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, crit_prob_thres)                        
+            curr_data = InputData(data.obs, curr_fcsts, refs)
             return -multiple_timesteps(alpha, curr_data, context, parallel_nodes, verbose).ruv
         max_ruv_thres = minimize_scalar(minimise_this, method='bounded', bounds=(0, 1), options={'disp': False, 'xatol': 0.005}).x        
-        
+
         max_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, max_ruv_thres)
-        max_refs = probabilistic_to_deterministic_forecast(data.refs, max_ruv_thres) if not context.event_freq_ref else generate_event_freq_ref(data.obs)
-        max_data = InputData(data.obs, max_fcsts, max_refs)
+        max_data = InputData(data.obs, max_fcsts, refs)
         outputs.insert(alpha, multiple_timesteps(alpha, max_data, context, parallel_nodes, verbose))
+
     return outputs
 
 
-def critical_probability_threshold_equals_alpha(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
-    outputs = MultiAlphaOutput()
+def critical_probability_threshold_equals_alpha(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:           
+    
+    refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)    
+    
+    outputs = MultiAlphaOutput()        
     for alpha in context.alphas:
         curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, alpha)
-        curr_refs = probabilistic_to_deterministic_forecast(data.refs, alpha) if not context.event_freq_ref else generate_event_freq_ref(data.obs)
-        curr_data = InputData(data.obs, curr_fcsts, curr_refs)
+        curr_data = InputData(data.obs, curr_fcsts, refs)
         outputs.insert(alpha, multiple_timesteps(alpha, curr_data, context, parallel_nodes, verbose))    
+    
     return outputs
 
 
