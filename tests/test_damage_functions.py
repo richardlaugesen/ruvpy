@@ -14,6 +14,7 @@
 
 from ruv.damage_functions import *
 
+
 def test_logistic():
     params = {'A': 1, 'k': 0.5, 'threshold': 0.5}
     damage_func = logistic(params)
@@ -30,14 +31,14 @@ def test_logistic_zero():
     assert np.allclose(
         damage_func(np.array([0, 1, 2])),
         np.array([0, 0.5621765, 0.6791787]), 1e-5)
-    
+
 
 def test_binary():
     params = {'max_loss': 2, 'min_loss': -1, 'threshold': 0.5}
     damage_func = binary(params)
 
     assert np.array_equal(
-        damage_func(np.array([-1000, 0, 0.2, 0.5, 0.6, 1000])), 
+        damage_func(np.array([-1000, 0, 0.2, 0.5, 0.6, 1000])),
         np.array([-1, -1, -1, 2, 2, 2]))
 
 
@@ -46,15 +47,15 @@ def test_linear():
     damage_func = linear(params)
 
     assert np.array_equal(
-        damage_func(np.array([-1000, 0, 0.2, 0.5, 0.6, 1000])), 
+        damage_func(np.array([-1000, 0, 0.2, 0.5, 0.6, 1000])),
         np.array([0, 0, 0, 0, 0, 0]))
-    
+
     params = {'slope': 5, 'intercept': 1}
     damage_func = linear(params)
 
     assert np.array_equal(
-        damage_func(np.array([-1000, 0, 0.2, 0.5, 0.6, 1000])), 
-        np.array([-4999, 1, 2, 3.5, 4, 5001]))    
+        damage_func(np.array([-1000, 0, 0.2, 0.5, 0.6, 1000])),
+        np.array([-4999, 1, 2, 3.5, 4, 5001]))
 
 
 def test_user_defined():
@@ -91,5 +92,5 @@ def test_user_defined_interpolator():
     interpolator = user_defined_interpolator(points)
 
     assert np.allclose(
-        interpolator(np.array([-1000, 0, 0.5, 1, 3, 4, 8, 10, 15, 1000])), 
+        interpolator(np.array([-1000, 0, 0.5, 1, 3, 4, 8, 10, 15, 1000])),
         np.array([10000, 2000, 1000, 0, 0, 0, 6666, 10000, 10000, 10000]), 1e-1)

@@ -12,28 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+from typing import Callable, List, Tuple
 import numpy as np
 from scipy import interpolate
 
-# Functional currying is used to allow a pre-paramterised damage functions to be passed into RUV
 
+def logistic(params: dict) -> Callable:
+    A = params['A']
+    k = params['k']
+    threshold = params['threshold']
 
-# Logistic-based damages, S-shaped damages with max A
-def logistic(params):
-    A, k, threshold = params['A'], params['k'], params['threshold']
+    def damages(magnitude: np.ndarray) -> np.ndarray:
+        return A / (1 + np.exp(-k * (magnitude - threshold)))
 
-    def damages(magnitude):
-        return np.divide(A, np.add(1, np.exp(np.multiply(-k, np.subtract(magnitude, threshold)))))
-    
     return damages
 
 
-# Logistic-based damages but with damages=0 when magnitude=0
-def logistic_zero(params):
+# Same as logistic with damages pegged to zero for zero flow
+def logistic_zero(params: dict) -> Callable:
     logistic_curry = logistic(params)
 
-    def damages(magnitude):
+    def damages(magnitude: np.ndarray) -> np.ndarray:
         damages = logistic_curry(magnitude)
         try:
             damages[magnitude == 0] = 0
@@ -44,48 +43,45 @@ def logistic_zero(params):
     return damages
 
 
-# Binary damages, 1 above a threshold, 0 below
-def binary(params):
+def binary(params: dict) -> Callable:
     threshold, max_loss, min_loss = params['threshold'], params['max_loss'], params['min_loss']
 
-    def damages(magnitude):
+    def damages(magnitude: np.ndarray) -> np.ndarray:
         ge = np.greater_equal(magnitude, threshold)
         damages = np.empty(magnitude.shape)
         damages[ge] = max_loss
         damages[~ge] = min_loss
         return damages
-    
+
     return damages
 
 
-# Linear damages
-def linear(params):
+def linear(params: dict) -> Callable:
     slope, intercept = params['slope'], params['intercept']
 
-    def damages(magnitude):
+    def damages(magnitude: np.ndarray) -> np.ndarray:
         return slope * magnitude + intercept
-    
+
     return damages
 
 
-# User defined damages by a linear interpolation over a set of points (list of tuples)
-def user_defined(params):
-
+# Damages by a linear interpolation over a set of points (list of tuples)
+def user_defined(params: dict) -> Callable:
     if 'interpolator' in params:
         inter = params['interpolator']
     else:
         points = params['points']
-        inter = user_defined_interpolator(points)     
+        inter = user_defined_interpolator(points)
 
-    def damages(magnitude):
+    def damages(magnitude: np.ndarray) -> np.ndarray:
         return inter(magnitude)
-    
+
     return damages
 
 
-# Convenience function for investigating interpolator used by user_defined
-def user_defined_interpolator(points):
+def user_defined_interpolator(points: List[Tuple]) -> Callable:
     user_flows, user_damages = zip(*points)
     extrapolate_value = user_damages[-1]
-    inter = interpolate.interp1d(user_flows, user_damages, kind='linear', fill_value=extrapolate_value, bounds_error=False)
+    inter = interpolate.interp1d(
+        user_flows, user_damages, kind='linear', fill_value=extrapolate_value, bounds_error=False)
     return inter
