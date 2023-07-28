@@ -67,7 +67,7 @@ class SingleAlphaOutput:
 
 @dataclass
 class MultiAlphaOutput:
-    data: dict[float, SingleAlphaOutput]    # alpha, results
+    data: dict    # alpha, results
 
     # maintains data ordered by alpha
     def insert(self, alpha, output):
