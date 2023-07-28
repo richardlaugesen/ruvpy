@@ -119,7 +119,7 @@ To calculate RUV it must simulate decision making at each timestep, there are th
 
 ### Dependencies
 
-Python 3.9+, numpy, scipy.
+Python 3.7+, numpy, scipy.
 
 ## Code of conduct
 
