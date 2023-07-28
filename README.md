@@ -63,7 +63,7 @@ These can, for example, be used to model constant absolute risk aversion (CARA),
 
 ### Damage functions
 
-The RUV method also requires a Damage function to be specified. This returns the cumulative damages up to a specified value. Any custom function can be provided, and the following standard damage functions are implemented in the library:
+The RUV method also requires a Damage function to be specified. This returns the damages at a specified value. Any custom function can be provided, and the following standard damage functions are implemented in the library:
 
 - Binary
 - Linear
@@ -83,17 +83,16 @@ The RUV method can quantify forecast value for binary, multi-categorical, or con
 
 To calculate RUV it must simulate decision making at each timestep, there are four methods implemented:
 
-- optimise_over_forecast_distribution uses the forecast distribution at each timestep to determine the optimium amount to spend on mitigation to maximise utility
-- critical_probability_threshold_fixed
-- critical_probability_threshold_equals_alpha
-- critical_probability_threshold_max_ruv
+- optimise_over_forecast_distribution - use the whole forecast distribution at each timestep to determine the optimium amount to spend on mitigation which is expected to maximise utility
+- critical_probability_threshold_fixed - convert the probabilistic forecast into deterministic using a critical probability threshold for all timesteps, spend enough to mitigate the damages from the flowclass it falls within 
+- critical_probability_threshold_equals_alpha - same as fixed threshold approach but set the critical probability threshold to equal alpha
+- critical_probability_threshold_max_ruv - same as the equals-alpha approach but set the critical probability threshold to maximise forecast value for each alpha
 
 ### Helper functions
 
 - Generate reference forecasts to replicate REV event frequency approach.
 - Convert between CARA risk aversion coefficient, risk premium, and probability premium (Babcock, 1993).
 - Check if forecasts are deterministic or ensemble.
-- Calculate emperical cummulative probability distribution function efficiently.
 
 ## Software
 
