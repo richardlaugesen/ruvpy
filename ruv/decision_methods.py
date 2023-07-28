@@ -19,7 +19,6 @@ from ruv.data_classes import *
 # so impact on value from decision making method depends on forecasts alone
 
 def optimise_over_forecast_distribution(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
-
     refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
     updated_data = InputData(data.obs, data.fcsts, refs)
 
@@ -30,7 +29,6 @@ def optimise_over_forecast_distribution(data: InputData, context: DecisionContex
 
 
 def critical_probability_threshold_fixed(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
-
     refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
     fcsts = probabilistic_to_deterministic_forecast(data.fcsts, context.crit_prob_thres)
     updated_data = InputData(data.obs, fcsts, refs)        
@@ -42,9 +40,7 @@ def critical_probability_threshold_fixed(data: InputData, context: DecisionConte
 
 
 def critical_probability_threshold_max_value(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:      
-    
     refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
-
     outputs = MultiAlphaOutput()            
     for alpha in context.alphas:       
         def minimise_this(crit_prob_thres):
@@ -61,9 +57,7 @@ def critical_probability_threshold_max_value(data: InputData, context: DecisionC
 
 
 def critical_probability_threshold_equals_alpha(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:           
-    
     refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)    
-    
     outputs = MultiAlphaOutput()        
     for alpha in context.alphas:
         curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, alpha)

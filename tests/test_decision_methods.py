@@ -16,6 +16,9 @@ import pytest
 import numpy as np
 
 from ruv.decision_methods import *
+from ruv.economic_models import *
+from ruv.utility_functions import *
+from ruv.damage_functions import *
 
 
 def test_probabilistic_to_deterministic_forecast():
@@ -69,74 +72,73 @@ def test_generate_event_freq_ref():
         ref.shape, (obs.shape[0], obs.shape[0] - np.sum(np.isnan(obs))))
 
 
-# TODO: Move all this into seperate test functions for each of the different decision making methods
-# def test_multiple_alpha():
+def test_optimise_over_forecast_distribution():    
+    
+    # basic ensemble fcst and ref
+    data = get_data()
+    context = get_context()
+    result = optimise_over_forecast_distribution(data, context, 1)
+    assert np.allclose(result.get_series('ruv'), [0.3101, -0.22249, -1.093606, -3.50433, -262.69065], 1e-3)
 
-#     alphas = np.array([0.001, 0.25, 0.5, 0.75, 0.999])
-#     thresholds = np.arange(0, 20, 3)
-#     economic_model = cost_loss
-#     analytical_spend = cost_loss_analytical_spend
-#     damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
-#     utility_func = cara({'A': 0.3})
+    # event freq ref
+    context = get_context(event_freq_ref=True)
+    result = optimise_over_forecast_distribution(data, context, 1)
+    assert np.allclose(result.get_series('ruv'), [-34.6425, -0.265098, -1.1084778, -3.67724, -262.69065], 1e-3)
 
-#     np.random.seed(42)
-#     num_steps = 20
-#     ens_size = 100
+    # ref equals fcst
+    data = get_data(ref_equals_fcst=True)
+    context = get_context()
+    result = optimise_over_forecast_distribution(data, context, 1)
+    assert np.allclose(result.get_series('ruv'), [0, 0, 0, 0, 0], 1e-3)
 
-#     # (timesteps, ens_members)
-#     obs = np.random.gamma(1, 5, (num_steps, 1))
-#     obs[obs < 0] = 0
 
-#     fcsts = np.random.normal(10, 1, (num_steps, ens_size))
-#     fcsts[fcsts < 0] = 0
+def test_critical_probability_threshold_equals_alpha():
+    data = get_data()
+    context = get_context(risk_aversion=0.1)
+    alpha_result = critical_probability_threshold_equals_alpha(data, context, 1)
+    optim_result = optimise_over_forecast_distribution(data, context, 1)
+    assert np.allclose(alpha_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
 
-#     fcst_likelihoods = all_likelihoods(obs, fcsts, thresholds)
-#     refs = np.random.normal(5, 3, (num_steps, ens_size))
-#     refs[refs < 0] = 0
-#     ref_likelihoods = all_likelihoods(obs, refs, thresholds)
+    data = get_data()
+    context = get_context(risk_aversion=5)
+    alpha_result = critical_probability_threshold_equals_alpha(data, context, 1)
+    optim_result = optimise_over_forecast_distribution(data, context, 1)
+    assert not np.allclose(alpha_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
 
-#     obs_likelihoods = all_likelihoods(obs, obs, thresholds)
 
-#     decision_method = 'optimise_over_forecast_distribution'
-#     result = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, obs_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
-#     assert np.allclose(
-#         result['ruv'],
-#         [0.184053111, -0.0742971672, -0.467401918, -1.65026591, -117.108686], 1e-3)
+def test_critical_probability_threshold_fixed():
+    data = get_data()
+    context = get_context(crit_prob_thres=0.5)
+    result = critical_probability_threshold_fixed(data, context, 1)
+    assert np.allclose(result.get_series('ruv'), [0.00398, -0.22249, -1.093606, -3.50433, -1271.97656], 1e-3)
 
-#     decision_method = 'critical_probability_threshold_equals_alpha'
-#     result = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, obs_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
-#     assert np.allclose(
-#         result['ruv'],
-#         [0.184053111, -0.0742971672, -0.467401918, -1.65026591, -117.108686], 1e-3)
 
-#     refs = generate_event_freq_ref(obs)
-#     ref_likelihoods = all_likelihoods(obs, refs, thresholds)
+def test_critical_probability_threshold_max_value():
+    data = get_data()
+    context = get_context()
+    max_result = critical_probability_threshold_max_value(data, context, 1)
+    assert np.allclose(max_result.get_series('ruv'), [0.00398, 0, -0.18472, -0.66092, -262.6907], 1e-3)
 
-#     decision_method = 'optimise_over_forecast_distribution'
-#     result = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, obs_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
-#     assert np.allclose(
-#         result['ruv'],
-#         [-74.0584681, -0.0742971679, -0.472369878, -1.71864364, -117.108684], 1e-3)
+    alpha_result = critical_probability_threshold_equals_alpha(data, context, 1)
+    assert np.alltrue(max_result.get_series('ruv')[1:] >= alpha_result.get_series('ruv')[1:])   # ignore first value because alpha value is extremely small
 
-#     decision_method = 'critical_probability_threshold_equals_alpha'
-#     result = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, obs_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
-#     assert np.allclose(
-#         result['ruv'],
-#         [-74.0584681, -0.0742971679, -0.472369878, -1.71864364, -117.108684], 1e-3)
 
-#     # two methods are equivilent when risk aversion is small
-#     utility_func = cara({'A': 0.1})
-#     decision_method = 'optimise_over_forecast_distribution'
-#     result_1 = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, obs_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
-#     result_1 = result_1
-#     decision_method = 'critical_probability_threshold_equals_alpha'
-#     result_2 = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, obs_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
-#     assert np.allclose(result_1['ruv'], result_2['ruv'], 1e-3)
+def get_data(ref_equals_fcst=False):    
+    np.random.seed(42)
+    fcsts = np.random.normal(10, 1, (20, 100))  # (timesteps, ens_members)
+    fcsts[fcsts < 0] = 0
+    refs = np.random.normal(5, 3, (20, 100)) if not ref_equals_fcst else fcsts
+    refs[refs < 0] = 0
+    obs = np.random.gamma(1, 5, (20, 1))
+    obs[obs < 0] = 0    
+    return InputData(obs, fcsts, refs)
 
-#     # two methods not equivilent when risk aversion is high
-#     utility_func = cara({'A': 5})
-#     decision_method = 'optimise_over_forecast_distribution'
-#     result_1 = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, obs_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
-#     decision_method = 'critical_probability_threshold_equals_alpha'
-#     result_2 = multiple_alpha(alphas, obs, fcsts, refs, fcst_likelihoods, ref_likelihoods, obs_likelihoods, thresholds, economic_model, analytical_spend, damage_func, utility_func, decision_method, 1)
-#     assert not np.allclose(result_1['ruv'], result_2['ruv'], 1e-3)
+
+def get_context(event_freq_ref=False, crit_prob_thres=None, risk_aversion=0.3):
+    alphas = np.array([0.001, 0.25, 0.5, 0.75, 0.999])
+    thresholds = np.arange(0, 20, 3)
+    economic_model = cost_loss
+    analytical_spend = cost_loss_analytical_spend
+    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
+    utility_func = cara({'A': risk_aversion})
+    return DecisionContext(alphas, damage_func, utility_func, thresholds, economic_model, analytical_spend, crit_prob_thres=crit_prob_thres, event_freq_ref=event_freq_ref)
