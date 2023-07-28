@@ -5,7 +5,7 @@
 
 [Open Science](https://en.wikipedia.org/wiki/Open_science) infrastructure written in [Python](https://python.org/).
 
-RUV is a library to quantify the value of forecast information for decision making using the Relative Utility Value metric. This reference implementation is reasonably computationally efficient and parallelises timesteps over available CPU cores. The software includes a small library of standard utility functions, damage functions, and economic models. The scope for this software is intentionally narrow and does not include any figure generation, data loading and saving, other metrics, or analysis functionality.
+RUV is a library to quantify the value of forecast information for decision making using the Relative Utility Value metric. This reference implementation is reasonably computationally efficient and parallelises timesteps over available CPU cores. The software includes a small library of standard utility functions, damage functions, and economic models. The scope is intentionally narrow and does not include any figure generation, data loading and saving, other metrics, or analysis functionality.
 
 Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27, 873–893, https://doi.org/10.5194/hess-27-873-2023, 2023.
 
@@ -28,7 +28,7 @@ The decision context needs to be fully defined:
 - Decision type and thresholds
 - Alpha values
 
-This is identical to REV(Richardson, 2000) when a specific decision context is used.
+The forecast value reaults of RUV are identical to REV (Richardson, 2000) when a specific decision context is used.
 
 ### Output data
 
@@ -81,7 +81,7 @@ The RUV method can quantify forecast value for binary, multi-categorical, or con
 
 ### Decision making methods
 
-To calculate RUV it must simulate decision making at each timestep, there are three methods implemented:
+To calculate RUV it must simulate decision making at each timestep, there are four methods implemented:
 
 - optimise_over_forecast_distribution uses the forecast distribution at each timestep to determine the optimium amount to spend on mitigation to maximise utility
 - critical_probability_threshold_fixed
