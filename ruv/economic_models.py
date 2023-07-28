@@ -14,13 +14,12 @@
 
 import numpy as np
 
-# Net expenses from cost-loss model
-def cost_loss(values, spend, alpha, damage_function):
+
+def cost_loss(alpha: float, values: np.ndarray, spend: float, damage_function: callable) -> np.ndarray:
     damages = damage_function(values)
-    benefits = np.minimum(np.divide(spend, alpha), damages)
-    return np.subtract(np.subtract(benefits, damages), spend)
+    benefits = np.minimum(spend/alpha, damages)
+    return benefits - damages - spend
 
 
-# Optimal cost-loss spend amount when forecast probability is entirely in a single flow class (ie. deterministic)
-def cost_loss_analytical_spend(threshold, alpha, damage_function):
+def cost_loss_analytical_spend(alpha: float, threshold: float, damage_function: callable) -> float:
     return damage_function(threshold) * alpha
