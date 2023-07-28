@@ -20,7 +20,7 @@ from scipy.optimize import root_scalar
 def ecdf(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     ens_sorted = np.sort(ens)
     idx = np.searchsorted(ens_sorted, thresholds)   # 3 times faster then linspace
-    probs = np.arange(ens.size + 1)/float(ens.size)
+    probs = np.arange(len(ens) + 1)/float(len(ens))
     return 1 - probs[idx]
 
 

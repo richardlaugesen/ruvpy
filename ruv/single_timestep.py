@@ -46,9 +46,10 @@ def single_timestep(t: int, alpha: float, data: InputData, context: DecisionCont
     return (t, obs_spends, obs_ex_post, fcst_spends, fcst_ex_post, ref_spends, ref_ex_post)
 
 
-def find_spend(alpha: float, fcst: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:    
+# only ensemble forecasts, not deterministic
+def find_spend(alpha: float, ens: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:    
     if context.decision_thresholds is None:
-        thresholds = fcst   # if continuous decision then all members equally likely
+        thresholds = ens   # if continuous decision then all members equally likely
         curr_context = DecisionContext(context.alphas, context.damage_function, context.utility_function, thresholds, context.economic_model, context.analytical_spend, context.crit_prob_thres)
     else:
         curr_context = context
@@ -71,7 +72,7 @@ def ex_post_utility(alpha: float, occured: float, spend: float, context: Decisio
     return context.utility_function(net_expense)
 
 
-def calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:    
+def calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     if thresholds is None:
         return np.full(ens.shape, 1/ens.shape[0])   # continuous decision limit is 1/num_classes
 
@@ -91,7 +92,6 @@ def realised_threshold(value: float, thresholds: np.ndarray) -> float:
     if np.isnan(value):
         return np.nan
 
-    #vals = np.subtract(value, thresholds)
-    vals = value - thresholds
+    vals = np.subtract(value, thresholds)
     idx = np.argmin(vals[vals >= 0.0])
     return thresholds[idx]
