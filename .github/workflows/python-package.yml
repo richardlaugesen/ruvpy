@@ -37,7 +37,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Run unit tests and generate coverage report
       run: |
-        pytest --cov=./ --cov-report=term term-missing --cov-report=xml
+        pytest --cov=./ --cov-report=term-missing --cov-report=xml
     - name: Parse coverage report
       run: |
         python -c "import xml.etree.ElementTree as ET; print(ET.parse('coverage.xml').getroot().get('line-rate'))" > coverage.txt
