@@ -1,5 +1,6 @@
 # Relative Utility Value (RUV)
 
+[![Unit tests](https://github.com/richardlaugesen/relative-utility-value/actions/workflows/python-package.yml/badge.svg)](https://github.com/richardlaugesen/relative-utility-value/actions/workflows/python-package.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
 
