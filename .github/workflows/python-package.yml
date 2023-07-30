@@ -41,15 +41,9 @@ jobs:
     - name: Parse coverage report
       run: |
         python -c "import xml.etree.ElementTree as ET; print(ET.parse('coverage.xml').getroot().get('line-rate'))" > coverage.txt
-    - name: Install GitHub CLI
-      run: |
-        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-        sudo apt-add-repository https://cli.github.com/packages
-        sudo apt update
-        sudo apt install gh
     - name: Update gist
       run: |
-        echo "$(cat coverage.txt)" | gh gist edit a08622619e06b2157bee092f47e404d9 --filename coverage.txt
-      env:
-        GH_TOKEN: ${{ secrets.GIST_TOKEN }}
-
+        echo "$(cat coverage.txt)" > coverage.json
+        curl -X PATCH -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
+              -d @coverage.json \
+              "https://api.github.com/gists/${{ secrets.GIST_ID }}"
