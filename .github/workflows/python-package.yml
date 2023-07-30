@@ -45,5 +45,5 @@ jobs:
       run: |
         echo "$(cat coverage.txt)" > coverage.txt
         curl -X PATCH -H "Authorization: token ${{ secrets.COVERAGE_GIST_TOKEN }}" \
-              -d @coverage.json \
+              -d @coverage.txt \
               "https://api.github.com/gists/${{ secrets.COVERAGE_GIST_ID }}"
