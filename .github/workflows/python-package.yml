@@ -40,7 +40,7 @@ jobs:
         pytest --cov=./ --cov-report=term-missing --cov-report=xml
     - name: Parse coverage report
       run: |
-        python -c "import xml.etree.ElementTree as ET; print(ET.parse('coverage.xml').getroot().get('line-rate'))" > coverage.txt
+        python -c "import xml.etree.ElementTree as ET; coverage = float(ET.parse('coverage.xml').getroot().get('line-rate')) * 100; print(f'{round(coverage)}%')" > coverage.txt
     - name: Update gist
       run: |
         echo "{\"files\": {\"coverage.json\": {\"content\": \"$(cat coverage.txt)\"}}}" > coverage.json
