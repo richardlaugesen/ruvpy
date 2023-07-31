@@ -94,6 +94,7 @@ To calculate RUV it must simulate decision making at each timestep, there are fo
 
 - Generate reference forecasts to replicate REV event frequency approach.
 - Convert between CARA risk aversion coefficient, risk premium, and probability premium (Babcock, 1993).
+- Calculate emperical cummulative probability distribution function efficiently.
 - Check if forecasts are deterministic or ensemble.
 
 ## Software
