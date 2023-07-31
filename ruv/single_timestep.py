@@ -30,7 +30,7 @@ def single_timestep(t: int, alpha: float, data: InputData, context: DecisionCont
     if is_deterministic(fcst):
         fcst_spends = context.analytical_spend(alpha, realised_threshold(fcst, context.decision_thresholds), context.damage_function)
     else:
-        fcst_likelihoods = calc_likelihood(fcst, context.decision_thresholds)   # not pre-calculating these because code becomes
+        fcst_likelihoods = calc_likelihood(fcst, context.decision_thresholds)   # not pre-calculating likelihoods because code becomes
         fcst_spends = find_spend(alpha, fcst, fcst_likelihoods, context)        # difficult to maintain even though it is 30% speedup
     
     if is_deterministic(ref):
