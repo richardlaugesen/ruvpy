@@ -96,7 +96,7 @@ def test_ex_post_utility():
         -8.199, 1e-2)
 
 
-def test_find_spend():
+def test_find_spend_ensemble():
     thresholds = np.arange(5, 20, 1)
     economic_model = cost_loss
     analytical_spend = cost_loss_analytical_spend
@@ -108,7 +108,7 @@ def test_find_spend():
     ens = np.random.normal(10, 1, 100)
     probs = calc_likelihood(ens, thresholds)
     alpha = 0.1
-    assert np.isclose(find_spend(alpha, ens, probs, context), 0.012, 1e-1)
+    assert np.isclose(find_spend_ensemble(alpha, ens, probs, context), 0.012, 1e-1)
 
     # Not implemented to work with deterministic forecasts so no need to test for it.
     # Code uses analytical_spend method of economic model instead of find_spend for 

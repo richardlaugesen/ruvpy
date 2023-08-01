@@ -15,6 +15,7 @@
 from typing import Callable
 import numpy as np
 
+# TODO: these occasionally overflow when c is large, could use float128 but not available on windows
 
 # Constant Absolute Risk Aversion utility function
 def cara(params: dict) -> Callable:

@@ -31,13 +31,13 @@ def single_timestep(t: int, alpha: float, data: InputData, context: DecisionCont
         fcst_spends = context.analytical_spend(alpha, realised_threshold(fcst, context.decision_thresholds), context.damage_function)
     else:
         fcst_likelihoods = calc_likelihood(fcst, context.decision_thresholds)   # not pre-calculating likelihoods because code becomes
-        fcst_spends = find_spend(alpha, fcst, fcst_likelihoods, context)        # difficult to maintain even though it is 30% speedup
+        fcst_spends = find_spend_ensemble(alpha, fcst, fcst_likelihoods, context)        # difficult to maintain even though it is 30% speedup
     
     if is_deterministic(ref):
         ref_spends = context.analytical_spend(alpha, realised_threshold(ref, context.decision_thresholds), context.damage_function)        
     else:
         ref_likelihoods = calc_likelihood(ref, context.decision_thresholds)
-        ref_spends = find_spend(alpha, ref, ref_likelihoods, context)     
+        ref_spends = find_spend_ensemble(alpha, ref, ref_likelihoods, context)     
 
     obs_ex_post = ex_post_utility(alpha, ob_threshold, obs_spends, context)
     fcst_ex_post = ex_post_utility(alpha, ob_threshold, fcst_spends, context)
@@ -46,8 +46,8 @@ def single_timestep(t: int, alpha: float, data: InputData, context: DecisionCont
     return (t, obs_spends, obs_ex_post, fcst_spends, fcst_ex_post, ref_spends, ref_ex_post)
 
 
-# only ensemble forecasts, not deterministic
-def find_spend(alpha: float, ens: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:    
+# deterministic forecasts dont need this, can use context.analytical_spend
+def find_spend_ensemble(alpha: float, ens: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:    
     if context.decision_thresholds is None:
         thresholds = ens   # if continuous decision then all members equally likely
         curr_context = DecisionContext(context.alphas, context.damage_function, context.utility_function, thresholds, context.economic_model, context.analytical_spend, context.crit_prob_thres)
