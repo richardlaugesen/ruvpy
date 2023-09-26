@@ -28,7 +28,7 @@ from ruv.utility_functions import *
 from ruv.helpers import *
 
 
-def gen_shape_fig(awrc, name, start_lt=1, end_lt=7, parallel_nodes=8, verbose=False):
+def shape_figure(awrc, name, start_lt=1, end_lt=7, parallel_nodes=8, verbose=False):
     metadata = {
         'awrc': awrc,
         'name': name,
@@ -44,10 +44,10 @@ def gen_shape_fig(awrc, name, start_lt=1, end_lt=7, parallel_nodes=8, verbose=Fa
     metadata['figure_name'] = 'shape'
 
     # generate results
-    results = shape_results(obs, fcst, clim, parallel_nodes, verbose)
+    results = generate_results(obs, fcst, clim, parallel_nodes, verbose)
 
     # generate and save figure
-    fig = shape_figure(results, metadata)
+    fig = generate_figure(results, metadata)
     save_figure(fig, metadata)
 
     # store all output
@@ -63,7 +63,7 @@ def gen_shape_fig(awrc, name, start_lt=1, end_lt=7, parallel_nodes=8, verbose=Fa
     return output
 
 
-def shape_results(obs, fcst, ref, parallel_nodes, verbose=False):
+def generate_results(obs, fcst, ref, parallel_nodes, verbose=False):
     print('\tGenerating results')
 
     target_unity_risk_aversion = 0.3
@@ -118,7 +118,7 @@ def shape_results(obs, fcst, ref, parallel_nodes, verbose=False):
     return output
 
 
-def shape_figure(results, metadata):
+def generate_figure(results, metadata):
     print('\tGenerating figure')
 
     fig, axes = create_panel()
