@@ -90,11 +90,10 @@ def generate_results(obs, fcst, ref, parallel_nodes, verbose=False):
     ks = np.append(ks, [10, 50, 100]) # add few more values closer to a step function
     
     # generate streamflow-damage values for the different steepness for damage function figure
+    select_ks = ks[[0, int(len(ks)/6), int(len(ks)/3), len(ks)-1]]
     streamflow = np.arange(0, np.nanmax(obs) * 1.3, 0.01)
     damage_fnc, params = decision_definition['damage_function']
-    select_ks = ks[[0, int(len(ks)/2), len(ks)-1]]
     streamflow_damages = pd.DataFrame(index=streamflow, columns=select_ks)
-
     for k in select_ks:
         params['k'] = k
         streamflow_damages[k] = damage_fnc(params)(streamflow)
@@ -126,18 +125,31 @@ def generate_figure(results, metadata):
                  % (metadata['name'], metadata['awrc'], metadata['start_lt'], metadata['end_lt']), 
                  fontweight='semibold', fontsize='large')
 
-    metadata['damages_title'] = 'Damages for example steepness'
-    gen_damage_function_fig(results, metadata, axes[0])
+    left_panel_color = LINE_COLORS['dark_blue']
+    right_panel_color = LINE_COLORS['dark_orange']
+
+    metadata['damages_title'] = 'Damages functions of different steepness'
+    gen_damage_function_fig(results['damages_results'], metadata, results['max_obs'], axes[0], left_panel_color, LINE_STYLES)
 
     ax = axes[1]
-    results['ruv_results'].plot(ax=ax)
-    plt.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='dotted')
+    for i, column in enumerate(results['ruv_results'].columns):
+        line_style = LINE_STYLES[i % len(LINE_STYLES)]
+        ax.plot(results['ruv_results'].index, results['ruv_results'][column], 
+                linewidth=1, alpha=1, color=right_panel_color, linestyle=line_style, 
+                label=r'$\alpha$ = %.1f' % column)
+ 
+    plt.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='--', label='_hidden')
+
     plt.ylim(-0.05, 1)
     plt.xlim((0, 4.5))
 
     ax.set_xlabel('Logistic steepness parameter (k)')
     ax.set_ylabel('Forecast value (RUV)')
-    ax.set_title('Forecast value for different values of alpha', fontsize='medium')
+    ax.set_title(r'Forecast value for different values of $\alpha$', fontsize='medium')
     ax.legend()
+
+    # Add labels to the top right corner of each panel
+    axes[0].text(0.05, 0.95, '(a)', horizontalalignment='left', verticalalignment='top', transform=axes[0].transAxes)
+    axes[1].text(0.05, 0.95, '(b)', horizontalalignment='left', verticalalignment='top', transform=axes[1].transAxes)
 
     return fig

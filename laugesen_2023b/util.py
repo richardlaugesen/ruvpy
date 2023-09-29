@@ -14,8 +14,6 @@
 
 # TODO: store all RUV results, and the RUV timeseries seperatly
 # TODO: write results out to disk
-# TODO: update legends so it says k= and alphas=
-# TODO: add distinct colours and line styles
 # TODO: create repo for muthre_data
 
 import sys
@@ -27,15 +25,35 @@ sys.path.append('../..')
 from muthre_results.muthre_results import load_from_csv, save_to_pickle
 
 
+LINE_COLORS = {
+    'black': '#000000',
+    'light_orange': '#E69F00',
+    'light_blue': '#56B4E9',
+    'green': '#009E73',
+    'yellow': '#F0E442',
+    'dark_blue': '#0072B2',
+    'dark_orange': '#D55E00',
+    'pink': '#CC79A7'
+} 
+
+
+LINE_STYLES = ['-', '--', ':', '-.', (0, (3, 5, 1, 5)), (0, (3, 1, 1, 1))]
+
+
 def load_data(awrc, start_lt, end_lt, scenario='muthre', input_path='../../muthre_results/muthre_csv'):
     print('Loading data')
     results = load_from_csv(awrc, start_lt, end_lt, scenario, input_path)
     return results['obs'], results['fcst'], results['clim']
 
 
-def gen_damage_function_fig(results, metadata, ax):
-    results['damages_results'].plot(ax=ax)
-    ax.axvline(results['max_obs'], color='red', linewidth=0.5, alpha=0.5, linestyle='dotted', label='Max obs')
+def gen_damage_function_fig(damages_results, metadata, max_obs, ax, line_color, line_styles):
+    for i, column in enumerate(damages_results.columns):
+        line_style = line_styles[i % len(line_styles)]
+        ax.plot(damages_results.index, damages_results[column], 
+                linewidth=1, alpha=1, color=line_color, linestyle=line_style, 
+                label=r'k = %.1f' % column)
+
+    ax.axvline(max_obs, color='red', linewidth=0.5, alpha=0.3, linestyle='dotted', label='Max obs')
     ax.set_title(metadata['damages_title'], fontsize='medium')
     ax.set_xlabel(r'Streamflow ($m^3/s$)')
     ax.set_ylabel('Damages ($)')
@@ -46,17 +64,6 @@ def create_panel():
     plt.rcParams['figure.figsize'] = (11.5, 6)
     plt.rcParams['font.family'] = "calibri"
     plt.rcParams['font.size'] = "12.5"
-
-    colors = {
-        'black': '#000000',
-        'light_orange': '#E69F00',
-        'light_blue': '#56B4E9',
-        'green': '#009E73',
-        'yellow': '#F0E442',
-        'dark blue': '#0072B2',
-        'dark_orange': '#D55E00',
-        'pink': '#CC79A7'
-    } 
 
     fig, axes = plt.subplots(1, 2, sharey=False, sharex=False)
     plt.subplots_adjust(wspace=0.22, bottom=0.23)
