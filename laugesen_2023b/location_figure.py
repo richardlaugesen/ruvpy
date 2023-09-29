@@ -142,7 +142,7 @@ def generate_figure(results, metadata):
     plt.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='--', label='_hidden')
 
     plt.ylim(-0.05, 1)
-    plt.xlim((0, 4.5))
+    plt.xlim((0, 10))
 
     ax.set_xlabel('Threshold for damage function')
     ax.set_ylabel('Forecast value (RUV)')
