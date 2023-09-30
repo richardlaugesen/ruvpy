@@ -96,20 +96,13 @@ def save_results(output, output_path='figures'):
     print(output.keys())
 
     filepath = os.path.join(output_path, '%s_%s_LT%d-%d.pkl' % (output['figure_name'], output['awrc'], output['start_lt'], output['end_lt']))
-    with bz2.BZ2File(filepath, 'w') as f:
+    with open(filepath, 'w') as f:
         pickle.dump(output, f)
 
 
 def progressor(curr_num, total_num, start_time):
     progress = curr_num / total_num * 100   
-    curr_time = time.time()
-    remaining_minutes = (curr_time - start_time) / 60 * (total_num - curr_num) / curr_num
-
-    if curr_num > 0 and (total_num < 10 or progress % 10 == 0):
+    if curr_num > 0 and (total_num < 20 or progress % 10 == 0):
+        curr_time = time.time()
+        remaining_minutes = (curr_time - start_time) / 60 * (total_num - curr_num) / curr_num        
         print('\t\t%.0f%% complete with %.1f minutes remaining' % (progress, remaining_minutes))
-
-
-# save everything to csv and json files and then zip it all up
-def save_results(output):
-    print('\tSaving output')
-    pass
