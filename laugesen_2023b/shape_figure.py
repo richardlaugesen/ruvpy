@@ -110,7 +110,7 @@ def generate_results(obs, fcst, ref, k_step, parallel_nodes, verbose=False):
         results[k] = relative_utility_value(obs, fcst, ref, decision_definition, parallel_nodes=parallel_nodes, verbose=verbose)
         ruv_only[k] = results[k]['ruv']
 
-    results = pd.DataFrame(ruv_only, index=decision_definition['alphas']).T    
+    ruv_only = pd.DataFrame(ruv_only, index=decision_definition['alphas']).T    
 
     output = {
         'ruv_only': ruv_only, 

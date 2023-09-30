@@ -126,7 +126,7 @@ def generate_results(obs, fcst, ref, alpha_step, parallel_nodes, verbose=False):
         results[name] = relative_utility_value(obs, fcst, ref, decision_definition, parallel_nodes=parallel_nodes, verbose=verbose)
         ruv_only[name] = results[name]['ruv']
 
-    results = pd.DataFrame(ruv_only, index=decision_definition['alphas'])
+    ruv_only = pd.DataFrame(ruv_only, index=decision_definition['alphas'])
 
     # Generate streamflow-damage values for the different thresholds for damage function figure
     streamflow = np.arange(0, np.nanmax(obs) * 1.3, 0.01)
