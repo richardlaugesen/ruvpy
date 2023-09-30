@@ -83,7 +83,7 @@ def generate_results(obs, fcst, ref, parallel_nodes, verbose=False):
         'damage_function': [logistic, {'k': 1.5, 'A': max_damages, 'threshold': np.nanquantile(obs, 0.99)}]
     }
 
-    thresholds_step = 0.5
+    thresholds_step = 0.2
     thresholds = np.arange(0, np.nanmax(obs) * 1.3, thresholds_step)
     
     # Calculate RUV for the different thresholds for damage function figure

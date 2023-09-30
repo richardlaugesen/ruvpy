@@ -101,7 +101,11 @@ def generate_results(obs, fcst, ref, parallel_nodes, verbose=False):
     # Calculate RUV for the different shape logistic damage functions for forecast value figure
     start_time = time.time()
     results = {}
-    for k in ks:
+    for i, k in enumerate(ks):
+        progress = (i / len(ks)) * 100
+        if progress % 10 == 0:
+            print('\t\t%.0f%%' % progress)
+
         decision_definition['damage_function'] = [logistic, {'k': k, 'A': max_damages, 'threshold': np.nanquantile(obs, 0.99)}]
         results[k] = relative_utility_value(obs, fcst, ref, decision_definition, parallel_nodes=parallel_nodes, verbose=verbose)['ruv']
     results = pd.DataFrame(results, index=decision_definition['alphas']).T
@@ -141,7 +145,7 @@ def generate_figure(results, metadata):
     plt.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='--', label='_hidden')
 
     plt.ylim(-0.05, 1)
-    plt.xlim((0, 4.5))
+    plt.xlim((0, 3.5))
 
     ax.set_xlabel('Logistic steepness parameter (k)')
     ax.set_ylabel('Forecast value (RUV)')
