@@ -28,13 +28,14 @@ from ruv.utility_functions import *
 from ruv.helpers import *
 
 
-def shape_figure(awrc, name, start_lt=1, end_lt=7, parallel_nodes=8, verbose=False):
+def shape_figure(awrc, name, start_lt=1, end_lt=7, k_step=0.02, parallel_nodes=8, verbose=False):
     metadata = {
         'awrc': awrc,
         'name': name,
         'start_lt': start_lt,
         'end_lt': end_lt,
-        'parallel_nodes': parallel_nodes
+        'parallel_nodes': parallel_nodes,
+        'k_step': k_step
     }
 
     # load data
@@ -44,7 +45,7 @@ def shape_figure(awrc, name, start_lt=1, end_lt=7, parallel_nodes=8, verbose=Fal
     metadata['figure_name'] = 'shape'
 
     # generate results
-    results = generate_results(obs, fcst, clim, parallel_nodes, verbose)
+    results = generate_results(obs, fcst, clim, k_step, parallel_nodes, verbose)
 
     # generate and save figure
     fig = generate_figure(results, metadata)
@@ -63,7 +64,7 @@ def shape_figure(awrc, name, start_lt=1, end_lt=7, parallel_nodes=8, verbose=Fal
     return output
 
 
-def generate_results(obs, fcst, ref, parallel_nodes, verbose=False):
+def generate_results(obs, fcst, ref, k_step, parallel_nodes, verbose=False):
     print('\tGenerating results')
 
     target_unity_risk_aversion = 0.3
@@ -85,7 +86,6 @@ def generate_results(obs, fcst, ref, parallel_nodes, verbose=False):
     }
 
     # define range of logistic steepness parameters
-    k_step = 0.02
     ks = np.exp(np.arange(0, 2, k_step)) - 1
     ks = np.append(ks, [10, 50, 100]) # add few more values closer to a step function
     
@@ -101,17 +101,20 @@ def generate_results(obs, fcst, ref, parallel_nodes, verbose=False):
     # Calculate RUV for the different shape logistic damage functions for forecast value figure
     start_time = time.time()
     results = {}
+    ruv_only = {}
+
     for i, k in enumerate(ks):
-        progress = (i / len(ks)) * 100
-        if progress % 10 == 0:
-            print('\t\t%.0f%%' % progress)
+        progressor(i, len(ks), start_time)
 
         decision_definition['damage_function'] = [logistic, {'k': k, 'A': max_damages, 'threshold': np.nanquantile(obs, 0.99)}]
-        results[k] = relative_utility_value(obs, fcst, ref, decision_definition, parallel_nodes=parallel_nodes, verbose=verbose)['ruv']
-    results = pd.DataFrame(results, index=decision_definition['alphas']).T
+        results[k] = relative_utility_value(obs, fcst, ref, decision_definition, parallel_nodes=parallel_nodes, verbose=verbose)
+        ruv_only[k] = results[k]['ruv']
+
+    results = pd.DataFrame(ruv_only, index=decision_definition['alphas']).T    
 
     output = {
-        'ruv_results': results, 
+        'ruv_only': ruv_only, 
+        'all_results': results, 
         'damages_results': streamflow_damages,
         'max_obs': np.nanmax(obs),
         'decision_definition': decision_definition,
@@ -125,20 +128,20 @@ def generate_figure(results, metadata):
     print('\tGenerating figure')
 
     fig, axes = create_panel()
-    fig.suptitle('Impact of damage function steepness, %s (%s) for lead-times %d to %d' 
-                 % (metadata['name'], metadata['awrc'], metadata['start_lt'], metadata['end_lt']), 
-                 fontweight='semibold', fontsize='large')
+    # fig.suptitle('Impact of damage function steepness, %s (%s) for lead-times %d to %d' 
+    #              % (metadata['name'], metadata['awrc'], metadata['start_lt'], metadata['end_lt']), 
+    #              fontweight='semibold', fontsize='large')
 
     left_panel_color = LINE_COLORS['dark_blue']
     right_panel_color = LINE_COLORS['dark_orange']
 
-    metadata['damages_title'] = 'Damages functions of different steepness'
-    gen_damage_function_fig(results['damages_results'], metadata, results['max_obs'], axes[0], left_panel_color, LINE_STYLES)
+    metadata['damages_title'] = 'Damage functions of different steepness'
+    gen_damage_function_fig(results['damages_results'], metadata, 'k', results['max_obs'], axes[0], left_panel_color, LINE_STYLES)
 
     ax = axes[1]
-    for i, column in enumerate(results['ruv_results'].columns):
+    for i, column in enumerate(results['ruv_only'].columns):
         line_style = LINE_STYLES[i % len(LINE_STYLES)]
-        ax.plot(results['ruv_results'].index, results['ruv_results'][column], 
+        ax.plot(results['ruv_only'].index, results['ruv_only'][column], 
                 linewidth=1, alpha=1, color=right_panel_color, linestyle=line_style, 
                 label=r'$\alpha$ = %.1f' % column)
  

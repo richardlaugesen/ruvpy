@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO: store all RUV results, and the RUV timeseries seperatly
 # TODO: write results out to disk
 # TODO: create repo for muthre_data
 
 import sys
 import os
+import pickle
+import bz2
+import time
 from matplotlib import pyplot as plt
 
 sys.path.append('../..')
@@ -46,12 +48,23 @@ def load_data(awrc, start_lt, end_lt, scenario='muthre', input_path='../../muthr
     return results['obs'], results['fcst'], results['clim']
 
 
-def gen_damage_function_fig(damages_results, metadata, max_obs, ax, line_color, line_styles):
+def gen_damage_function_fig(damages_results, metadata, param_name, max_obs, ax, line_colors, line_styles):
     for i, column in enumerate(damages_results.columns):
         line_style = line_styles[i % len(line_styles)]
+        
+        if param_name:
+            label = r'%s = %.1f' % (param_name, column)
+        else:
+            label = column
+
+        if type(line_colors) is str:
+            line_color = line_colors
+        else:
+            line_color = line_colors[i % len(line_colors)]
+
         ax.plot(damages_results.index, damages_results[column], 
                 linewidth=1, alpha=1, color=line_color, linestyle=line_style, 
-                label=r'k = %.1f' % column)
+                label=label)
 
     ax.axvline(max_obs, color='red', linewidth=0.5, alpha=0.3, linestyle='dotted', label='Max obs')
     ax.set_title(metadata['damages_title'], fontsize='medium')
@@ -76,6 +89,24 @@ def save_figure(fig, metadata, output_path='figures'):
     fig.savefig(os.path.join(output_path, 
                 '%s_%s_LT%d-%d.png' % (metadata['figure_name'], metadata['awrc'], metadata['start_lt'], metadata['end_lt'])),
                 dpi=600, bbox_inches='tight', pad_inches=0.1)
+
+
+def save_results(output, output_path='figures'):
+    print('\tSaving output')
+    print(output.keys())
+
+    filepath = os.path.join(output_path, '%s_%s_LT%d-%d.pkl' % (output['figure_name'], output['awrc'], output['start_lt'], output['end_lt']))
+    with bz2.BZ2File(filepath, 'w') as f:
+        pickle.dump(output, f)
+
+
+def progressor(curr_num, total_num, start_time):
+    progress = curr_num / total_num * 100   
+    curr_time = time.time()
+    remaining_minutes = (curr_time - start_time) / 60 * (total_num - curr_num) / curr_num
+
+    if curr_num > 0 and (total_num < 10 or progress % 10 == 0):
+        print('\t\t%.0f%% complete with %.1f minutes remaining' % (progress, remaining_minutes))
 
 
 # save everything to csv and json files and then zip it all up
