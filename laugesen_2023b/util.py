@@ -95,8 +95,8 @@ def save_results(output, output_path='figures'):
     print('\tSaving output')
     print(output.keys())
 
-    filepath = os.path.join(output_path, '%s_%s_LT%d-%d.pkl' % (output['figure_name'], output['awrc'], output['start_lt'], output['end_lt']))
-    with open(filepath, 'w') as f:
+    filepath = os.path.join(output_path, '%s_%s_LT%d-%d.pkl.bz2' % (output['figure_name'], output['awrc'], output['start_lt'], output['end_lt']))
+    with bz2.BZ2File(filepath, 'wb') as f:
         pickle.dump(output, f)
 
 
