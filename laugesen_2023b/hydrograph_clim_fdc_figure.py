@@ -118,11 +118,13 @@ def generate_figure(results, metadata, color=LINE_COLORS['dark_blue']):
 
     # TODO: move this into the generate_results function
     # Prepare data for flow duration curve
-    sorted_flows = np.sort(df['Flow_m3s'].values)[::-1]
+    flow = df['Flow_m3s'].dropna().values
+    sorted_flows = np.sort(flow)[::-1]
     exceedance_probabilities = np.arange(1., len(sorted_flows) + 1) / len(sorted_flows) * 100
 
     ax3 = fig.add_subplot(2, 2, 4)
     ax3.plot(exceedance_probabilities, sorted_flows, color=color)
+    ax3.set_xlim((0, 100))
     ax3.set_yscale("log")
     ax3.set_title("Flow duration curve")
     ax3.set_xlabel("Exceedance Probability (%)")
