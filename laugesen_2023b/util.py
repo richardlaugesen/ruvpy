@@ -104,5 +104,12 @@ def progressor(curr_num, total_num, start_time):
     progress = curr_num / total_num * 100   
     if curr_num > 0 and (total_num < 20 or progress % 10 == 0):
         curr_time = time.time()
-        remaining_minutes = (curr_time - start_time) / 60 * (total_num - curr_num) / curr_num        
-        print('\t\t%.0f%% complete with %.1f minutes remaining' % (progress, remaining_minutes))
+        remaining_seconds = (curr_time - start_time) * (total_num - curr_num) / curr_num  
+        remaining_minutes = remaining_seconds / 60
+        remaining_hours = remaining_minutes / 60
+        if remaining_hours >= 1:
+            print('\t\t%.0f%% complete with %.1f hours remaining' % (progress, remaining_hours))
+        elif remaining_minutes >= 1:
+            print('\t\t%.0f%% complete with %.1f minutes remaining' % (progress, remaining_minutes))
+        else:
+            print('\t\t%.0f%% complete with %.0f seconds remaining' % (progress, remaining_seconds))
