@@ -6,16 +6,17 @@ import calendar
 from util import *
 
 
-def hydrograph_clim_fdc_figure(awrc, name, start_lt=1, end_lt=7, verbose=False):
+def hydrograph_clim_fdc_figure(awrc, name, start_lt, end_lt, area, verbose=False):
     metadata = {
         'awrc': awrc,
         'name': name,
         'start_lt': start_lt,
         'end_lt': end_lt,
+        'area': area
     }
 
     # load data
-    obs, fcst, clim = load_data(awrc, start_lt, end_lt)
+    obs, fcst, clim = load_data(awrc, start_lt, end_lt, area)
 
     print('Starting shape figure...')
     metadata['figure_name'] = 'hydrograph_clim_fdc'
@@ -89,7 +90,7 @@ def generate_figure(results, metadata, color=LINE_COLORS['dark_blue']):
     # Panel 1: Hydrograph spanning the full width at the top
     ax1 = fig.add_subplot(2, 1, 1)
     df.set_index('Date')['Flow_m3s'].plot(ax=ax1, color=color)
-    ax1.set_title("Daily Streamflow (first Week of each month)")
+    ax1.set_title("Daily Streamflow (first week of each month)")
     ax1.set_ylabel(r"Streamflow ($m^3/s$)")
     ax1.set_xlabel("Time")
     ax1.text(0.02, 0.95, '(a)', transform=ax1.transAxes, va='top')

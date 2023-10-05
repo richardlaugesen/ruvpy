@@ -42,10 +42,19 @@ LINE_COLORS = {
 LINE_STYLES = ['-', '--', ':', '-.', (0, (3, 5, 1, 5)), (0, (3, 1, 1, 1))]
 
 
-def load_data(awrc, start_lt, end_lt, scenario='muthre', input_path='../../muthre_results/muthre_csv'):
+def load_data(awrc, start_lt, end_lt, area, scenario='muthre', input_path='../../muthre_results/muthre_csv'):
     print('Loading data')
     results = load_from_csv(awrc, start_lt, end_lt, scenario, input_path)
+    results = mm_to_m3s(results, area)
     return results['obs'], results['fcst'], results['clim']
+
+
+def mm_to_m3s(results, area):
+    factor = area * 1000 / (60 * 60 * 24)
+    results['obs'] = results['obs'] * factor
+    results['fcst'] = results['fcst'] * factor
+    results['clim'] = results['clim'] * factor
+    return results
 
 
 def gen_damage_function_fig(damages_results, metadata, param_name, max_obs, ax, line_colors, line_styles):
@@ -53,7 +62,10 @@ def gen_damage_function_fig(damages_results, metadata, param_name, max_obs, ax, 
         line_style = line_styles[i % len(line_styles)]
         
         if param_name:
-            label = r'%s = %.1f' % (param_name, column)
+            if param_name == 'k':
+                label = r'%s = %.2f' % (param_name, column)
+            else:
+                label = r'%s = %.0f' % (param_name, column)
         else:
             label = column
 

@@ -29,18 +29,19 @@ from ruv.utility_functions import *
 from ruv.helpers import *
 from util import *
 
-def location_figure(awrc, name, start_lt=1, end_lt=7, q_step=0.2, parallel_nodes=8, verbose=False):
+def location_figure(awrc, name, start_lt, end_lt, area, q_step=0.2, parallel_nodes=8, verbose=False):
     metadata = {
         'awrc': awrc,
         'name': name,
         'start_lt': start_lt,
         'end_lt': end_lt,
         'parallel_nodes': parallel_nodes,
-        'q_step': q_step
+        'q_step': q_step,
+        'area': area
     }
 
     # load data
-    obs, fcst, clim = load_data(awrc, start_lt, end_lt)
+    obs, fcst, clim = load_data(awrc, start_lt, end_lt, area)
 
     print('Starting location figure...')
     metadata['figure_name'] = 'location'
@@ -65,7 +66,7 @@ def location_figure(awrc, name, start_lt=1, end_lt=7, q_step=0.2, parallel_nodes
     return output
 
 
-def generate_results(obs, fcst, ref, q_step, parallel_nodes, verbose=False):
+def generate_results(obs, fcst, ref, q_step, parallel_nodes, verbose):
     print('\tGenerating results')
 
     target_unity_risk_aversion = 0.3
@@ -83,7 +84,7 @@ def generate_results(obs, fcst, ref, q_step, parallel_nodes, verbose=False):
         'economic_model': [cost_loss, cost_loss_analytical_spend],
         'decision_method': 'optimise_over_forecast_distribution',
         'decision_thresholds': None,
-        'damage_function': [logistic, {'k': 1.5, 'A': max_damages, 'threshold': np.nanquantile(obs, 0.99)}]
+        'damage_function': [logistic, {'k': 0.2, 'A': max_damages, 'threshold': np.nanquantile(obs, 0.99)}]
     }
 
     thresholds = np.arange(0, np.nanmax(obs) * 1.3, q_step)
@@ -145,7 +146,7 @@ def generate_figure(results, obs, metadata, show_percentiles=True):
                 label=r'$\alpha$ = %.1f' % column)
  
     plt.ylim(0, 1)
-    plt.xlim((0, 20))
+    plt.xlim((0, 150))
 
     ax.set_xlabel(r'Damage function threshold $q_\tau$ ($m^3/s$)')
     ax.set_ylabel('Forecast value (RUV)')

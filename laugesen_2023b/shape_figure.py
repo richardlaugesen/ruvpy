@@ -28,18 +28,19 @@ from ruv.utility_functions import *
 from ruv.helpers import *
 
 
-def shape_figure(awrc, name, start_lt=1, end_lt=7, k_step=0.02, parallel_nodes=8, verbose=False):
+def shape_figure(awrc, name, start_lt, end_lt, area, k_step=0.02, parallel_nodes=8, verbose=False):
     metadata = {
         'awrc': awrc,
         'name': name,
         'start_lt': start_lt,
         'end_lt': end_lt,
         'parallel_nodes': parallel_nodes,
-        'k_step': k_step
+        'k_step': k_step,
+        'area': area
     }
 
     # load data
-    obs, fcst, clim = load_data(awrc, start_lt, end_lt)
+    obs, fcst, clim = load_data(awrc, start_lt, end_lt, area)
 
     print('Starting shape figure...')
     metadata['figure_name'] = 'shape'
@@ -64,7 +65,7 @@ def shape_figure(awrc, name, start_lt=1, end_lt=7, k_step=0.02, parallel_nodes=8
     return output
 
 
-def generate_results(obs, fcst, ref, k_step, parallel_nodes, verbose=False):
+def generate_results(obs, fcst, ref, k_step, parallel_nodes, verbose):
     print('\tGenerating results')
 
     target_unity_risk_aversion = 0.3
@@ -85,10 +86,13 @@ def generate_results(obs, fcst, ref, k_step, parallel_nodes, verbose=False):
         'damage_function': [logistic, {'k': 1, 'A': max_damages, 'threshold': np.nanquantile(obs, 0.99)}]
     }
 
-    # define range of logistic steepness parameters
-    ks = np.exp(np.arange(0, 2, k_step)) - 1
-    ks = np.append(ks, [10, 50, 100]) # add few more values closer to a step function
-    
+    # define range of logistic steepness parameters with more focus on low values
+    # ks = np.exp(np.arange(0, 2, k_step)) - 1
+    # ks = np.append(ks, [10, 50, 100]) # add few more values closer to a step function
+    k_max = 5
+    k_slope = 5 
+    ks = (np.exp(np.arange(0, k_slope, k_step)) - 1) * k_max / (np.exp(k_slope - k_step) - 1)
+
     # generate streamflow-damage values for the different steepness for damage function figure
     select_ks = ks[[0, int(len(ks)/6), int(len(ks)/3), len(ks)-1]]
     streamflow = np.arange(0, np.nanmax(obs) * 1.3, 0.01)
@@ -147,8 +151,8 @@ def generate_figure(results, metadata):
  
     plt.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='--', label='_hidden')
 
-    plt.ylim(-0.05, 1)
-    plt.xlim((0, 3.5))
+    plt.ylim(-1, 1)
+    plt.xlim((0, 0.5))
 
     ax.set_xlabel('Logistic steepness parameter (k)')
     ax.set_ylabel('Forecast value (RUV)')

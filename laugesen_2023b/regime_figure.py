@@ -29,18 +29,19 @@ from ruv.utility_functions import *
 from ruv.helpers import *
 from util import *
 
-def regime_figure(awrc, name, start_lt=1, end_lt=7, alpha_step=0.2, parallel_nodes=8, verbose=False):
+def regime_figure(awrc, name, start_lt, end_lt, area, alpha_step=0.2, parallel_nodes=8, verbose=False):
     metadata = {
         'awrc': awrc,
         'name': name,
         'start_lt': start_lt,
         'end_lt': end_lt,
         'parallel_nodes': parallel_nodes,
-        'alpha_step': alpha_step
+        'alpha_step': alpha_step,
+        'area': area
     }
 
     # load data
-    obs, fcst, clim = load_data(awrc, start_lt, end_lt)
+    obs, fcst, clim = load_data(awrc, start_lt, end_lt, area)
 
     print('Starting regime figure...')
     metadata['figure_name'] = 'regime'
@@ -65,7 +66,7 @@ def regime_figure(awrc, name, start_lt=1, end_lt=7, alpha_step=0.2, parallel_nod
     return output
 
 
-def generate_results(obs, fcst, ref, alpha_step, parallel_nodes, verbose=False):
+def generate_results(obs, fcst, ref, alpha_step, parallel_nodes, verbose):
     print('\tGenerating results')
 
     target_unity_risk_aversion = 0.3
@@ -112,7 +113,7 @@ def generate_results(obs, fcst, ref, alpha_step, parallel_nodes, verbose=False):
     ]
     damage_functions['only low'] = [user_defined, {'interpolator': user_defined_interpolator(flow_damage_pairs)}]
 
-    damage_functions['only high (logistic)'] = [logistic, {'k': 1.5, 'A': max_damages, 'threshold': np.nanquantile(obs, 0.99)}]
+    damage_functions['only high (logistic)'] = [logistic, {'k': 0.2, 'A': max_damages, 'threshold': np.nanquantile(obs, 0.991)}]
    
     # Calculate RUV for the different thresholds for damage function figure
     start_time = time.time()
