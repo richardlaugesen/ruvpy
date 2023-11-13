@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import pytest
+from dask.distributed import Client
 
 from ruv.relative_utility_value import *
 from ruv.damage_functions import *
@@ -43,9 +44,18 @@ def test_multiple_timesteps():
     data = InputData(obs, fcsts, refs)
     context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, analytical_spend)
 
-    result = multiple_timesteps(alpha, data, context, 1)
+    result = multiple_timesteps(alpha, data, context)
 
     assert np.isclose(result.ruv, 0.0445, 1e-2)
     assert np.isclose(result.avg_fcst_ex_post, -3.399, 1e-2)
     assert np.isclose(result.avg_ref_ex_post, -3.402, 1e-2)
     assert np.isclose(result.avg_obs_ex_post, -3.340, 1e-2)
+
+    dask_client = Client(n_workers=3, threads_per_worker=1, processes=False)
+    result = multiple_timesteps(alpha, data, context, dask_client)
+    dask_client.close()
+
+    assert np.isclose(result.ruv, 0.0445, 1e-2)
+    assert np.isclose(result.avg_fcst_ex_post, -3.399, 1e-2)
+    assert np.isclose(result.avg_ref_ex_post, -3.402, 1e-2)
+    assert np.isclose(result.avg_obs_ex_post, -3.340, 1e-2)    

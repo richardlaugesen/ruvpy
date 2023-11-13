@@ -14,11 +14,17 @@
 
 import ruv.decision_methods
 from ruv.data_classes import *
-import numpy as np
 
+import numpy as np
+from dask.distributed import Client
 
 # main entry function for RUV calculation
-def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, decision_definition: dict, parallel_nodes: int=4, verbose: bool=False) -> dict:
+def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, decision_definition: dict, parallel_nodes: int=4, dask_client: Client=None, verbose: bool=False) -> dict:
+    
+    # create a local thread-based dask client if none is supplied
+    if dask_client is None and parallel_nodes > 1:
+        dask_client = Client(n_workers=parallel_nodes, threads_per_worker=1, processes=False)
+
     data = InputData(obs, fcsts, refs)
 
     alphas = decision_definition['alphas']
@@ -37,7 +43,11 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     context = DecisionContext(alphas, damage_function, utility_function, decision_thresholds, economic_model, analytical_spend, crit_prob_thres, event_freq_ref)
 
     check_inputs(data, context)
-    results = decision_making_fnc(data, context, parallel_nodes, verbose)    
+    results = decision_making_fnc(data, context, dask_client, verbose)    
+
+    if dask_client is None and parallel_nodes > 1:
+        dask_client.close()
+    
     return to_dict(results)
 
 

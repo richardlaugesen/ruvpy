@@ -77,49 +77,49 @@ def test_optimise_over_forecast_distribution():
     # basic ensemble fcst and ref
     data = get_data()
     context = get_context()
-    result = optimise_over_forecast_distribution(data, context, 1)
+    result = optimise_over_forecast_distribution(data, context)
     assert np.allclose(result.get_series('ruv'), [0.3101, -0.22249, -1.093606, -3.50433, -262.69065], 1e-3)
 
     # event freq ref
     context = get_context(event_freq_ref=True)
-    result = optimise_over_forecast_distribution(data, context, 1)
+    result = optimise_over_forecast_distribution(data, context)
     assert np.allclose(result.get_series('ruv'), [-34.6425, -0.265098, -1.1084778, -3.67724, -262.69065], 1e-3)
 
     # ref equals fcst
     data = get_data(ref_equals_fcst=True)
     context = get_context()
-    result = optimise_over_forecast_distribution(data, context, 1)
+    result = optimise_over_forecast_distribution(data, context)
     assert np.allclose(result.get_series('ruv'), [0, 0, 0, 0, 0], 1e-3)
 
 
 def test_critical_probability_threshold_equals_alpha():
     data = get_data()
     context = get_context(risk_aversion=0.1)
-    alpha_result = critical_probability_threshold_equals_alpha(data, context, 1)
-    optim_result = optimise_over_forecast_distribution(data, context, 1)
+    alpha_result = critical_probability_threshold_equals_alpha(data, context)
+    optim_result = optimise_over_forecast_distribution(data, context)
     assert np.allclose(alpha_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
 
     data = get_data()
     context = get_context(risk_aversion=5)
-    alpha_result = critical_probability_threshold_equals_alpha(data, context, 1)
-    optim_result = optimise_over_forecast_distribution(data, context, 1)
+    alpha_result = critical_probability_threshold_equals_alpha(data, context)
+    optim_result = optimise_over_forecast_distribution(data, context)
     assert not np.allclose(alpha_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
 
 
 def test_critical_probability_threshold_fixed():
     data = get_data()
     context = get_context(crit_prob_thres=0.5)
-    result = critical_probability_threshold_fixed(data, context, 1)
+    result = critical_probability_threshold_fixed(data, context)
     assert np.allclose(result.get_series('ruv'), [0.00398, -0.22249, -1.093606, -3.50433, -1271.97656], 1e-3)
 
 
 def test_critical_probability_threshold_max_value():
     data = get_data()
     context = get_context()
-    max_result = critical_probability_threshold_max_value(data, context, 1)
+    max_result = critical_probability_threshold_max_value(data, context)
     assert np.allclose(max_result.get_series('ruv'), [0.00398, 0, -0.18472, -0.66092, -262.6907], 1e-3)
 
-    alpha_result = critical_probability_threshold_equals_alpha(data, context, 1)
+    alpha_result = critical_probability_threshold_equals_alpha(data, context)
     assert np.alltrue(max_result.get_series('ruv')[1:] >= alpha_result.get_series('ruv')[1:])   # ignore first value because alpha value is extremely small
 
 

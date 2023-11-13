@@ -107,7 +107,7 @@ To calculate RUV it must simulate decision making at each timestep, there are fo
 - Free and Open Source Software licence
 - Community code of conduct
 - Python v3 with standard code conventions
-- Only three dependencies (numpy, scipy, pathos)
+- Only three dependencies (numpy, scipy, dask)
 - Sane versioning and DOI
 
 ### Conventions
@@ -117,11 +117,12 @@ To calculate RUV it must simulate decision making at each timestep, there are fo
 - Clarity over cleverness
 - DRY and YAGNI
 - Vanilla python and numpy arrays
+- Dask for parallelisation and monitoring
 - Function and variable naming is unambiguous
 
 ### Dependencies
 
-Python 3.7+, numpy, scipy.
+Python 3.7+, numpy, scipy, dask.
 
 ## Code of conduct
 

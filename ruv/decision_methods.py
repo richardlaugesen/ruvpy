@@ -14,55 +14,56 @@
 
 from ruv.multi_timestep import *
 from ruv.data_classes import *
+from dask.distributed import Client
 
 # generate event frequency refs if requested, otherwise leave refs as supplied 
 # so impact on value from decision making method depends on forecasts alone
 
-def optimise_over_forecast_distribution(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
+def optimise_over_forecast_distribution(data: InputData, context: DecisionContext, dask_client: Client=None, verbose: bool=False) -> MultiAlphaOutput:
     refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
     updated_data = InputData(data.obs, data.fcsts, refs)
 
     outputs = MultiAlphaOutput()
     for alpha in context.alphas:
-        outputs.insert(alpha, multiple_timesteps(alpha, updated_data, context, parallel_nodes, verbose))
+        outputs.insert(alpha, multiple_timesteps(alpha, updated_data, context, dask_client, verbose))
     return outputs
 
 
-def critical_probability_threshold_fixed(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
+def critical_probability_threshold_fixed(data: InputData, context: DecisionContext, dask_client: Client=None, verbose: bool=False) -> MultiAlphaOutput:
     refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
     fcsts = probabilistic_to_deterministic_forecast(data.fcsts, context.crit_prob_thres)
     updated_data = InputData(data.obs, fcsts, refs)        
 
     outputs = MultiAlphaOutput()
     for alpha in context.alphas:
-        outputs.insert(alpha, multiple_timesteps(alpha, updated_data, context, parallel_nodes, verbose))
+        outputs.insert(alpha, multiple_timesteps(alpha, updated_data, context, dask_client, verbose))
     return outputs
 
 
-def critical_probability_threshold_max_value(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:      
+def critical_probability_threshold_max_value(data: InputData, context: DecisionContext, dask_client: Client=None, verbose: bool=False) -> MultiAlphaOutput:
     refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
     outputs = MultiAlphaOutput()            
     for alpha in context.alphas:       
         def minimise_this(crit_prob_thres):
             curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, crit_prob_thres)                        
             curr_data = InputData(data.obs, curr_fcsts, refs)
-            return -multiple_timesteps(alpha, curr_data, context, parallel_nodes, verbose).ruv
+            return -multiple_timesteps(alpha, curr_data, context, dask_client, verbose).ruv
         max_ruv_thres = minimize_scalar(minimise_this, method='bounded', bounds=(0, 1), options={'disp': False, 'xatol': 0.005}).x        
 
         max_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, max_ruv_thres)
         max_data = InputData(data.obs, max_fcsts, refs)
-        outputs.insert(alpha, multiple_timesteps(alpha, max_data, context, parallel_nodes, verbose))
+        outputs.insert(alpha, multiple_timesteps(alpha, max_data, context, dask_client, verbose))
 
     return outputs
 
 
-def critical_probability_threshold_equals_alpha(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:           
+def critical_probability_threshold_equals_alpha(data: InputData, context: DecisionContext, dask_client: Client=None, verbose: bool=False) -> MultiAlphaOutput:
     refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)    
     outputs = MultiAlphaOutput()        
     for alpha in context.alphas:
         curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, alpha)
         curr_data = InputData(data.obs, curr_fcsts, refs)
-        outputs.insert(alpha, multiple_timesteps(alpha, curr_data, context, parallel_nodes, verbose))    
+        outputs.insert(alpha, multiple_timesteps(alpha, curr_data, context, dask_client, verbose))    
     
     return outputs
 
