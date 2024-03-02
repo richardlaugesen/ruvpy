@@ -17,6 +17,7 @@ from ruv.data_classes import *
 
 from dask.distributed import Client
 import dask.bag as db
+from dask import delayed
 
 
 # Calculate RUV for a single alpha value, parallelises over timesteps
@@ -30,27 +31,32 @@ def multiple_timesteps(alpha: float, data: InputData, context: DecisionContext, 
                 results.append(single_timestep(t, alpha, data, context))
 
     else:
-        # partition all the timesteps with obs into chunks
-        timesteps = np.nonzero(~np.isnan(data.obs))[0]
-        num_processes = sum(dask_client.ncores().values())
-        npartitions = int(len(timesteps) / np.sqrt(len(timesteps) / num_processes))
-        timesteps_bag = db.from_sequence(timesteps, npartitions=npartitions)
-
-        # process all timesteps in single partition sequentially
-        def process_partition(ts, data_future, context_future):
-            results = []
-            for t in ts:
-                results.append(single_timestep(t, alpha, data_future, context_future))
+        # process all timesteps in partition
+        def process_partition(ts, data, context):
+            results = [single_timestep(t, alpha, data, context) for t in ts]
             return results
 
-        # build dask tree to process partitions using immutable data and context across all workers
-        data_future, context_future = dask_client.scatter([data, context], broadcast=True)
-        results_bag = timesteps_bag.map_partitions(process_partition, data_future, context_future)            
-        results_bag = dask_client.persist(results_bag)   # stop futures from being garbage collected
+        # Partition timesteps into chunks
+        npartitions = len(dask_client.ncores())
+        timestep_partitions = np.array_split(np.nonzero(~np.isnan(data.obs))[0], npartitions)
 
-        # compute the lazy results and clean up
-        results = dask_client.compute(results_bag).result()
-        del data_future, context_future, results_bag
+        #data_delayed, context_delayed = dask_client.scatter([data, context], broadcast=True)
+
+        # delay the data and context so they are not hashed for every task
+        data_delayed = delayed(data)
+        context_delayed = delayed(context)
+
+        # Create a list of delayed tasks
+        delayed_tasks = [delayed(process_partition)(partition, data_delayed, context_delayed) for partition in timestep_partitions]
+
+        # Compute the tasks in parallel
+        future_results = dask_client.compute(delayed_tasks)
+
+        # Gather results
+        results = dask_client.gather(future_results)
+
+        # Combine the results from all partitions
+        results = [item for sublist in results for item in sublist]
 
     # store all the results into output object
     output = SingleAlphaOutput(data.obs.shape[0])

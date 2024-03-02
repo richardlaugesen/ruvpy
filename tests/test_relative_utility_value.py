@@ -109,41 +109,44 @@ def test_relative_utility_value():
 
 def test_dask():
 
-    np.random.seed(42)
-    num_steps = 20
-    ens_size = 100
+    for i in range(100):
+        print(i)
 
-    # (timesteps, ens_members)
-    obs = np.random.gamma(1, 5, (num_steps, 1))
-    obs[obs < 0] = 0
+        np.random.seed(42)
+        num_steps = 20
+        ens_size = 100
 
-    fcsts = np.random.normal(10, 1, (num_steps, ens_size))
-    fcsts[fcsts < 0] = 0
+        # (timesteps, ens_members)
+        obs = np.random.gamma(1, 5, (num_steps, 1))
+        obs[obs < 0] = 0
 
-    refs = np.random.normal(5, 3, (num_steps, ens_size))
-    refs[refs < 0] = 0
+        fcsts = np.random.normal(10, 1, (num_steps, ens_size))
+        fcsts[fcsts < 0] = 0
 
-    decision_definition = {
-        'alphas': np.array([0.001, 0.25, 0.5, 0.75, 0.999]),
-        'damage_function': [logistic_zero, {'A': 1, 'k': 0.5, 'threshold': 15}],
-        'utility_function': [cara, {'A': 0.3}],
-        'economic_model': [cost_loss, cost_loss_analytical_spend],
-        'decision_thresholds': np.arange(0, 20, 3),
-        'event_freq_ref': True
-    }
+        refs = np.random.normal(5, 3, (num_steps, ens_size))
+        refs[refs < 0] = 0
 
-    decision_definition['event_freq_ref'] = False
-    max_val = np.max([np.nanmax(obs), np.nanmax(fcsts), np.nanmax(refs)])
-    threshold_size = 5000
-    decision_definition['decision_thresholds'] = np.linspace(
-        0, max_val, threshold_size)
-    many_thresholds = relative_utility_value(
-        obs, fcsts, refs, decision_definition, parallel_nodes=2)
+        decision_definition = {
+            'alphas': np.array([0.001, 0.25, 0.5, 0.75, 0.999]),
+            'damage_function': [logistic_zero, {'A': 1, 'k': 0.5, 'threshold': 15}],
+            'utility_function': [cara, {'A': 0.3}],
+            'economic_model': [cost_loss, cost_loss_analytical_spend],
+            'decision_thresholds': np.arange(0, 20, 3),
+            'event_freq_ref': True
+        }
 
-    decision_definition['decision_thresholds'] = None
-    continuous = relative_utility_value(
-        obs, fcsts, refs, decision_definition, parallel_nodes=2)
-    assert np.allclose(many_thresholds['ruv'], continuous['ruv'], 0.01)
+        decision_definition['event_freq_ref'] = False
+        max_val = np.max([np.nanmax(obs), np.nanmax(fcsts), np.nanmax(refs)])
+        threshold_size = 5000
+        decision_definition['decision_thresholds'] = np.linspace(
+            0, max_val, threshold_size)
+        many_thresholds = relative_utility_value(
+            obs, fcsts, refs, decision_definition, parallel_nodes=2)
+
+        decision_definition['decision_thresholds'] = None
+        continuous = relative_utility_value(
+            obs, fcsts, refs, decision_definition, parallel_nodes=2)
+        assert np.allclose(many_thresholds['ruv'], continuous['ruv'], 0.01)
 
 
 def test_to_dict():

@@ -17,13 +17,23 @@ from ruv.data_classes import *
 
 import numpy as np
 from dask.distributed import Client
+import logging
+
 
 # main entry function for RUV calculation
 def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, decision_definition: dict, parallel_nodes: int=4, dask_client: Client=None, verbose: bool=False) -> dict:
-    
+
     # create a local thread-based dask client if none is supplied
     if dask_client is None and parallel_nodes > 1:
         dask_client = Client(n_workers=parallel_nodes, threads_per_worker=1, processes=False)
+        # processes should be faster like in pathos
+        # but it is taking progressively longer for each worker to 
+        # 'transfer' it may be due to the scheduler being blocked before it can serealise the data
+        # should be the case though because it is shared and immutable
+        # ill try to scatter appraoch again. Scatter was better, especially if set to not broadcast
+        # still a long transfer time but all workers take around the same length of time
+
+        # when using threads it is not using anywhere near 100% cpu. Is the GIL blocking?
 
     data = InputData(obs, fcsts, refs)
 
