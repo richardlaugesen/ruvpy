@@ -18,7 +18,7 @@ def hydrograph_clim_fdc_figure(awrc, name, start_lt, end_lt, area, verbose=False
     # load data
     obs, fcst, clim = load_data(awrc, start_lt, end_lt, area)
 
-    print('Starting shape figure...')
+    print('Starting hydrograph figure...')
     metadata['figure_name'] = 'hydrograph_clim_fdc'
 
     # generate results
@@ -90,8 +90,8 @@ def generate_figure(results, metadata, color=LINE_COLORS['dark_blue']):
     # Panel 1: Hydrograph spanning the full width at the top
     ax1 = fig.add_subplot(2, 1, 1)
     df.set_index('Date')['Flow_m3s'].plot(ax=ax1, color=color)
-    ax1.set_title("Daily Streamflow (first week of each month)")
-    ax1.set_ylabel(r"Streamflow ($m^3/s$)")
+    ax1.set_title("Daily streamflow observations (first week of each month)")
+    ax1.set_ylabel(r"Daily streamflow ($m^3/s$)")
     ax1.set_xlabel("Time")
     ax1.text(0.02, 0.95, '(a)', transform=ax1.transAxes, va='top')
 
@@ -108,12 +108,13 @@ def generate_figure(results, metadata, color=LINE_COLORS['dark_blue']):
 
     max_vals = monthly_daily_data.max()
     max_pos = list(range(1, 13))
-    ax2.scatter(max_pos, max_vals, color=color, marker='o', s=15, label="Max Values")
+    ax2.scatter(max_pos, max_vals, color=color, marker='o', s=15, label="Max")
 
     ax2.set_title("Monthly climatology")
     ax2.set_ylabel(r"Daily streamflow ($m^3/s$)")
     ax2.set_xlabel("Month")
-    ax2.text(0.02, 0.95, '(b)', transform=ax2.transAxes, va='top')   
+    ax2.text(0.02, 0.95, '(b)', transform=ax2.transAxes, va='top')
+    ax2.legend()
 
     # Panel 3: Flow Duration Curve (bottom right)
 
@@ -128,8 +129,8 @@ def generate_figure(results, metadata, color=LINE_COLORS['dark_blue']):
     ax3.set_xlim((0, 100))
     ax3.set_yscale("log")
     ax3.set_title("Flow duration curve")
-    ax3.set_xlabel("Exceedance Probability (%)")
-    ax3.set_ylabel(r"Streamflow ($m^3/s$)")
+    ax3.set_xlabel("Exceedance probability (%)")
+    ax3.set_ylabel(r"Daily streamflow ($m^3/s$)")
     ax3.text(0.95, 0.95, '(c)', transform=ax3.transAxes, va='top')
 
     # Adjust the layout for better spacing
