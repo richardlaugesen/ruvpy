@@ -113,8 +113,8 @@ def generate_figure(results, metadata, color=LINE_COLORS['dark_blue']):
     ax2.set_title("Monthly climatology")
     ax2.set_ylabel(r"Daily streamflow ($m^3/s$)")
     ax2.set_xlabel("Month")
-    ax2.text(0.02, 0.95, '(b)', transform=ax2.transAxes, va='top')
-    ax2.legend()
+    ax2.text(0.93, 0.95, '(b)', transform=ax2.transAxes, va='top')
+    ax2.legend(loc='upper left')
 
     # Panel 3: Flow Duration Curve (bottom right)
 
@@ -131,7 +131,7 @@ def generate_figure(results, metadata, color=LINE_COLORS['dark_blue']):
     ax3.set_title("Flow duration curve")
     ax3.set_xlabel("Exceedance probability (%)")
     ax3.set_ylabel(r"Daily streamflow ($m^3/s$)")
-    ax3.text(0.95, 0.95, '(c)', transform=ax3.transAxes, va='top')
+    ax3.text(0.93, 0.95, '(c)', transform=ax3.transAxes, va='top')
 
     # Adjust the layout for better spacing
     plt.tight_layout()
