@@ -11,6 +11,20 @@ RUV is a library to quantify the value of forecast information for decision maki
 
 Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27, 873–893, https://doi.org/10.5194/hess-27-873-2023, 2023.
 
+## Quick start for examples
+
+Install Poetry then run
+
+    poetry install
+
+    poetry shell
+
+    jupyter notebook
+
+Open up the browser
+
+    http://localhost:8888/tree/examples
+
 ## Functionality
 
 ### Input data
@@ -107,7 +121,7 @@ To calculate RUV it must simulate decision making at each timestep, there are fo
 - Free and Open Source Software licence
 - Community code of conduct
 - Python v3 with standard code conventions
-- Only three dependencies (numpy, scipy, pathos)
+- Only three core dependencies (numpy, scipy, pathos)
 - Sane versioning and DOI
 
 ### Conventions
@@ -121,7 +135,7 @@ To calculate RUV it must simulate decision making at each timestep, there are fo
 
 ### Dependencies
 
-Python 3.7+, numpy, scipy.
+Defined in (pyproject.toml) file for [Poetry](https://python-poetry.org/) dependency management.
 
 ## Code of conduct
 
@@ -129,4 +143,4 @@ We encourage you to contribute! Everyone interacting with this project is expect
 
 ## Contact
 
-Richard Laugesen - [Web](https://richardlaugesen.com) / [Email](mailto://ruv@richardlaugesen.com)
+Richard Laugesen - [Web](https://laugesen.com.au) / [Email](mailto://ruv@laugesen.com.au)
