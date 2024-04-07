@@ -13,7 +13,7 @@ Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast valu
 
 ## Quick start for examples
 
-Install Poetry then run
+Install [Poetry](https://python-poetry.org/) then run
 
     poetry install
 
