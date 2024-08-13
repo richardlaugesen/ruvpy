@@ -7,17 +7,17 @@ license = "Apache 2"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.8"
-numpy = "^1.24.4"
-scipy = "^1.9.3"
-pathos = "^0.3.2"
-statsmodels = "^0.14.1"
-jupyter = "^1.0.0"
-matplotlib = "^3.7.5"
-pandas = "^2.0.3"
+python = ">=3.11"
+numpy = ">=1.25.0"
+scipy = ">=1.10.0"
+pathos = ">=0.3.2"
+statsmodels = ">=0.14.0"
+jupyter = ">=1.0.0"
+matplotlib = ">=3.8.0"
+pandas = ">=2.1.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.4"
+pytest = ">=7.4.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

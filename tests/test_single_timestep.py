@@ -36,32 +36,32 @@ def test_ex_ante_utility():
 
     context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, fast_economic_model)
 
-    alpha = 0.1
+    econ_par = 0.1
     spend = 0.052
     assert np.isclose(
-        ex_ante_utility(alpha, spend, probs, context),
+        ex_ante_utility(econ_par, spend, probs, context),
         -3.386, 1e-2)
 
-    alpha = 0.7
+    econ_par = 0.7
     spend = 0.052
     assert np.isclose(
-        ex_ante_utility(alpha, spend, probs, context),
+        ex_ante_utility(econ_par, spend, probs, context),
         -3.386, 1e-2)
 
-    alpha = 0.1
+    econ_par = 0.1
     spend = 3
     assert np.isclose(
-        ex_ante_utility(alpha, spend, probs, context),
+        ex_ante_utility(econ_par, spend, probs, context),
         -8.199, 1e-2)
 
-    alpha = 0.1
+    econ_par = 0.1
     spend = 3
     thresholds = np.arange(1, 100000, 1)
     ens = np.random.normal(50000, 10000, 100000)    
     probs = calc_likelihood(ens, thresholds)   # tiny likelihoods
     context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, fast_economic_model)
     assert np.isclose(
-        ex_ante_utility(alpha, spend, probs, context),
+        ex_ante_utility(econ_par, spend, probs, context),
         -8.199, 1e-2)
 
 
@@ -75,24 +75,24 @@ def test_ex_post_utility():
     context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, fast_economic_model)
 
     occured = thresholds[10]
-    alpha = 0.1
+    econ_par = 0.1
     spend = 0.052
     assert np.isclose(
-        ex_post_utility(alpha, occured, spend, context),
+        ex_post_utility(econ_par, occured, spend, context),
         -3.386, 1e-2)
 
     occured = thresholds[10]
-    alpha = 0.7
+    econ_par = 0.7
     spend = 0.052
     assert np.isclose(
-        ex_post_utility(alpha, occured, spend, context),
+        ex_post_utility(econ_par, occured, spend, context),
         -3.847, 1e-2)
 
     occured = thresholds[10]
-    alpha = 0.1
+    econ_par = 0.1
     spend = 3
     assert np.isclose(
-        ex_post_utility(alpha, occured, spend, context),
+        ex_post_utility(econ_par, occured, spend, context),
         -8.199, 1e-2)
 
 
@@ -107,8 +107,8 @@ def test_find_spend_ensemble():
     np.random.seed(42)
     ens = np.random.normal(10, 1, 100)
     probs = calc_likelihood(ens, thresholds)
-    alpha = 0.1
-    assert np.isclose(find_spend_ensemble(alpha, ens, probs, context), 0.012, 1e-1)
+    econ_par = 0.1
+    assert np.isclose(find_spend_ensemble(econ_par, ens, probs, context), 0.012, 1e-1)
 
     # Not implemented to work with deterministic forecasts so no need to test for it.
     # Code uses analytical_spend method of economic model instead of find_spend for 
@@ -119,7 +119,7 @@ def test_find_spend_ensemble():
 def test_single_timestep():
     t = 1
     ob = 10
-    alpha = 0.1
+    econ_par = 0.1
     thresholds = np.arange(5, 20, 1)
     economic_model = cost_loss
     analytical_spend = cost_loss_analytical_spend
@@ -134,7 +134,7 @@ def test_single_timestep():
     data = InputData([ob], [fcst], [ref])
     context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, analytical_spend)
     
-    t, obs_spends, obs_ex_post, fcst_spends, fcst_ex_post, ref_spends, ref_ex_post = single_timestep(t, alpha, data, context)
+    t, obs_spends, obs_ex_post, fcst_spends, fcst_ex_post, ref_spends, ref_ex_post = single_timestep(t, econ_par, data, context)
 
     assert np.isclose(obs_spends, 0.0076, 1e-2)
     assert np.isclose(fcst_spends, 0.012, 1e-2)

@@ -18,55 +18,58 @@ from ruv.data_classes import *
 # generate event frequency refs if requested, otherwise leave refs as supplied 
 # so impact on value from decision making method depends on forecasts alone
 
-def optimise_over_forecast_distribution(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
+def optimise_over_forecast_distribution(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiParOutput:
     refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
     updated_data = InputData(data.obs, data.fcsts, refs)
 
-    outputs = MultiAlphaOutput()
-    for alpha in context.alphas:
-        outputs.insert(alpha, multiple_timesteps(alpha, updated_data, context, parallel_nodes, verbose))
+    outputs = MultiParOutput()
+    for econ_par in context.econ_pars:
+        outputs.insert(econ_par, multiple_timesteps(econ_par, updated_data, context, parallel_nodes, verbose))
     return outputs
 
 
-def critical_probability_threshold_fixed(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:
+def critical_probability_threshold_fixed(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiParOutput:
     refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
     fcsts = probabilistic_to_deterministic_forecast(data.fcsts, context.crit_prob_thres)
     updated_data = InputData(data.obs, fcsts, refs)        
 
-    outputs = MultiAlphaOutput()
-    for alpha in context.alphas:
-        outputs.insert(alpha, multiple_timesteps(alpha, updated_data, context, parallel_nodes, verbose))
+    outputs = MultiParOutput()
+    for econ_par in context.econ_pars:
+        outputs.insert(econ_par, multiple_timesteps(econ_par, updated_data, context, parallel_nodes, verbose))
     return outputs
 
 
-def critical_probability_threshold_max_value(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:      
+def critical_probability_threshold_max_value(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiParOutput:
     refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
-    outputs = MultiAlphaOutput()            
-    for alpha in context.alphas:       
+    outputs = MultiParOutput()
+    for econ_par in context.econ_pars:
         def minimise_this(crit_prob_thres):
             curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, crit_prob_thres)                        
             curr_data = InputData(data.obs, curr_fcsts, refs)
-            return -multiple_timesteps(alpha, curr_data, context, parallel_nodes, verbose).ruv
+            return -multiple_timesteps(econ_par, curr_data, context, parallel_nodes, verbose).ruv
         max_ruv_thres = minimize_scalar(minimise_this, method='bounded', bounds=(0, 1), options={'disp': False, 'xatol': 0.005}).x        
 
         max_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, max_ruv_thres)
         max_data = InputData(data.obs, max_fcsts, refs)
-        outputs.insert(alpha, multiple_timesteps(alpha, max_data, context, parallel_nodes, verbose))
+        outputs.insert(econ_par, multiple_timesteps(econ_par, max_data, context, parallel_nodes, verbose))
 
     return outputs
 
 
-def critical_probability_threshold_equals_alpha(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiAlphaOutput:           
+def critical_probability_threshold_equals_par(data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> MultiParOutput:
     refs = data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)    
-    outputs = MultiAlphaOutput()        
-    for alpha in context.alphas:
-        curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, alpha)
+    outputs = MultiParOutput()
+    for econ_par in context.econ_pars:
+        curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, econ_par)
         curr_data = InputData(data.obs, curr_fcsts, refs)
-        outputs.insert(alpha, multiple_timesteps(alpha, curr_data, context, parallel_nodes, verbose))    
+        outputs.insert(econ_par, multiple_timesteps(econ_par, curr_data, context, parallel_nodes, verbose))
     
     return outputs
 
 
+#
+# TODO: move this to helpers.py
+#
 def probabilistic_to_deterministic_forecast(ensembles: np.ndarray, crit_thres: float) -> np.ndarray:
     if is_deterministic(ensembles[0]):
         raise ValueError('Cannot convert deterministic forecast to deterministic forecast')   
@@ -77,5 +80,8 @@ def probabilistic_to_deterministic_forecast(ensembles: np.ndarray, crit_thres: f
 # using the RUV expected utility approach with an ensemble for each timestep 
 # which is simply the observation record. NA are dropped to simplify
 # calculation of forecast likelihoods
+#
+# TODO: move this to helpers.py
+#
 def generate_event_freq_ref(obs: np.ndarray) -> np.ndarray:
     return np.tile(obs[~np.isnan(obs)], (obs.shape[0], 1))

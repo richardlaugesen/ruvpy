@@ -14,6 +14,8 @@
 
 import numpy as np
 
+# Rest of system is implemented expecting economic models to accept a single parameter (e.g. alpha for cost-loss)
+# This could change in the future, but for now, we will keep the models as single parameter functions
 
 def cost_loss(alpha: float, values: np.ndarray, spend: float, damage_function: callable) -> np.ndarray:
     damages = damage_function(values)

@@ -18,59 +18,58 @@ import numpy as np
 from scipy.optimize import minimize_scalar
 
 
-# Calculate RUV for a single alpha and single timestep
-def single_timestep(t: int, alpha: float, data: InputData, context: DecisionContext) -> tuple:
+# Calculate RUV for a single economic parameter and single timestep
+def single_timestep(t: int, econ_par: float, data: InputData, context: DecisionContext) -> tuple:
     ob = data.obs[t]
     fcst = data.fcsts[t]
     ref = data.refs[t]
 
     ob_threshold = realised_threshold(ob, context.decision_thresholds)
-    obs_spends = context.analytical_spend(alpha, ob_threshold, context.damage_function)
+    obs_spends = context.analytical_spend(econ_par, ob_threshold, context.damage_function)
 
     if is_deterministic(fcst):
-        fcst_spends = context.analytical_spend(alpha, realised_threshold(fcst, context.decision_thresholds), context.damage_function)
+        fcst_spends = context.analytical_spend(econ_par, realised_threshold(fcst, context.decision_thresholds), context.damage_function)
     else:
         fcst_likelihoods = calc_likelihood(fcst, context.decision_thresholds)   # not pre-calculating likelihoods because code becomes
-        fcst_spends = find_spend_ensemble(alpha, fcst, fcst_likelihoods, context)        # difficult to maintain even though it is 30% speedup
+        fcst_spends = find_spend_ensemble(econ_par, fcst, fcst_likelihoods, context)        # difficult to maintain even though it is 30% speedup
     
     if is_deterministic(ref):
-        ref_spends = context.analytical_spend(alpha, realised_threshold(ref, context.decision_thresholds), context.damage_function)        
+        ref_spends = context.analytical_spend(econ_par, realised_threshold(ref, context.decision_thresholds), context.damage_function)
     else:
         ref_likelihoods = calc_likelihood(ref, context.decision_thresholds)
-        ref_spends = find_spend_ensemble(alpha, ref, ref_likelihoods, context)     
+        ref_spends = find_spend_ensemble(econ_par, ref, ref_likelihoods, context)
 
-    obs_ex_post = ex_post_utility(alpha, ob_threshold, obs_spends, context)
-    fcst_ex_post = ex_post_utility(alpha, ob_threshold, fcst_spends, context)
-    ref_ex_post = ex_post_utility(alpha, ob_threshold, ref_spends, context)
+    obs_ex_post = ex_post_utility(econ_par, ob_threshold, obs_spends, context)
+    fcst_ex_post = ex_post_utility(econ_par, ob_threshold, fcst_spends, context)
+    ref_ex_post = ex_post_utility(econ_par, ob_threshold, ref_spends, context)
 
     return (t, obs_spends, obs_ex_post, fcst_spends, fcst_ex_post, ref_spends, ref_ex_post)
 
 
 # deterministic forecasts dont need this, can use context.analytical_spend
-def find_spend_ensemble(alpha: float, ens: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:    
+def find_spend_ensemble(econ_par: float, ens: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:
     if context.decision_thresholds is None:
         thresholds = ens   # if continuous decision then all members equally likely
-        curr_context = DecisionContext(context.alphas, context.damage_function, context.utility_function, thresholds, context.economic_model, context.analytical_spend, context.crit_prob_thres)
+        curr_context = DecisionContext(context.econ_pars, context.damage_function, context.utility_function, thresholds, context.economic_model, context.analytical_spend, context.crit_prob_thres)
     else:
         curr_context = context
 
     def minimise_this(spend):
-        return -ex_ante_utility(alpha, spend, likelihoods, curr_context)
+        return -ex_ante_utility(econ_par, spend, likelihoods, curr_context)
     spend_amount = minimize_scalar(minimise_this, method='brent').x
 
     return spend_amount
 
 
-def ex_ante_utility(alpha: float, spend: float, likelihoods: np.ndarray, context: DecisionContext) -> float:
-    net_expenses = context.economic_model(alpha, context.decision_thresholds, spend, context.damage_function)
+def ex_ante_utility(econ_par: float, spend: float, likelihoods: np.ndarray, context: DecisionContext) -> float:
+    net_expenses = context.economic_model(econ_par, context.decision_thresholds, spend, context.damage_function)
     expected_utility = np.sum(likelihoods * context.utility_function(net_expenses))
     return expected_utility
 
 
-def ex_post_utility(alpha: float, occured: float, spend: float, context: DecisionContext) -> float:
-    net_expense = context.economic_model(alpha, occured, spend, context.damage_function)
+def ex_post_utility(econ_par: float, occured: float, spend: float, context: DecisionContext) -> float:
+    net_expense = context.economic_model(econ_par, occured, spend, context.damage_function)
     return context.utility_function(net_expense)
-
 
 def calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     if thresholds is None:
