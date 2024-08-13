@@ -24,7 +24,7 @@ from ruv.data_classes import *
 
 
 def test_multiple_timesteps():
-    alpha = 0.1
+    econ_par = 0.1
     thresholds = np.arange(0, 20, 1)
     economic_model = cost_loss
     analytical_spend = cost_loss_analytical_spend
@@ -43,7 +43,7 @@ def test_multiple_timesteps():
     data = InputData(obs, fcsts, refs)
     context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, analytical_spend)
 
-    result = multiple_timesteps(alpha, data, context, 1)
+    result = multiple_timesteps(econ_par, data, context, 1)
 
     assert np.isclose(result.ruv, 0.0445, 1e-2)
     assert np.isclose(result.avg_fcst_ex_post, -3.399, 1e-2)

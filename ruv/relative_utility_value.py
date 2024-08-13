@@ -21,7 +21,7 @@ import numpy as np
 def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, decision_definition: dict, parallel_nodes: int=4, verbose: bool=False) -> dict:
     data = InputData(obs, fcsts, refs)
 
-    alphas = decision_definition['alphas']
+    econ_pars = decision_definition['econ_pars']
     damage_fnc_mth = decision_definition['damage_function'][0]
     damage_fnc_params = decision_definition['damage_function'][1]
     damage_function = damage_fnc_mth(damage_fnc_params)
@@ -34,7 +34,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     decision_method = decision_definition['decision_method'] if 'decision_method' in decision_definition.keys() else 'optimise_over_forecast_distribution'
     decision_making_fnc = getattr(ruv.decision_methods, decision_method)
     event_freq_ref = decision_definition['event_freq_ref'] if 'event_freq_ref' in decision_definition.keys() else False
-    context = DecisionContext(alphas, damage_function, utility_function, decision_thresholds, economic_model, analytical_spend, crit_prob_thres, event_freq_ref)
+    context = DecisionContext(econ_pars, damage_function, utility_function, decision_thresholds, economic_model, analytical_spend, crit_prob_thres, event_freq_ref)
 
     check_inputs(data, context)
     results = decision_making_fnc(data, context, parallel_nodes, verbose)    
@@ -51,7 +51,7 @@ def check_inputs(data: InputData, context: DecisionContext) -> None:
 
 
 # TODO: return ex ante utility too
-def to_dict(outputs: MultiAlphaOutput) -> dict:
+def to_dict(outputs: MultiParOutput) -> dict:
     results = {}
     results['ruv'] = outputs.get_series('ruv')
     results['avg_fcst_ex_post'] = outputs.get_series('avg_fcst_ex_post')

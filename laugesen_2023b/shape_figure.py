@@ -75,7 +75,7 @@ def generate_results(obs, fcst, ref, k_step, parallel_nodes, verbose):
 
     # Define decision context
     decision_definition = {
-        'alphas': np.array([0.1, 0.5, 0.9]),
+        'econ_pars': np.array([0.1, 0.5, 0.9]),
         'target_unity_risk_aversion': target_unity_risk_aversion,
         'target_risk_premium': target_risk_premium,
         'adjusted_risk_aversion': adjusted_risk_aversion,
@@ -114,7 +114,7 @@ def generate_results(obs, fcst, ref, k_step, parallel_nodes, verbose):
         results[k] = relative_utility_value(obs, fcst, ref, decision_definition, parallel_nodes=parallel_nodes, verbose=verbose)
         ruv_only[k] = results[k]['ruv']
 
-    ruv_only = pd.DataFrame(ruv_only, index=decision_definition['alphas']).T    
+    ruv_only = pd.DataFrame(ruv_only, index=decision_definition['econ_pars']).T
 
     output = {
         'ruv_only': ruv_only, 

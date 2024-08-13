@@ -76,7 +76,7 @@ def generate_results(obs, fcst, ref, q_step, parallel_nodes, verbose):
 
     # Define decision context
     decision_definition = {
-        'alphas': np.array([0.1, 0.5, 0.9]),
+        'econ_pars': np.array([0.1, 0.5, 0.9]),
         'target_unity_risk_aversion': target_unity_risk_aversion,
         'target_risk_premium': target_risk_premium,
         'adjusted_risk_aversion': adjusted_risk_aversion,
@@ -101,7 +101,7 @@ def generate_results(obs, fcst, ref, q_step, parallel_nodes, verbose):
         results[threshold] = relative_utility_value(obs, fcst, ref, decision_definition, parallel_nodes=parallel_nodes, verbose=verbose)
         ruv_only[threshold] = results[threshold]['ruv']
 
-    ruv_only = pd.DataFrame(ruv_only, index=decision_definition['alphas']).T
+    ruv_only = pd.DataFrame(ruv_only, index=decision_definition['econ_pars']).T
 
     # Generate streamflow-damage values for the different thresholds for damage function figure
     select_thresholds = thresholds[[0, int(len(thresholds)/4), int(len(thresholds)/2), 3*int(len(thresholds)/4), len(thresholds)-1]]
