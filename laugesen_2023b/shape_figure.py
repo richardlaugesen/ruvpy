@@ -28,7 +28,7 @@ from ruv.utility_functions import *
 from ruv.helpers import *
 
 
-def shape_figure(awrc, name, start_lt, end_lt, area, k_step=0.02, parallel_nodes=8, verbose=False):
+def shape_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=0.02, k_step=0.02, parallel_nodes=8, verbose=False):
     metadata = {
         'awrc': awrc,
         'name': name,
@@ -36,7 +36,8 @@ def shape_figure(awrc, name, start_lt, end_lt, area, k_step=0.02, parallel_nodes
         'end_lt': end_lt,
         'parallel_nodes': parallel_nodes,
         'k_step': k_step,
-        'area': area
+        'area': area,
+        'select_alphas': select_alphas
     }
 
     # load data
@@ -46,7 +47,7 @@ def shape_figure(awrc, name, start_lt, end_lt, area, k_step=0.02, parallel_nodes
     metadata['figure_name'] = 'shape'
 
     # generate results
-    results = generate_results(obs, fcst, clim, k_step, parallel_nodes, verbose)
+    results = generate_results(obs, fcst, clim, a_step, k_step, parallel_nodes, verbose)
 
     # generate and save figure
     fig = generate_figure(results, metadata)
@@ -65,17 +66,20 @@ def shape_figure(awrc, name, start_lt, end_lt, area, k_step=0.02, parallel_nodes
     return output
 
 
-def generate_results(obs, fcst, ref, k_step, parallel_nodes, verbose):
+def generate_results(obs, fcst, ref, a_step, k_step, parallel_nodes, verbose):
     print('\tGenerating results')
 
-    target_unity_risk_aversion = 0.3
+    alphas = np.arange(a_step, 1, a_step)
+    print('%d alpha values to simulate' % len(alphas))
+
+    target_unity_risk_aversion = 0.15
     max_damages = 10000
     target_risk_premium = risk_aversion_coef_to_risk_premium(target_unity_risk_aversion, 1) 
     adjusted_risk_aversion = risk_premium_to_risk_aversion_coef(target_risk_premium, max_damages)
 
     # Define decision context
     decision_definition = {
-        'econ_pars': np.array([0.1, 0.5, 0.9]),
+        'econ_pars': alphas,
         'target_unity_risk_aversion': target_unity_risk_aversion,
         'target_risk_premium': target_risk_premium,
         'adjusted_risk_aversion': adjusted_risk_aversion,
@@ -92,6 +96,7 @@ def generate_results(obs, fcst, ref, k_step, parallel_nodes, verbose):
     k_max = 5
     k_slope = 5 
     ks = (np.exp(np.arange(0, k_slope, k_step)) - 1) * k_max / (np.exp(k_slope - k_step) - 1)
+    print('%d k values to simulate' % len(ks))
 
     # generate streamflow-damage values for the different steepness for damage function figure
     select_ks = ks[[0, int(len(ks)/6), int(len(ks)/3), len(ks)-1]]
@@ -114,10 +119,10 @@ def generate_results(obs, fcst, ref, k_step, parallel_nodes, verbose):
         results[k] = relative_utility_value(obs, fcst, ref, decision_definition, parallel_nodes=parallel_nodes, verbose=verbose)
         ruv_only[k] = results[k]['ruv']
 
-    ruv_only = pd.DataFrame(ruv_only, index=decision_definition['econ_pars']).T
+    ruv_only_df = pd.DataFrame(ruv_only, index=decision_definition['econ_pars'], columns=ks)
 
     output = {
-        'ruv_only': ruv_only, 
+        'ruv_only': ruv_only_df,
         'all_results': results, 
         'damages_results': streamflow_damages,
         'max_obs': np.nanmax(obs),
@@ -131,7 +136,7 @@ def generate_results(obs, fcst, ref, k_step, parallel_nodes, verbose):
 def generate_figure(results, metadata):
     print('\tGenerating figure')
 
-    fig, axes = create_panel()
+    fig, axes = create_panel(3)
     # fig.suptitle('Impact of damage function steepness, %s (%s) for lead-times %d to %d' 
     #              % (metadata['name'], metadata['awrc'], metadata['start_lt'], metadata['end_lt']), 
     #              fontweight='semibold', fontsize='large')
@@ -139,28 +144,84 @@ def generate_figure(results, metadata):
     left_panel_color = LINE_COLORS['dark_blue']
     right_panel_color = LINE_COLORS['dark_orange']
 
-    metadata['damages_title'] = 'Damage functions of different steepness'
+    # damage functions panel
+    metadata['damages_title'] = 'Five damage functions with different steepness'
     gen_damage_function_fig(results['damages_results'], metadata, 'k', results['max_obs'], axes[0], left_panel_color, LINE_STYLES)
 
+    print(results['ruv_only'].columns)
+
+    # value diagrams panel
     ax = axes[1]
-    for i, column in enumerate(results['ruv_only'].columns):
+    for i, k in enumerate(results['ruv_only'].columns):
         line_style = LINE_STYLES[i % len(LINE_STYLES)]
-        ax.plot(results['ruv_only'].index, results['ruv_only'][column], 
+
+        ax.plot(results['ruv_only'].index, results['ruv_only'][k].T,
+                linewidth=1, alpha=1, color=left_panel_color, linestyle=line_style,
+                label='k=%.2f' % k)
+
+    plt.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='--', label='_hidden')
+
+    plt.ylim(-1, 1)  # y-range of 2nd and 3rd panels should be the same
+    plt.xlim((0, 1))
+
+    ax.set_xlabel(r'$\alpha$')
+    ax.set_ylabel('Forecast value (RUV)')
+    ax.set_title('Value diagrams for the five damage functions', fontsize='medium')
+    ax.legend()
+
+    # continuous variation of k panel
+    ax = axes[2]
+    for i, alpha in enumerate(metadata['select_alphas']):
+        ruv_vales = results['ruv_only'].loc[alpha]
+        line_style = LINE_STYLES[i % len(LINE_STYLES)]
+        ax.plot(results['ruv_only'].columns, ruv_vales,
                 linewidth=1, alpha=1, color=right_panel_color, linestyle=line_style, 
-                label=r'$\alpha$ = %.1f' % column)
+                label=r'$\alpha$ = %.1f' % alpha)
  
     plt.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='--', label='_hidden')
 
-    plt.ylim(-1, 1)
+    plt.ylim(-1, 1) # y-range of 2nd and 3rd panels should be the same
     plt.xlim((0, 0.5))
 
     ax.set_xlabel('Logistic steepness parameter (k)')
     ax.set_ylabel('Forecast value (RUV)')
-    ax.set_title(r'Forecast value for different values of $\alpha$', fontsize='medium')
+    #ax.set_title(r'Continuum of damage function steepness for three $\alpha$ values', fontsize='medium')
+    ax.set_title(r'Varying steepness for three $\alpha$ values', fontsize='medium')
     ax.legend()
 
     # Add labels to the top right corner of each panel
     axes[0].text(0.05, 0.95, '(a)', horizontalalignment='left', verticalalignment='top', transform=axes[0].transAxes)
     axes[1].text(0.05, 0.95, '(b)', horizontalalignment='left', verticalalignment='top', transform=axes[1].transAxes)
+    axes[2].text(0.05, 0.95, '(c)', horizontalalignment='left', verticalalignment='top', transform=axes[1].transAxes)
 
     return fig
+
+
+def main():
+    parallel_nodes = 6
+    alpha_resolution = 0.02
+    shape_resolution = 0.02
+    select_alphas = np.array([0.1, 0.5, 0.9])
+    verbose = False
+
+    # awrc = '405219'
+    # name = 'Goulburn River at Dohertys'
+    # area = 700.2
+
+    # awrc = '401012'
+    # name = 'Murray River at Biggera'
+    # area = 1257
+
+    awrc = '405209'
+    name = 'Acheron River at Taggerty'
+    area = 629.4
+
+    start_lt = 1
+    end_lt = 7
+
+    shape_output = shape_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=alpha_resolution, k_step=shape_resolution, parallel_nodes=parallel_nodes, verbose=verbose)
+    print('%.2f minutes' % shape_output['execution_time_min'])
+
+
+if __name__ == "__main__":
+    main()

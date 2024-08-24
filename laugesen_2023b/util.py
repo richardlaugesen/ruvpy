@@ -20,6 +20,8 @@ import os
 import pickle
 import bz2
 import time
+from logging import exception
+
 from matplotlib import pyplot as plt
 
 sys.path.append('../..')
@@ -85,12 +87,18 @@ def gen_damage_function_fig(damages_results, metadata, param_name, max_obs, ax, 
     ax.legend()
 
 
-def create_panel():
-    plt.rcParams['figure.figsize'] = (11.5, 6)
+def create_panel(panels=2):
+    if panels == 2:
+        plt.rcParams['figure.figsize'] = (11.5, 6)
+    elif panels == 3:
+        plt.rcParams['figure.figsize'] = (17.4, 6)
+    else:
+        print('Only 2 or 3 panel figures are implemented')
+
     plt.rcParams['font.family'] = "calibri"
     plt.rcParams['font.size'] = "12.5"
 
-    fig, axes = plt.subplots(1, 2, sharey=False, sharex=False)
+    fig, axes = plt.subplots(1, panels, sharey=False, sharex=False)
     plt.subplots_adjust(wspace=0.22, bottom=0.23)
     return fig, axes
 
@@ -102,15 +110,24 @@ def save_figure(fig, metadata, output_path='figures'):
                 '%s_%s_LT%d-%d.png' % (metadata['figure_name'], metadata['awrc'], metadata['start_lt'], metadata['end_lt'])),
                 dpi=600, bbox_inches='tight', pad_inches=0.1)
 
+    fig.savefig(os.path.join(output_path,
+                '%s_%s_LT%d-%d.pdf' % (metadata['figure_name'], metadata['awrc'], metadata['start_lt'], metadata['end_lt'])),
+                bbox_inches='tight', pad_inches=0.1)
+
+    fig.savefig(os.path.join(output_path,
+                '%s_%s_LT%d-%d.svg' % (metadata['figure_name'], metadata['awrc'], metadata['start_lt'], metadata['end_lt'])),
+                bbox_inches='tight', pad_inches=0.1)
+
 
 def save_results(output, output_path='figures'):
     print('\tSaving output')
-    print(output.keys())
 
     filepath = os.path.join(output_path, '%s_%s_LT%d-%d.pkl.bz2' % (output['figure_name'], output['awrc'], output['start_lt'], output['end_lt']))
     with bz2.BZ2File(filepath, 'wb') as f:
         pickle.dump(output, f)
 
+    filepath = os.path.join(output_path, '%s_ruv_only_%s_LT%d-%d.csv' % (output['figure_name'], output['awrc'], output['start_lt'], output['end_lt']))
+    output['ruv_only'].to_csv(os.path.join(filepath), header=['k=%.4f' % v for v in output['all_results'].keys()], index=True, index_label='alpha')
 
 def progressor(curr_num, total_num, start_time):
     progress = curr_num / total_num * 100   

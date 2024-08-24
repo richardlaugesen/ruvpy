@@ -69,7 +69,7 @@ def regime_figure(awrc, name, start_lt, end_lt, area, alpha_step=0.2, parallel_n
 def generate_results(obs, fcst, ref, alpha_step, parallel_nodes, verbose):
     print('\tGenerating results')
 
-    target_unity_risk_aversion = 0.3
+    target_unity_risk_aversion = 0.15
     max_damages = 10000
     target_risk_premium = risk_aversion_coef_to_risk_premium(target_unity_risk_aversion, 1) 
     adjusted_risk_aversion = risk_premium_to_risk_aversion_coef(target_risk_premium, max_damages)

@@ -22,18 +22,26 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     data = InputData(obs, fcsts, refs)
 
     econ_pars = decision_definition['econ_pars']
+
     damage_fnc_mth = decision_definition['damage_function'][0]
     damage_fnc_params = decision_definition['damage_function'][1]
     damage_function = damage_fnc_mth(damage_fnc_params)
+
     utility_fnc_mth = decision_definition['utility_function'][0]
     utility_fnc_params = decision_definition['utility_function'][1]
     utility_function = utility_fnc_mth(utility_fnc_params)
+
     decision_thresholds = decision_definition['decision_thresholds']
+
     economic_model, analytical_spend = decision_definition['economic_model']
+
     crit_prob_thres = decision_definition['critical_probability_threshold'] if 'critical_probability_threshold' in decision_definition.keys() else None
+
     decision_method = decision_definition['decision_method'] if 'decision_method' in decision_definition.keys() else 'optimise_over_forecast_distribution'
     decision_making_fnc = getattr(ruv.decision_methods, decision_method)
+
     event_freq_ref = decision_definition['event_freq_ref'] if 'event_freq_ref' in decision_definition.keys() else False
+
     context = DecisionContext(econ_pars, damage_function, utility_function, decision_thresholds, economic_model, analytical_spend, crit_prob_thres, event_freq_ref)
 
     check_inputs(data, context)
@@ -50,19 +58,29 @@ def check_inputs(data: InputData, context: DecisionContext) -> None:
             raise ValueError('One or more values are less than smallest threshold')
 
 
-# TODO: return ex ante utility too
+# TODO: move this to the data classes file
 def to_dict(outputs: MultiParOutput) -> dict:
     results = {}
     results['ruv'] = outputs.get_series('ruv')
+
     results['avg_fcst_ex_post'] = outputs.get_series('avg_fcst_ex_post')
-    results['avg_obs_ex_post'] = outputs.get_series('avg_obs_ex_post')
     results['avg_ref_ex_post'] = outputs.get_series('avg_ref_ex_post')
+    results['avg_obs_ex_post'] = outputs.get_series('avg_obs_ex_post')
+
     results['fcst_spends'] = outputs.get_series('fcst_spends')
-    results['obs_spends'] = outputs.get_series('obs_spends')
     results['ref_spends'] = outputs.get_series('ref_spends')
+    results['obs_spends'] = outputs.get_series('obs_spends')
+
+    results['fcst_ex_ante'] = outputs.get_series('fcst_ex_ante')
+    results['ref_ex_ante'] = outputs.get_series('ref_ex_ante')
+    results['obs_ex_ante'] = outputs.get_series('obs_ex_ante')
+
     results['fcst_ex_post'] = outputs.get_series('fcst_ex_post')
-    results['obs_ex_post'] = outputs.get_series('obs_ex_post')
     results['ref_ex_post'] = outputs.get_series('ref_ex_post')
-    results['fcst_likelihoods'] = outputs.get_series('fcst_likelihoods')
-    results['ref_likelihoods'] = outputs.get_series('ref_likelihoods')
+    results['obs_ex_post'] = outputs.get_series('obs_ex_post')
+
+    results['fcst_expected_damages'] = outputs.get_series('fcst_expected_damages')
+    results['ref_expected_damages'] = outputs.get_series('ref_expected_damages')
+    results['obs_damages'] = outputs.get_series('obs_damages')
+
     return results
