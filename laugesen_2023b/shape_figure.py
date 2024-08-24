@@ -198,9 +198,9 @@ def generate_figure(results, metadata):
 
 
 def main():
-    parallel_nodes = 6
+    parallel_nodes = 50
     alpha_resolution = 0.02
-    shape_resolution = 0.02
+    shape_resolution = 0.1
     select_alphas = np.array([0.1, 0.5, 0.9])
     verbose = False
 
