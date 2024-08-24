@@ -33,14 +33,19 @@ def multiple_timesteps(econ_par: float, data: InputData, context: DecisionContex
         with Pool(nodes=parallel_nodes) as pool:
             results = pool.map(single_timestep, *args, chunksize=int(np.sqrt(len(data.obs)/parallel_nodes)))
 
+    # TODO: refactor this into a Dict_to_SingleParOutput function or just make the single_timestep return SingleParOutput for a single timestep
     output = SingleParOutput(data.obs.shape[0])
-    for t, obs_spends, obs_ex_post, fcst_spends, fcst_ex_post, ref_spends, ref_ex_post in results:
-        output.obs_spends[t] = obs_spends
-        output.obs_ex_post[t] = obs_ex_post
-        output.fcst_spends[t] = fcst_spends
-        output.fcst_ex_post[t] = fcst_ex_post
-        output.ref_spends[t] = ref_spends
-        output.ref_ex_post[t] = ref_ex_post
+    for result in results:
+        t = result['t']
+        output.obs_spends[t] = result['ob_spends']
+        output.obs_ex_post[t] = result['ob_ex_post']
+        output.fcst_spends[t] = result['fcst_spend']
+        output.fcst_ex_post[t] = result['fcst_ex_post']
+        output.ref_spends[t] = result['ref_spend']
+        output.ref_ex_post[t] = result['ref_ex_post']
+        output.fcst_expected_damages[t] = result['fcst_expected_damage']
+        output.ref_expected_damages[t] = result['ref_expected_damage']
+        output.obs_damages[t] = result['ob_damage']
 
     output.avg_fcst_ex_post = np.nanmean(output.fcst_ex_post)
     output.avg_obs_ex_post = np.nanmean(output.obs_ex_post)

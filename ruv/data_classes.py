@@ -39,20 +39,26 @@ class DecisionContext:
 @dataclass
 class SingleParOutput:
     ruv: float
+
     avg_fcst_ex_post: float
     avg_obs_ex_post: float
     avg_ref_ex_post: float
+
     fcst_spends: np.ndarray
     obs_spends: np.ndarray
     ref_spends: np.ndarray
-    fcst_likelihoods: np.ndarray
-    ref_likelihoods: np.ndarray
+
     fcst_ex_post: np.ndarray
     obs_ex_post: np.ndarray
     ref_ex_post: np.ndarray
+
     fcst_ex_ante: np.ndarray
     obs_ex_ante: np.ndarray
     ref_ex_ante: np.ndarray
+
+    fcst_expected_damages: np.ndarray
+    ref_expected_damages: np.ndarray
+    obs_damages: np.ndarray
 
     def __init__(self, obs_size: int):
         self.ruv = np.nan
@@ -62,7 +68,7 @@ class SingleParOutput:
         self.fcst_spends, self.obs_spends, self.ref_spends = np.full((3, obs_size), np.nan)
         self.fcst_ex_ante, self.obs_ex_ante, self.ref_ex_ante = np.full((3, obs_size), np.nan)
         self.fcst_ex_post, self.obs_ex_post, self.ref_ex_post = np.full((3, obs_size), np.nan)
-        self.fcst_likelihoods, self.ref_likelihoods = np.full((2, obs_size), np.nan)
+        self.fcst_expected_damages, self.ref_expected_damages, self.obs_damages = np.full((3, obs_size), np.nan)
 
 
 @dataclass
