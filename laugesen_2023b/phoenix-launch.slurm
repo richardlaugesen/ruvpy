@@ -3,9 +3,9 @@
 #SBATCH -p batch
 #SBATCH -N 1
 #SBATCH --ntasks-per-core=2
-#SBATCH --mem=16GB
-#SBATCH --time=00:20:00
-#SBATCH -n 25
+#SBATCH --mem=8GB
+#SBATCH --time=06:00:00
+#SBATCH -n 2
 
 #SBATCH --mail-type=END
 #SBATCH --mail-type=FAIL

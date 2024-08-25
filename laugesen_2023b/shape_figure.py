@@ -151,8 +151,11 @@ def generate_figure(results, metadata):
     print(results['ruv_only'].columns)
 
     # value diagrams panel
+    ks = results['ruv_only'].columns
+    select_ks = ks[[0, int(len(ks)/6), int(len(ks)/3), len(ks)-1]]    
     ax = axes[1]
-    for i, k in enumerate(results['ruv_only'].columns):
+    for i, k in enumerate(select_ks):
+
         line_style = LINE_STYLES[i % len(LINE_STYLES)]
 
         ax.plot(results['ruv_only'].index, results['ruv_only'][k].T,
@@ -198,9 +201,9 @@ def generate_figure(results, metadata):
 
 
 def main():
-    parallel_nodes = 50
+    parallel_nodes = 4
     alpha_resolution = 0.02
-    shape_resolution = 0.1
+    shape_resolution = 0.02
     select_alphas = np.array([0.1, 0.5, 0.9])
     verbose = False
 
