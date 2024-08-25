@@ -25,13 +25,14 @@ def multiple_timesteps(econ_par: float, data: InputData, context: DecisionContex
             if not np.isnan(ob):    
                 results.append(single_timestep(t, econ_par, data, context))
     else:
+        #print('Parallelising over %d cores' % parallel_nodes)
         args = []
         for t, ob in enumerate(data.obs):
             if not np.isnan(ob):
                 args.append([t, econ_par, data, context])
         args = list(map(list, zip(*args)))
         with Pool(nodes=parallel_nodes) as pool:
-            results = pool.map(single_timestep, *args, chunksize=int(np.sqrt(len(data.obs)/parallel_nodes)))
+            results = pool.map(single_timestep, *args, chunksize=(len(data.obs) // parallel_nodes))
 
     # TODO: refactor this into a Dict_to_SingleParOutput function or just make the single_timestep return SingleParOutput for a single timestep
     output = SingleParOutput(data.obs.shape[0])
