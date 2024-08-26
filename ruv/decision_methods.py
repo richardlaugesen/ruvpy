@@ -35,7 +35,7 @@ def critical_probability_threshold_fixed(data: InputData, context: DecisionConte
 
     fcsts = probabilistic_to_deterministic_forecast(data.fcsts, context.crit_prob_thres)
     #refs = probabilistic_to_deterministic_forecast(refs, context.crit_prob_thres)     # TODO: this makes value diagrams flat
-    updated_data = InputData(data.obs, fcsts, refs)        
+    updated_data = InputData(data.obs, fcsts, refs)
 
     outputs = MultiParOutput()
     for econ_par in context.econ_pars:
@@ -55,8 +55,8 @@ def critical_probability_threshold_max_value(data: InputData, context: DecisionC
         max_ruv_thres = minimize_scalar(minimise_this, method='bounded', bounds=(0, 1), options={'disp': False, 'xatol': 0.005}).x        
 
         max_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, max_ruv_thres)
-        max_refs = refs #probabilistic_to_deterministic_forecast(refs, max_ruv_thres)
-        max_data = InputData(data.obs, max_fcsts, max_refs)
+        #max_refs = probabilistic_to_deterministic_forecast(refs, max_ruv_thres)
+        max_data = InputData(data.obs, max_fcsts, refs)
         outputs.insert(econ_par, multiple_timesteps(econ_par, max_data, context, parallel_nodes, verbose))
 
     return outputs
@@ -67,8 +67,8 @@ def critical_probability_threshold_equals_par(data: InputData, context: Decision
     outputs = MultiParOutput()
     for econ_par in context.econ_pars:
         curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, econ_par)
-        curr_refs = refs #probabilistic_to_deterministic_forecast(refs, econ_par) # TODO: this one is possibly okay
-        curr_data = InputData(data.obs, curr_fcsts, curr_refs)
+        #curr_refs = probabilistic_to_deterministic_forecast(refs, econ_par) # TODO: this one is possibly okay
+        curr_data = InputData(data.obs, curr_fcsts, refs)
         outputs.insert(econ_par, multiple_timesteps(econ_par, curr_data, context, parallel_nodes, verbose))
     
     return outputs

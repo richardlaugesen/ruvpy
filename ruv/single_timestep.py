@@ -17,6 +17,7 @@ from ruv.data_classes import *
 import numpy as np
 from scipy.optimize import minimize_scalar
 
+# TODO: lots of this could be done in place or without creating new variables
 
 # Calculate RUV for a single economic parameter and single timestep
 def single_timestep(t: int, econ_par: float, data: InputData, context: DecisionContext) -> dict[str, np.ndarray]:
@@ -52,20 +53,16 @@ def single_timestep(t: int, econ_par: float, data: InputData, context: DecisionC
         else:
             ref_expected_damage = np.sum(ref_likelihoods * context.damage_function(ref))
 
-    ob_ex_post = ex_post_utility(econ_par, ob_threshold, ob_spend, context)
-    fcst_ex_post = ex_post_utility(econ_par, ob_threshold, fcst_spend, context)
-    ref_ex_post = ex_post_utility(econ_par, ob_threshold, ref_spend, context)
-
     # TODO: calc and return the ex_ante utilities
 
     return {
         't': t,
         'ob_spends': ob_spend,
-        'ob_ex_post': ob_ex_post,
+        'ob_ex_post': ex_post_utility(econ_par, ob_threshold, ob_spend, context),
         'fcst_spend': fcst_spend,
-        'fcst_ex_post': fcst_ex_post,
+        'fcst_ex_post': ex_post_utility(econ_par, ob_threshold, fcst_spend, context),
         'ref_spend': ref_spend,
-        'ref_ex_post': ref_ex_post,
+        'ref_ex_post': ex_post_utility(econ_par, ob_threshold, ref_spend, context),
         'fcst_expected_damage': fcst_expected_damage,
         'ref_expected_damage': ref_expected_damage,
         'ob_damage': ob_damage,
@@ -74,33 +71,30 @@ def single_timestep(t: int, econ_par: float, data: InputData, context: DecisionC
 
 def find_spend_ensemble(econ_par: float, ens: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:
     if context.decision_thresholds is None:
-        thresholds = ens   # if continuous decision then all members equally likely
-        curr_context = DecisionContext(context.econ_pars, context.damage_function, context.utility_function, thresholds, context.economic_model, context.analytical_spend, context.crit_prob_thres)
+        # if continuous decision then all members equally likely so thresholds=ens
+        curr_context = DecisionContext(context.econ_pars, context.damage_function, context.utility_function, ens, context.economic_model, context.analytical_spend, context.crit_prob_thres)
     else:
         curr_context = context
 
     def minimise_this(spend):
         return -ex_ante_utility(econ_par, spend, likelihoods, curr_context)
-    spend_amount = minimize_scalar(minimise_this, method='brent').x
 
-    return spend_amount
+    return minimize_scalar(minimise_this, method='brent').x
 
 
 def ex_ante_utility(econ_par: float, spend: float, likelihoods: np.ndarray, context: DecisionContext) -> float:
-    net_expenses = context.economic_model(econ_par, context.decision_thresholds, spend, context.damage_function)
-    expected_utility = np.sum(likelihoods * context.utility_function(net_expenses))
-    return expected_utility
+    return np.sum(likelihoods * context.utility_function(context.economic_model(econ_par, context.decision_thresholds, spend, context.damage_function)))
 
 
 def ex_post_utility(econ_par: float, occured: float, spend: float, context: DecisionContext) -> float:
-    net_expense = context.economic_model(econ_par, occured, spend, context.damage_function)
-    return context.utility_function(net_expense)
+    return context.utility_function(context.economic_model(econ_par, occured, spend, context.damage_function))
 
 
 def calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     if thresholds is None:
         return np.full(ens.shape, 1/ens.shape[0])   # continuous decision limit is 1/num_classes
 
+    # TODO: this could probably be done in place somehow
     probs_above = ecdf(ens, thresholds)
     adjustment = np.roll(probs_above, -1)
     adjustment[-1] = 0.0
@@ -118,5 +112,4 @@ def realised_threshold(value: float, thresholds: np.ndarray) -> float:
         return np.nan
 
     vals = np.subtract(value, thresholds)
-    idx = np.argmin(vals[vals >= 0.0])
-    return thresholds[idx]
+    return thresholds[np.argmin(vals[vals >= 0.0])]
