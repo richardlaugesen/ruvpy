@@ -66,7 +66,6 @@ def shape_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=0.02,
         }
         output.update(metadata)
         output.update(results)
-
         save_results(output)
 
     return output

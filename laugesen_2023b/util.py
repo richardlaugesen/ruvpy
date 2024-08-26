@@ -135,8 +135,9 @@ def save_results(output, output_path='figures'):
     output['ruv_only'].to_csv(os.path.join(filepath), header=['k=%.4f' % v for v in output['all_results'].keys()], index=True, index_label='alpha')
 
 def progressor(curr_num, total_num, start_time):
-    progress = curr_num / total_num * 100   
-    if curr_num > 0 and (total_num < 20 or progress % 10 == 0):
+    print(curr_num, total_num)
+    progress = curr_num / total_num * 100
+    if curr_num > 0 and (total_num < 20 or progress % 5 == 0 or curr_num == 2):
         curr_time = time.time()
         remaining_seconds = (curr_time - start_time) * (total_num - curr_num) / curr_num  
         remaining_minutes = remaining_seconds / 60

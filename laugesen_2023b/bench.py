@@ -32,7 +32,7 @@ damages_shape = 0.2
 # num_timesteps = 1000
 
 # should take about 1 minute
-parallel_nodes = 8
+parallel_nodes = 6
 num_alphas = 5
 benchmark_repeats = 5
 num_timesteps = 100

@@ -20,10 +20,10 @@ from scipy.optimize import minimize_scalar
 # TODO: lots of this could be done in place or without creating new variables
 
 # Calculate RUV for a single economic parameter and single timestep
-def single_timestep(t: int, econ_par: float, data: InputData, context: DecisionContext) -> dict[str, np.ndarray]:
-    ob = data.obs[t]
-    fcst = data.fcsts[t]
-    ref = data.refs[t]
+def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.array, context: DecisionContext) -> dict[str, np.ndarray]:
+    # ob = data.obs[t]
+    # fcst = data.fcsts[t]
+    # ref = data.refs[t]
 
     ob_threshold = realised_threshold(ob, context.decision_thresholds)
     ob_spend = context.analytical_spend(econ_par, ob_threshold, context.damage_function)
