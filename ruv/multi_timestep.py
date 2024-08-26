@@ -25,7 +25,6 @@ def multiple_timesteps(econ_par: float, data: InputData, context: DecisionContex
             if not np.isnan(ob):    
                 results.append(single_timestep(t, econ_par, data, context))
     else:
-        #print('Parallelising over %d cores' % parallel_nodes)
         args = []
         for t, ob in enumerate(data.obs):
             if not np.isnan(ob):
