@@ -23,7 +23,7 @@ def multiple_timesteps(econ_par: float, data: InputData, context: DecisionContex
         results = []
         for t, ob in enumerate(data.obs):
             if not np.isnan(ob):    
-                results.append(single_timestep(t, econ_par, data, context))
+                results.append(single_timestep(t, econ_par, ob, data.fcsts[t], data.refs[t], context))
     else:
         args = []
         for t, ob in enumerate(data.obs):
