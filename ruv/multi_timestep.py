@@ -28,7 +28,7 @@ def multiple_timesteps(econ_par: float, data: InputData, context: DecisionContex
         args = []
         for t, ob in enumerate(data.obs):
             if not np.isnan(ob):
-                args.append([t, econ_par, data, context])
+                args.append([t, econ_par, ob, data.fcsts[t], data.refs[t], context])
         args = list(map(list, zip(*args)))
         with Pool(nodes=parallel_nodes) as pool:
             results = pool.map(single_timestep, *args, chunksize=(len(data.obs) // parallel_nodes))
