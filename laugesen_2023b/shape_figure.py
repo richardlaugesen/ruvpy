@@ -28,7 +28,7 @@ from ruv.utility_functions import *
 from ruv.helpers import *
 
 
-def shape_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=0.02, k_step=0.02, parallel_nodes=8, verbose=False):
+def shape_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=0.02, k_step=0.02, parallel_nodes=8, restore_data_filepath=None, verbose=False):
     metadata = {
         'awrc': awrc,
         'name': name,
@@ -46,22 +46,28 @@ def shape_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=0.02,
     print('Starting shape figure...')
     metadata['figure_name'] = 'shape'
 
-    # generate results
-    results = generate_results(obs, fcst, clim, a_step, k_step, parallel_nodes, verbose)
+    # generate or restore results
+    if restore_data_filepath is None:
+        results = generate_results(obs, fcst, clim, a_step, k_step, parallel_nodes, verbose)
+    else:
+        output = restore_data(restore_data_filepath)
+        results = output
 
     # generate and save figure
     fig = generate_figure(results, metadata)
     save_figure(fig, metadata)
 
     # store all output
-    output = {
-        'obs': obs,
-        'fcst': fcst,
-        'clim': clim
-    }
-    output.update(metadata)
-    output.update(results)
-    save_results(output)
+    if restore_data_filepath is None:
+        output = {
+            'obs': obs,
+            'fcst': fcst,
+            'clim': clim
+        }
+        output.update(metadata)
+        output.update(results)
+
+        save_results(output)
 
     return output
 
@@ -145,10 +151,8 @@ def generate_figure(results, metadata):
     right_panel_color = LINE_COLORS['dark_orange']
 
     # damage functions panel
-    metadata['damages_title'] = 'Five damage functions with different steepness'
+    metadata['damages_title'] = 'Four damage functions with different steepness'
     gen_damage_function_fig(results['damages_results'], metadata, 'k', results['max_obs'], axes[0], left_panel_color, LINE_STYLES)
-
-    print(results['ruv_only'].columns)
 
     # value diagrams panel
     ks = results['ruv_only'].columns
@@ -162,14 +166,14 @@ def generate_figure(results, metadata):
                 linewidth=1, alpha=1, color=left_panel_color, linestyle=line_style,
                 label='k=%.2f' % k)
 
-    plt.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='--', label='_hidden')
+    ax.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='--', label='_hidden')
 
-    plt.ylim(-1, 1)  # y-range of 2nd and 3rd panels should be the same
-    plt.xlim((0, 1))
+    ax.set_ylim(-1, 1)
+    ax.set_xlim((0, 1))
 
     ax.set_xlabel(r'$\alpha$')
     ax.set_ylabel('Forecast value (RUV)')
-    ax.set_title('Value diagrams for the five damage functions', fontsize='medium')
+    ax.set_title('Value diagrams for the four damage functions', fontsize='medium')
     ax.legend()
 
     # continuous variation of k panel
@@ -181,21 +185,20 @@ def generate_figure(results, metadata):
                 linewidth=1, alpha=1, color=right_panel_color, linestyle=line_style, 
                 label=r'$\alpha$ = %.1f' % alpha)
  
-    plt.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='--', label='_hidden')
+    ax.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='--', label='_hidden')
 
-    plt.ylim(-1, 1) # y-range of 2nd and 3rd panels should be the same
-    plt.xlim((0, 0.5))
+    ax.set_ylim(-1, 1)
+    ax.set_xlim((0, 0.5))
 
     ax.set_xlabel('Logistic steepness parameter (k)')
     ax.set_ylabel('Forecast value (RUV)')
-    #ax.set_title(r'Continuum of damage function steepness for three $\alpha$ values', fontsize='medium')
-    ax.set_title(r'Varying steepness for three $\alpha$ values', fontsize='medium')
+    ax.set_title(r'Value for damage functions of varying steepness', fontsize='medium') # for three $\alpha$ values
     ax.legend()
 
-    # Add labels to the top right corner of each panel
+    # Add labels to the top corner of each panel
     axes[0].text(0.05, 0.95, '(a)', horizontalalignment='left', verticalalignment='top', transform=axes[0].transAxes)
-    axes[1].text(0.05, 0.95, '(b)', horizontalalignment='left', verticalalignment='top', transform=axes[1].transAxes)
-    axes[2].text(0.05, 0.95, '(c)', horizontalalignment='left', verticalalignment='top', transform=axes[1].transAxes)
+    axes[1].text(0.95, 0.95, '(b)', horizontalalignment='right', verticalalignment='top', transform=axes[1].transAxes)
+    axes[2].text(0.05, 0.95, '(c)', horizontalalignment='left', verticalalignment='top', transform=axes[2].transAxes)
 
     return fig
 
@@ -206,6 +209,8 @@ def main():
     shape_resolution = 0.02
     select_alphas = np.array([0.1, 0.5, 0.9])
     verbose = False
+    #restore_data_filepath = None
+    restore_data_filepath = 'figures/shape_405209_LT1-7.pkl.bz2'
 
     # awrc = '405219'
     # name = 'Goulburn River at Dohertys'
@@ -222,7 +227,7 @@ def main():
     start_lt = 1
     end_lt = 7
 
-    shape_output = shape_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=alpha_resolution, k_step=shape_resolution, parallel_nodes=parallel_nodes, verbose=verbose)
+    shape_output = shape_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=alpha_resolution, k_step=shape_resolution, parallel_nodes=parallel_nodes, restore_data_filepath=restore_data_filepath, verbose=verbose)
     print('%.2f minutes' % shape_output['execution_time_min'])
 
 

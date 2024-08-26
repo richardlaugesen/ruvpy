@@ -50,6 +50,11 @@ def load_data(awrc, start_lt, end_lt, area, scenario='muthre', input_path='../..
     results = mm_to_m3s(results, area)
     return results['obs'], results['fcst'], results['clim']
 
+def restore_data(filepath):
+    print('Restoring data')
+    with bz2.BZ2File(filepath, 'rb') as f:
+        return pickle.load(f)
+
 
 def mm_to_m3s(results, area):
     factor = area * 1000 / (60 * 60 * 24)
