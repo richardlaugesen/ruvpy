@@ -54,10 +54,6 @@ def location_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=0.
         output = restore_data(restore_data_filepath)
         results = output
 
-    # generate and save figure
-    fig = generate_figure(results, obs, metadata)
-    save_figure(fig, metadata)
-
     # store all output
     if restore_data_filepath is None:
         output = {
@@ -68,6 +64,10 @@ def location_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=0.
         output.update(metadata)
         output.update(results)
         save_results(output)
+
+    # generate and save figure
+    fig = generate_figure(results, obs, metadata)
+    save_figure(fig, metadata)
 
     return output
 
