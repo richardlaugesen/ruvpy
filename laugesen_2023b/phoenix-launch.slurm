@@ -3,7 +3,7 @@
 #SBATCH -p batch
 #SBATCH -N 1
 #SBATCH --ntasks-per-core=2
-#SBATCH --mem=8GB
+#SBATCH --mem=4GB
 #SBATCH --time=06:00:00
 #SBATCH -n 2
 
