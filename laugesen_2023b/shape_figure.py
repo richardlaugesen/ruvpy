@@ -203,13 +203,13 @@ def generate_figure(results, metadata):
 
 
 def main():
-    parallel_nodes = 4
+    parallel_nodes = 8
     alpha_resolution = 0.02
     shape_resolution = 0.02
     select_alphas = np.array([0.1, 0.5, 0.9])
     verbose = False
-    #restore_data_filepath = None
-    restore_data_filepath = 'figures/shape_405209_LT1-7.pkl.bz2'
+    restore_data_filepath = None
+    #restore_data_filepath = 'figures/shape_405209_LT1-7.pkl.bz2'
 
     # awrc = '405219'
     # name = 'Goulburn River at Dohertys'

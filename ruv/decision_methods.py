@@ -67,8 +67,8 @@ def critical_probability_threshold_equals_par(data: InputData, context: Decision
     outputs = MultiParOutput()
     for econ_par in context.econ_pars:
         curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, econ_par)
-        curr_refs = probabilistic_to_deterministic_forecast(refs, econ_par) # TODO: this one is possibly okay
-        curr_data = InputData(data.obs, curr_fcsts, curr_refs)
+        #curr_refs = probabilistic_to_deterministic_forecast(refs, econ_par) # TODO: this one is possibly okay
+        curr_data = InputData(data.obs, curr_fcsts, refs)
         outputs.insert(econ_par, multiple_timesteps(econ_par, curr_data, context, parallel_nodes, verbose))
     
     return outputs

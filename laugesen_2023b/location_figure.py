@@ -91,8 +91,8 @@ def generate_results(obs, fcst, ref, a_step, q_step, parallel_nodes, verbose):
         'adjusted_risk_aversion': adjusted_risk_aversion,
         'utility_function': [cara, {'A': adjusted_risk_aversion}],
         'economic_model': [cost_loss, cost_loss_analytical_spend],
-        #'decision_method': 'optimise_over_forecast_distribution',
-        'decision_method': 'critical_probability_threshold_equals_par',
+        'decision_method': 'optimise_over_forecast_distribution',
+        #'decision_method': 'critical_probability_threshold_equals_par',
         'decision_thresholds': None,
         'damage_function': [logistic, {'k': 0.2, 'A': max_damages, 'threshold': np.nanquantile(obs, 0.99)}]
     }
@@ -207,7 +207,7 @@ def generate_figure(results, obs, metadata, show_percentiles=True):
 
 
 def main():
-    parallel_nodes = 6
+    parallel_nodes = 8
     alpha_resolution = 0.1
     threshold_resolution = 5
     select_alphas = np.array([0.1, 0.5, 0.9])

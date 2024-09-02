@@ -94,6 +94,12 @@ def test_optimise_over_forecast_distribution():
 
 def test_critical_probability_threshold_equals_par():
     data = get_data()
+    context = get_context(risk_aversion=0)
+    econ_par_result = critical_probability_threshold_equals_par(data, context, 1)
+    optim_result = optimise_over_forecast_distribution(data, context, 1)
+    assert np.allclose(econ_par_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
+
+    data = get_data()
     context = get_context(risk_aversion=0.1)
     econ_par_result = critical_probability_threshold_equals_par(data, context, 1)
     optim_result = optimise_over_forecast_distribution(data, context, 1)

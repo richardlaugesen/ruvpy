@@ -131,14 +131,14 @@ def test_single_timestep():
     ref = np.random.normal(5, 3, 100)
 
     t = 0
-    data = InputData([ob], [fcst], [ref])
+    #data = InputData([ob], [fcst], [ref])
     context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, analytical_spend)
     
-    t, obs_spends, obs_ex_post, fcst_spends, fcst_ex_post, ref_spends, ref_ex_post = single_timestep(t, econ_par, data, context)
+    result = single_timestep(t, econ_par, ob, fcst, ref, context)
 
-    assert np.isclose(obs_spends, 0.0076, 1e-2)
-    assert np.isclose(fcst_spends, 0.012, 1e-2)
-    assert np.isclose(ref_spends, 0.0076, 1e-2)
+    assert np.isclose(result['ob_spend'], 0.0076, 1e-2)
+    assert np.isclose(result['fcst_spend'], 0.012, 1e-2)
+    assert np.isclose(result['ref_spend'], 0.0076, 1e-2)
 
 
 def test_calc_likelihoods():
