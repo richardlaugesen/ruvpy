@@ -26,16 +26,14 @@ max_damages = 10000
 damages_quantile_threshold = 0.99
 damages_shape = 0.2
 
-# should take about an hour
-# parallel_nodes = 8
-# num_alphas = 20
-# benchmark_repeats = 15
-# num_timesteps = 1000
+num_alphas = 10
+benchmark_repeats = 20
+num_timesteps = 200
 
 # should take about 1 minute
-num_alphas = 5
-benchmark_repeats = 5
-num_timesteps = 100
+#num_alphas = 5
+#benchmark_repeats = 5
+#num_timesteps = 100
 verbose = False
 alphas = np.linspace(1/num_alphas, 1-1/num_alphas, num_alphas)
 target_risk_premium = risk_aversion_coef_to_risk_premium(target_unity_risk_aversion, 1)
@@ -61,25 +59,21 @@ decision_definition = {
 
 results = {}
 
+print('Starting benchmark')
+
 for cores in range(1, 9):
     benchmark_results = timeit.repeat(
         lambda: relative_utility_value(obs, fcst, ref, decision_definition, parallel_nodes=cores, verbose=verbose),
         number=1, repeat=benchmark_repeats)
 
-    print(cores)
-
     times = np.array(benchmark_results) / num_alphas
 
-    print('times_per_alpha')
-    print(f"Mean: {statistics.mean(times)} seconds")
-    print(f"Median: {statistics.median(times)} seconds")
-    print(f"Standard Deviation: {statistics.stdev(times)} seconds")
-
-    times_per_step = times/num_timesteps
-    print('times_per_step')
-    print(f"Mean: {statistics.mean(times_per_step)} seconds")
-    print(f"Median: {statistics.median(times_per_step)} seconds")
-    print(f"Standard Deviation: {statistics.stdev(times_per_step)} seconds")
+    print('\n%d timesteps with cores=%d' % (num_timesteps, cores))
+    print('Mean time per alpha: %.4f seconds +/- %.4f' % (statistics.mean(times), statistics.stdev(times)))
+    print('Mean time per alpha per timestep: %.4f seconds' % (statistics.mean(times) / num_timesteps))
+    
+    if cores > 1:
+        print('Speedup factor: %.4f (vs %d)' % (statistics.mean(results[1]) / statistics.mean(times), cores))
 
     results[cores] = times
 
