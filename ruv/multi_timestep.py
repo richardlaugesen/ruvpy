@@ -37,7 +37,7 @@ def multiple_timesteps(econ_par: float, data: InputData, context: DecisionContex
     output = SingleParOutput(data.obs.shape[0])
     for result in results:
         t = result['t']
-        output.obs_spends[t] = result['ob_spends']
+        output.obs_spends[t] = result['ob_spend']
         output.obs_ex_post[t] = result['ob_ex_post']
         output.fcst_spends[t] = result['fcst_spend']
         output.fcst_ex_post[t] = result['fcst_ex_post']

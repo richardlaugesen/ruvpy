@@ -37,9 +37,9 @@ def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.
         fcst_likelihoods = calc_likelihood(fcst, context.decision_thresholds)               # not pre-calculating likelihoods because code becomes
         fcst_spend = find_spend_ensemble(econ_par, fcst, fcst_likelihoods, context)        # difficult to maintain even though it is 30% speedup
         if context.decision_thresholds is not None:
-            fcst_expected_damage = np.sum(fcst_likelihoods * context.damage_function(context.decision_thresholds))
+            fcst_expected_damage = np.dot(fcst_likelihoods, context.damage_function(context.decision_thresholds))
         else:
-            fcst_expected_damage = np.sum(fcst_likelihoods * context.damage_function(fcst))
+            fcst_expected_damage = np.dot(fcst_likelihoods, context.damage_function(fcst))
 
     if is_deterministic(ref):
         ref_threshold = realised_threshold(ref, context.decision_thresholds)
@@ -49,15 +49,15 @@ def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.
         ref_likelihoods = calc_likelihood(ref, context.decision_thresholds)
         ref_spend = find_spend_ensemble(econ_par, ref, ref_likelihoods, context)
         if context.decision_thresholds is not None:
-            ref_expected_damage = np.sum(ref_likelihoods * context.damage_function(context.decision_thresholds))
+            ref_expected_damage = np.dot(ref_likelihoods, context.damage_function(context.decision_thresholds))
         else:
-            ref_expected_damage = np.sum(ref_likelihoods * context.damage_function(ref))
+            ref_expected_damage = np.dot(ref_likelihoods, context.damage_function(ref))
 
     # TODO: calc and return the ex_ante utilities
 
     return {
         't': t,
-        'ob_spends': ob_spend,
+        'ob_spend': ob_spend,
         'ob_ex_post': ex_post_utility(econ_par, ob_threshold, ob_spend, context),
         'fcst_spend': fcst_spend,
         'fcst_ex_post': ex_post_utility(econ_par, ob_threshold, fcst_spend, context),
@@ -83,7 +83,7 @@ def find_spend_ensemble(econ_par: float, ens: np.ndarray, likelihoods: np.ndarra
 
 
 def ex_ante_utility(econ_par: float, spend: float, likelihoods: np.ndarray, context: DecisionContext) -> float:
-    return np.sum(likelihoods * context.utility_function(context.economic_model(econ_par, context.decision_thresholds, spend, context.damage_function)))
+    return np.dot(likelihoods, context.utility_function(context.economic_model(econ_par, context.decision_thresholds, spend, context.damage_function)))
 
 
 def ex_post_utility(econ_par: float, occured: float, spend: float, context: DecisionContext) -> float:
@@ -98,8 +98,8 @@ def calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     probs_above = ecdf(ens, thresholds)
     adjustment = np.roll(probs_above, -1)
     adjustment[-1] = 0.0
-    probs_between = probs_above - adjustment
-    probs_between /= np.sum(probs_between)  # normalise to ensure small probs are handled correctly
+    probs_between = np.subtract(probs_above, adjustment)
+    probs_between = np.divide(probs_between, np.sum(probs_between))  # normalise to ensure small probs are handled correctly
 
     return probs_between
 
