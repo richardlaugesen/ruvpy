@@ -104,7 +104,17 @@ def generate_results(obs, fcst, ref, a_step, q_step, parallel_nodes, verbose):
     start_time = time.time()
     results = {}
     ruv_only = {}
-    
+
+    # print out estimated time
+    est_time = 0.0012/60 * len(thresholds) * len(alphas) * len(obs)
+    if est_time > 60:
+        est_time /= 60
+        time_str = '%.2f hours' % est_time
+    else:
+        time_str = '%.2f minutes' % est_time
+    print('Estimated calculate time is %s' % time_str)
+
+    # calculate RUV for each threshold
     for i, threshold in enumerate(thresholds):
         progressor(i, len(thresholds), start_time)
 
@@ -208,8 +218,8 @@ def generate_figure(results, obs, metadata, show_percentiles=True):
 
 def main():
     parallel_nodes = 8
-    alpha_resolution = 0.1
-    threshold_resolution = 5
+    alpha_resolution = 0.02
+    threshold_resolution = 1
     select_alphas = np.array([0.1, 0.5, 0.9])
     verbose = False
     restore_data_filepath = None
