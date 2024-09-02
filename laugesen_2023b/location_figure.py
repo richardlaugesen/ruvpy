@@ -63,11 +63,11 @@ def location_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=0.
         }
         output.update(metadata)
         output.update(results)
-        save_results(output)
+        #save_results(output)
 
     # generate and save figure
-    fig = generate_figure(results, obs, metadata)
-    save_figure(fig, metadata)
+    #fig = generate_figure(results, obs, metadata)
+    #save_figure(fig, metadata)
 
     return output
 
@@ -241,6 +241,7 @@ def main():
     end_lt = 7
 
     shape_output = location_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=alpha_resolution, q_step=threshold_resolution, parallel_nodes=parallel_nodes, restore_data_filepath=restore_data_filepath, verbose=verbose)
+
     print('%.2f minutes' % shape_output['execution_time_min'])
 
 
