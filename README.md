@@ -19,6 +19,8 @@ Install [Poetry](https://python-poetry.org/) then run
 
     poetry shell
 
+    poetry run pytest
+
     jupyter notebook
 
 Open up the browser
