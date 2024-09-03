@@ -47,27 +47,35 @@ def regime_figure(awrc, name, start_lt, end_lt, area, alpha_step=0.2, parallel_n
     metadata['figure_name'] = 'regime'
 
     # generate results
-    results = generate_results(obs, fcst, clim, alpha_step, parallel_nodes, verbose)
+    if restore_data_filepath is None:
+        results = generate_results(obs, fcst, clim, a_step, parallel_nodes, verbose)
+    else:
+        output = restore_data(restore_data_filepath)
+        results = output
+
+    # store all output
+    if restore_data_filepath is None:
+        output = {
+            'obs': obs,
+            'fcst': fcst,
+            'clim': clim
+        }
+        output.update(metadata)
+        output.update(results)
+        save_results(output)
 
     # generate and save figure
     fig = generate_figure(results, metadata)
     save_figure(fig, metadata)
-
-    # store all output
-    output = {
-        'obs': obs,
-        'fcst': fcst,
-        'clim': clim
-    }
-    output.update(metadata)
-    output.update(results)
-    save_results(output)
 
     return output
 
 
 def generate_results(obs, fcst, ref, alpha_step, parallel_nodes, verbose):
     print('\tGenerating results')
+
+    alphas = np.arange(alpha_step, 1, alpha_step)
+    print('%d alpha values to simulate' % len(alphas))
 
     target_unity_risk_aversion = 0.15
     max_damages = 10000
@@ -76,7 +84,7 @@ def generate_results(obs, fcst, ref, alpha_step, parallel_nodes, verbose):
 
     # Define decision context
     decision_definition = {
-        'econ_pars': np.arange(alpha_step, 1, alpha_step),
+        'econ_pars': alphas,
         'target_unity_risk_aversion': target_unity_risk_aversion,
         'target_risk_premium': target_risk_premium,
         'adjusted_risk_aversion': adjusted_risk_aversion,
@@ -114,7 +122,16 @@ def generate_results(obs, fcst, ref, alpha_step, parallel_nodes, verbose):
     damage_functions['only low'] = [user_defined, {'interpolator': user_defined_interpolator(flow_damage_pairs)}]
 
     damage_functions['only high (logistic)'] = [logistic, {'k': 0.2, 'A': max_damages, 'threshold': np.nanquantile(obs, 0.991)}]
-   
+
+    # print out estimated time
+    est_time = 0.0012/60 * len(damage_functions) * len(alphas) * len(obs)
+    if est_time > 60:
+        est_time /= 60
+        time_str = '%.2f hours' % est_time
+    else:
+        time_str = '%.2f minutes' % est_time
+    print('Estimated calculate time is %s' % time_str)
+
     # Calculate RUV for the different thresholds for damage function figure
     start_time = time.time()
     results = {}
@@ -184,3 +201,34 @@ def generate_figure(results, metadata):
     axes[1].text(0.05, 0.95, '(b)', horizontalalignment='left', verticalalignment='top', transform=axes[1].transAxes)
 
     return fig
+
+
+def main():
+    parallel_nodes = 8
+    alpha_resolution = 0.2 #02
+    verbose = False
+    restore_data_filepath = None
+    #restore_data_filepath = 'figures/regime_405209_LT1-7.pkl.bz2'
+
+    # awrc = '405219'
+    # name = 'Goulburn River at Dohertys'
+    # area = 700.2
+
+    # awrc = '401012'
+    # name = 'Murray River at Biggera'
+    # area = 1257
+
+    awrc = '405209'
+    name = 'Acheron River at Taggerty'
+    area = 629.4
+
+    start_lt = 1
+    end_lt = 7
+
+    shape_output = location_figure(awrc, name, start_lt, end_lt, area, a_step=alpha_resolution, parallel_nodes=parallel_nodes, restore_data_filepath=restore_data_filepath, verbose=verbose)
+
+    print('%.2f minutes' % shape_output['execution_time_min'])
+
+
+if __name__ == "__main__":
+    main()
