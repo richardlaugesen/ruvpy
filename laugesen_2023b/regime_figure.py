@@ -29,7 +29,7 @@ from ruv.utility_functions import *
 from ruv.helpers import *
 from util import *
 
-def regime_figure(awrc, name, start_lt, end_lt, area, alpha_step=0.2, parallel_nodes=8, verbose=False):
+def regime_figure(awrc, name, start_lt, end_lt, area, alpha_step=0.2, parallel_nodes=8, restore_data_filepath=None, verbose=False):
     metadata = {
         'awrc': awrc,
         'name': name,
@@ -48,7 +48,7 @@ def regime_figure(awrc, name, start_lt, end_lt, area, alpha_step=0.2, parallel_n
 
     # generate results
     if restore_data_filepath is None:
-        results = generate_results(obs, fcst, clim, a_step, parallel_nodes, verbose)
+        results = generate_results(obs, fcst, clim, alpha_step, parallel_nodes, verbose)
     else:
         output = restore_data(restore_data_filepath)
         results = output
@@ -207,8 +207,8 @@ def main():
     parallel_nodes = 8
     alpha_resolution = 0.2 #02
     verbose = False
-    restore_data_filepath = None
-    #restore_data_filepath = 'figures/regime_405209_LT1-7.pkl.bz2'
+    #restore_data_filepath = None
+    restore_data_filepath = 'figures/regime_405209_LT1-7.pkl.bz2'
 
     # awrc = '405219'
     # name = 'Goulburn River at Dohertys'
@@ -225,7 +225,7 @@ def main():
     start_lt = 1
     end_lt = 7
 
-    shape_output = location_figure(awrc, name, start_lt, end_lt, area, a_step=alpha_resolution, parallel_nodes=parallel_nodes, restore_data_filepath=restore_data_filepath, verbose=verbose)
+    shape_output = regime_figure(awrc, name, start_lt, end_lt, area, alpha_step=alpha_resolution, parallel_nodes=parallel_nodes, restore_data_filepath=restore_data_filepath, verbose=verbose)
 
     print('%.2f minutes' % shape_output['execution_time_min'])
 

@@ -29,7 +29,7 @@ from ruv.utility_functions import *
 from ruv.helpers import *
 from util import *
 
-def location_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=0.02, q_step=0.2, parallel_nodes=8, restore_data_filepath=None, verbose=False):
+def location_figure(awrc, name, start_lt, end_lt, area, select_alphas, select_thresholds, a_step=0.02, q_step=0.2, parallel_nodes=8, restore_data_filepath=None, show_percentiles=False, verbose=False):
     metadata = {
         'awrc': awrc,
         'name': name,
@@ -49,7 +49,7 @@ def location_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=0.
 
     # generate results
     if restore_data_filepath is None:
-        results = generate_results(obs, fcst, clim, a_step, q_step, parallel_nodes, verbose)
+        results = generate_results(obs, fcst, clim, select_thresholds, a_step, q_step, parallel_nodes, verbose)
     else:
         output = restore_data(restore_data_filepath)
         results = output
@@ -63,16 +63,16 @@ def location_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=0.
         }
         output.update(metadata)
         output.update(results)
-        #save_results(output)
+        save_results(output)
 
     # generate and save figure
-    #fig = generate_figure(results, obs, metadata)
-    #save_figure(fig, metadata)
+    fig = generate_figure(results, obs, metadata, select_thresholds, show_percentiles)
+    save_figure(fig, metadata)
 
     return output
 
 
-def generate_results(obs, fcst, ref, a_step, q_step, parallel_nodes, verbose):
+def generate_results(obs, fcst, ref, select_thresholds, a_step, q_step, parallel_nodes, verbose):
     print('\tGenerating results')
 
     alphas = np.arange(a_step, 1, a_step)
@@ -125,7 +125,9 @@ def generate_results(obs, fcst, ref, a_step, q_step, parallel_nodes, verbose):
     ruv_only_df = pd.DataFrame(ruv_only, index=decision_definition['econ_pars']).T
 
     # Generate streamflow-damage values for the different thresholds for damage function figure
-    select_thresholds = thresholds[[0, int(len(thresholds)/4), int(len(thresholds)/2), 3*int(len(thresholds)/4), len(thresholds)-1]]
+    if select_thresholds is None:
+        select_thresholds = thresholds[[0, int(len(thresholds)/4), int(len(thresholds)/2), 3*int(len(thresholds)/4), len(thresholds)-1]]
+
     streamflow = np.arange(0, np.nanmax(obs) * 1.3, 0.01)
     damage_fnc, params = decision_definition['damage_function']
     streamflow_damages = pd.DataFrame(index=streamflow, columns=select_thresholds)
@@ -146,7 +148,7 @@ def generate_results(obs, fcst, ref, a_step, q_step, parallel_nodes, verbose):
     return output
 
 
-def generate_figure(results, obs, metadata, show_percentiles=True):
+def generate_figure(results, obs, metadata, select_thresholds, show_percentiles=True):
     print('\tGenerating figure')
 
     fig, axes = create_panel(3)
@@ -158,18 +160,20 @@ def generate_figure(results, obs, metadata, show_percentiles=True):
     right_panel_color = LINE_COLORS['dark_orange']
 
     # damage function panel
-    metadata['damages_title'] = 'Five damage functions with different locations thresholds'
-    gen_damage_function_fig(results['damages_results'], metadata, r'$q_\tau$', results['max_obs'], axes[0], left_panel_color, LINE_STYLES)
+    metadata['damages_title'] = 'Three damage functions with different locations thresholds'
+    gen_damage_function_fig(results['damages_results'], metadata, r'$q_\tau$', results['max_obs'], axes[0], left_panel_color, LINE_STYLES, select_thresholds)
 
     # value diagrams panel
-    select_thresholds = results['select_thresholds']
+    if select_thresholds is None:
+        select_thresholds = results['select_thresholds']
+
     ax = axes[1]
     for i, threshold in enumerate(select_thresholds):
         line_style = LINE_STYLES[i % len(LINE_STYLES)]
 
-        ax.plot(results['ruv_only'].index, results['ruv_only'][threshold].T,
+        ax.plot(results['ruv_only'].T.index, results['ruv_only'].T[threshold],
                 linewidth=1, alpha=1, color=left_panel_color, linestyle=line_style,
-                label=r'$q_\tau$=%.2f' % threshold)
+                label=r'$q_\tau$ = %.0f' % threshold)
 
     ax.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='--', label='_hidden')
 
@@ -178,7 +182,7 @@ def generate_figure(results, obs, metadata, show_percentiles=True):
 
     ax.set_xlabel(r'$\alpha$')
     ax.set_ylabel('Forecast value (RUV)')
-    ax.set_title('Value diagrams for the five damage functions', fontsize='medium')
+    ax.set_title('Value diagrams for the three damage functions', fontsize='medium')
     ax.legend()
 
     # continuous variation of threshold
@@ -208,6 +212,7 @@ def generate_figure(results, obs, metadata, show_percentiles=True):
     def percentile_to_flow(x):
         return np.nanpercentile(obs, x)
 
+    # TODO: this is not working, obs seems to be [] rather than the actual obs data
     if show_percentiles:
         secax = ax.secondary_xaxis(-0.15, functions=(flow_to_percentile, percentile_to_flow))
         secax.xaxis.set_major_locator(ticker.FixedLocator([50, 90, 99, 99.9, 100]))
@@ -222,8 +227,10 @@ def main():
     threshold_resolution = 1
     select_alphas = np.array([0.1, 0.5, 0.9])
     verbose = False
-    restore_data_filepath = None
-    #restore_data_filepath = 'figures/location_405209_LT1-7.pkl.bz2'
+    show_percentiles = False
+    select_thresholds = [50, 100, 150]
+    #restore_data_filepath = None
+    restore_data_filepath = 'figures/location_405209_LT1-7.pkl.bz2'
 
     # awrc = '405219'
     # name = 'Goulburn River at Dohertys'
@@ -240,7 +247,7 @@ def main():
     start_lt = 1
     end_lt = 7
 
-    shape_output = location_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=alpha_resolution, q_step=threshold_resolution, parallel_nodes=parallel_nodes, restore_data_filepath=restore_data_filepath, verbose=verbose)
+    shape_output = location_figure(awrc, name, start_lt, end_lt, area, select_alphas, a_step=alpha_resolution, q_step=threshold_resolution, parallel_nodes=parallel_nodes, restore_data_filepath=restore_data_filepath, show_percentiles=show_percentiles, select_thresholds=select_thresholds, verbose=verbose)
 
     print('%.2f minutes' % shape_output['execution_time_min'])
 

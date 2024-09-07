@@ -161,9 +161,9 @@ def generate_figure(results, metadata):
 
         line_style = LINE_STYLES[i % len(LINE_STYLES)]
 
-        ax.plot(results['ruv_only'].index, results['ruv_only'][k].T,
+        ax.plot(results['ruv_only'].index, results['ruv_only'].T[k],
                 linewidth=1, alpha=1, color=left_panel_color, linestyle=line_style,
-                label='k=%.2f' % k)
+                label='k = %.2f' % k)
 
     ax.axhline(0, color='grey', linewidth=0.5, alpha=0.3, linestyle='--', label='_hidden')
 
