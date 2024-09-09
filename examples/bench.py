@@ -78,5 +78,5 @@ for cores in range(1, 9):
     results[cores] = times
 
 df = pd.DataFrame(results)
-df.to_csv('bench_results.csv')
+df.to_csv('bench_results_full_chunk.csv')
 
