@@ -30,7 +30,7 @@ def test_probabilistic_to_deterministic_forecast():
         probabilistic_to_deterministic_forecast(fcst_ens, 0.5),
         np.array([10.02530061, 10.06307713,  9.99974924, 10.00018457,  9.98175801]), 1e-5)
 
-    assert np.alltrue(probabilistic_to_deterministic_forecast(
+    assert np.all(probabilistic_to_deterministic_forecast(
         fcst_ens, 0.1) > probabilistic_to_deterministic_forecast(fcst_ens, 0.9))
 
     with pytest.raises(ValueError):
@@ -92,18 +92,24 @@ def test_optimise_over_forecast_distribution():
     assert np.allclose(result.get_series('ruv'), [0, 0, 0, 0, 0], 1e-3)
 
 
-def test_critical_probability_threshold_equals_alpha():
+def test_critical_probability_threshold_equals_par():
+    data = get_data()
+    context = get_context(risk_aversion=0)
+    econ_par_result = critical_probability_threshold_equals_par(data, context, 1)
+    optim_result = optimise_over_forecast_distribution(data, context, 1)
+    assert np.allclose(econ_par_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
+
     data = get_data()
     context = get_context(risk_aversion=0.1)
-    alpha_result = critical_probability_threshold_equals_alpha(data, context, 1)
+    econ_par_result = critical_probability_threshold_equals_par(data, context, 1)
     optim_result = optimise_over_forecast_distribution(data, context, 1)
-    assert np.allclose(alpha_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
+    assert np.allclose(econ_par_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
 
     data = get_data()
     context = get_context(risk_aversion=5)
-    alpha_result = critical_probability_threshold_equals_alpha(data, context, 1)
+    econ_par_result = critical_probability_threshold_equals_par(data, context, 1)
     optim_result = optimise_over_forecast_distribution(data, context, 1)
-    assert not np.allclose(alpha_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
+    assert not np.allclose(econ_par_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
 
 
 def test_critical_probability_threshold_fixed():
@@ -119,8 +125,8 @@ def test_critical_probability_threshold_max_value():
     max_result = critical_probability_threshold_max_value(data, context, 1)
     assert np.allclose(max_result.get_series('ruv'), [0.00398, 0, -0.18472, -0.66092, -262.6907], 1e-3)
 
-    alpha_result = critical_probability_threshold_equals_alpha(data, context, 1)
-    assert np.alltrue(max_result.get_series('ruv')[1:] >= alpha_result.get_series('ruv')[1:])   # ignore first value because alpha value is extremely small
+    econ_par_result = critical_probability_threshold_equals_par(data, context, 1)
+    assert np.all(max_result.get_series('ruv')[1:] >= econ_par_result.get_series('ruv')[1:])   # ignore first value because economic parameter value is extremely small
 
 
 def get_data(ref_equals_fcst=False):    
@@ -135,10 +141,10 @@ def get_data(ref_equals_fcst=False):
 
 
 def get_context(event_freq_ref=False, crit_prob_thres=None, risk_aversion=0.3):
-    alphas = np.array([0.001, 0.25, 0.5, 0.75, 0.999])
+    econ_pars = np.array([0.001, 0.25, 0.5, 0.75, 0.999])
     thresholds = np.arange(0, 20, 3)
     economic_model = cost_loss
     analytical_spend = cost_loss_analytical_spend
     damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
     utility_func = cara({'A': risk_aversion})
-    return DecisionContext(alphas, damage_func, utility_func, thresholds, economic_model, analytical_spend, crit_prob_thres=crit_prob_thres, event_freq_ref=event_freq_ref)
+    return DecisionContext(econ_pars, damage_func, utility_func, thresholds, economic_model, analytical_spend, crit_prob_thres=crit_prob_thres, event_freq_ref=event_freq_ref)

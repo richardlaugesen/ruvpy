@@ -26,7 +26,7 @@ class InputData:
 
 @dataclass(frozen=True)
 class DecisionContext:
-    alphas: np.ndarray
+    econ_pars: np.ndarray
     damage_function: Callable
     utility_function: Callable
     decision_thresholds: np.ndarray
@@ -37,22 +37,28 @@ class DecisionContext:
 
 
 @dataclass
-class SingleAlphaOutput:
+class SingleParOutput:
     ruv: float
+
     avg_fcst_ex_post: float
     avg_obs_ex_post: float
     avg_ref_ex_post: float
+
     fcst_spends: np.ndarray
     obs_spends: np.ndarray
     ref_spends: np.ndarray
-    fcst_likelihoods: np.ndarray
-    ref_likelihoods: np.ndarray
+
     fcst_ex_post: np.ndarray
     obs_ex_post: np.ndarray
     ref_ex_post: np.ndarray
+
     fcst_ex_ante: np.ndarray
     obs_ex_ante: np.ndarray
     ref_ex_ante: np.ndarray
+
+    fcst_expected_damages: np.ndarray
+    ref_expected_damages: np.ndarray
+    obs_damages: np.ndarray
 
     def __init__(self, obs_size: int):
         self.ruv = np.nan
@@ -62,22 +68,21 @@ class SingleAlphaOutput:
         self.fcst_spends, self.obs_spends, self.ref_spends = np.full((3, obs_size), np.nan)
         self.fcst_ex_ante, self.obs_ex_ante, self.ref_ex_ante = np.full((3, obs_size), np.nan)
         self.fcst_ex_post, self.obs_ex_post, self.ref_ex_post = np.full((3, obs_size), np.nan)
-        self.fcst_likelihoods, self.ref_likelihoods = np.full((2, obs_size), np.nan)
+        self.fcst_expected_damages, self.ref_expected_damages, self.obs_damages = np.full((3, obs_size), np.nan)
 
 
 @dataclass
-class MultiAlphaOutput:
-    data: dict    # alpha, results
+class MultiParOutput:
+    data: dict    # econ_par, results
 
-    # maintains data ordered by alpha
-    def insert(self, alpha, output):
-        self.data[alpha] = output
-        self.data = {alpha: self.data[alpha] for alpha in sorted(self.data)}
+    # maintains data ordered by econ_par
+    def insert(self, econ_par, output):
+        self.data[econ_par] = output
+        self.data = {econ_par: self.data[econ_par] for econ_par in sorted(self.data)}
 
-    # return either a 1D or 2D numpy array depending on the type of SingleAlphaOutput field that is stored in the data dict
+    # return either a 1D or 2D numpy array depending on the type of SingleParOutput field that is stored in the data dict
     def get_series(self, field):
         return np.array([getattr(v, field).tolist() if isinstance(getattr(v, field), np.ndarray) else getattr(v, field) for a, v in self.data.items()])
         
     def __init__(self):
         self.data = {}
-

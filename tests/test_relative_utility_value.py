@@ -39,7 +39,7 @@ def test_relative_utility_value():
     refs[refs < 0] = 0
 
     decision_definition = {
-        'alphas': np.array([0.001, 0.25, 0.5, 0.75, 0.999]),
+        'econ_pars': np.array([0.001, 0.25, 0.5, 0.75, 0.999]),
         'damage_function': [logistic_zero, {'A': 1, 'k': 0.5, 'threshold': 15}],
         'utility_function': [cara, {'A': 0.3}],
         'economic_model': [cost_loss, cost_loss_analytical_spend],
@@ -53,7 +53,7 @@ def test_relative_utility_value():
         results['ruv'],
         [0.184053111, -0.0742971672, -0.467401918, -1.65026591, -117.108686], 1e-3)
 
-    decision_definition['decision_method'] = 'critical_probability_threshold_equals_alpha'
+    decision_definition['decision_method'] = 'critical_probability_threshold_equals_par'
     results = relative_utility_value(
         obs, fcsts, refs, decision_definition, parallel_nodes=2)
     assert np.allclose(
@@ -68,7 +68,7 @@ def test_relative_utility_value():
         results['ruv'],
         [-0.182290404, -0.0742971673, -0.467401918, -1.65026591, -616.302376], 1e-3)
 
-    decision_definition['decision_method'] = 'critical_probability_threshold_equals_alpha'
+    decision_definition['decision_method'] = 'critical_probability_threshold_equals_par'
     decision_definition['event_freq_ref'] = True
     results = relative_utility_value(
         obs, fcsts, None, decision_definition, parallel_nodes=2)
@@ -77,7 +77,7 @@ def test_relative_utility_value():
         [-74.0584681, -0.0742971679, -0.472369878, -1.71864364, -117.108684], 1e-3)
 
     decision_definition = {
-        'alphas': np.array([0.001, 0.25, 0.5, 0.75, 0.999]),
+        'econ_pars': np.array([0.001, 0.25, 0.5, 0.75, 0.999]),
         'damage_function': [logistic_zero, {'A': 1, 'k': 0.5, 'threshold': 15}],
         'utility_function': [cara, {'A': 0.3}],
         'economic_model': [cost_loss, cost_loss_analytical_spend],

@@ -17,30 +17,35 @@ from ruv.data_classes import *
 from pathos.multiprocessing import ProcessPool as Pool      # pathos.pools
 
 
-# Calculate RUV for a single alpha value, parallelises over timesteps
-def multiple_timesteps(alpha: float, data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> SingleAlphaOutput:    
+# Calculate RUV for a single economic parameter value, parallelises over timesteps
+def multiple_timesteps(econ_par: float, data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> SingleParOutput:
     if parallel_nodes == 1:
         results = []
         for t, ob in enumerate(data.obs):
             if not np.isnan(ob):    
-                results.append(single_timestep(t, alpha, data, context))
+                results.append(single_timestep(t, econ_par, ob, data.fcsts[t], data.refs[t], context))
     else:
         args = []
         for t, ob in enumerate(data.obs):
             if not np.isnan(ob):
-                args.append([t, alpha, data, context])
+                args.append([t, econ_par, ob, data.fcsts[t], data.refs[t], context])
         args = list(map(list, zip(*args)))
         with Pool(nodes=parallel_nodes) as pool:
-            results = pool.map(single_timestep, *args, chunksize=int(np.sqrt(len(data.obs)/parallel_nodes)))
+            results = pool.map(single_timestep, *args, chunksize=(len(data.obs) // parallel_nodes))
 
-    output = SingleAlphaOutput(data.obs.shape[0])
-    for t, obs_spends, obs_ex_post, fcst_spends, fcst_ex_post, ref_spends, ref_ex_post in results:
-        output.obs_spends[t] = obs_spends
-        output.obs_ex_post[t] = obs_ex_post
-        output.fcst_spends[t] = fcst_spends
-        output.fcst_ex_post[t] = fcst_ex_post
-        output.ref_spends[t] = ref_spends
-        output.ref_ex_post[t] = ref_ex_post
+    # TODO: refactor this into a Dict_to_SingleParOutput function or just make the single_timestep return SingleParOutput for a single timestep
+    output = SingleParOutput(data.obs.shape[0])
+    for result in results:
+        t = result['t']
+        output.obs_spends[t] = result['ob_spend']
+        output.obs_ex_post[t] = result['ob_ex_post']
+        output.fcst_spends[t] = result['fcst_spend']
+        output.fcst_ex_post[t] = result['fcst_ex_post']
+        output.ref_spends[t] = result['ref_spend']
+        output.ref_ex_post[t] = result['ref_ex_post']
+        output.fcst_expected_damages[t] = result['fcst_expected_damage']
+        output.ref_expected_damages[t] = result['ref_expected_damage']
+        output.obs_damages[t] = result['ob_damage']
 
     output.avg_fcst_ex_post = np.nanmean(output.fcst_ex_post)
     output.avg_obs_ex_post = np.nanmean(output.obs_ex_post)
@@ -48,6 +53,6 @@ def multiple_timesteps(alpha: float, data: InputData, context: DecisionContext, 
     output.ruv = (output.avg_ref_ex_post - output.avg_fcst_ex_post) / (output.avg_ref_ex_post - output.avg_obs_ex_post)
 
     if verbose:
-        print('Alpha: %.3f   RUV: %.2f' % (alpha, output.ruv))
+        print('Economic model parameter: %.3f   RUV: %.2f' % (econ_par, output.ruv))
 
     return output

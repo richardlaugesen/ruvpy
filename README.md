@@ -11,6 +11,22 @@ RUV is a library to quantify the value of forecast information for decision maki
 
 Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27, 873–893, https://doi.org/10.5194/hess-27-873-2023, 2023.
 
+## Quick start for examples
+
+Install [Poetry](https://python-poetry.org/) then run
+
+    poetry install
+
+    poetry shell
+
+    poetry run pytest
+
+    jupyter notebook
+
+Open up the browser
+
+    http://localhost:8888/tree/examples
+
 ## Functionality
 
 ### Input data
@@ -28,7 +44,7 @@ The decision context needs to be fully defined:
 - Economic model
 - Decision making method
 - Decision type and thresholds
-- Alpha values
+- Economic parameter values (single parameter)
 
 The forecast value reaults of RUV are identical to REV (Richardson, 2000) when a specific decision context is used.
 
@@ -51,7 +67,7 @@ A Python dictionary with the following keys, all values are numpy arrays:
 - ref_ex_post
 - ruv
 
-RUV values are returned for each alpha value requested in the decision context. Other values are returned for every combination of alpha and timestep defined by the observation data.
+RUV values are returned for each economic parameter value requested in the decision context. Other values are returned for every combination of alpha and timestep defined by the observation data.
 
 ### Utility functions
 
@@ -87,8 +103,8 @@ To calculate RUV it must simulate decision making at each timestep, there are fo
 
 - optimise_over_forecast_distribution - use the whole forecast distribution at each timestep to determine the optimium amount to spend on mitigation which is expected to maximise utility
 - critical_probability_threshold_fixed - convert the probabilistic forecast into deterministic using a critical probability threshold for all timesteps, spend enough to mitigate the damages from the flowclass it falls within 
-- critical_probability_threshold_equals_alpha - same as fixed threshold approach but set the critical probability threshold to equal alpha
-- critical_probability_threshold_max_ruv - same as the equals-alpha approach but set the critical probability threshold to maximise forecast value for each alpha
+- critical_probability_threshold_equals_par - same as fixed threshold approach but set the critical probability threshold to equal the economic parameter
+- critical_probability_threshold_max_ruv - same as the equals-par approach but set the critical probability threshold to maximise forecast value for each economic parameter
 
 ### Helper functions
 
@@ -107,7 +123,7 @@ To calculate RUV it must simulate decision making at each timestep, there are fo
 - Free and Open Source Software licence
 - Community code of conduct
 - Python v3 with standard code conventions
-- Only three dependencies (numpy, scipy, pathos)
+- Only three core dependencies (numpy, scipy, pathos)
 - Sane versioning and DOI
 
 ### Conventions
@@ -121,7 +137,7 @@ To calculate RUV it must simulate decision making at each timestep, there are fo
 
 ### Dependencies
 
-Python 3.7+, numpy, scipy.
+Defined in (pyproject.toml) file for [Poetry](https://python-poetry.org/) dependency management.
 
 ## Code of conduct
 
@@ -129,4 +145,4 @@ We encourage you to contribute! Everyone interacting with this project is expect
 
 ## Contact
 
-Richard Laugesen - [Web](https://richardlaugesen.com) / [Email](mailto://ruv@richardlaugesen.com)
+Richard Laugesen - [Web](https://laugesen.com.au) / [Email](mailto://ruv@laugesen.com.au)
