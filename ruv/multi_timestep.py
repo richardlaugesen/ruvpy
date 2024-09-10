@@ -18,7 +18,7 @@ from pathos.multiprocessing import ProcessPool as Pool      # pathos.pools
 
 
 # Calculate RUV for a single economic parameter value, parallelises over timesteps
-def multiple_timesteps(econ_par: float, data: InputData, context: DecisionContext, parallel_nodes: int, verbose: bool = False) -> SingleParOutput:
+def multiple_timesteps(econ_par: float, data: InputData, context: DecisionContext, parallel_nodes: int) -> SingleParOutput:
     if parallel_nodes == 1:
         results = []
         for t, ob in enumerate(data.obs):
@@ -33,8 +33,14 @@ def multiple_timesteps(econ_par: float, data: InputData, context: DecisionContex
         with Pool(nodes=parallel_nodes) as pool:
             results = pool.map(single_timestep, *args, chunksize=(len(data.obs) // parallel_nodes))
 
-    # TODO: refactor this into a Dict_to_SingleParOutput function or just make the single_timestep return SingleParOutput for a single timestep
-    output = SingleParOutput(data.obs.shape[0])
+    output = dict_to_output(results, data.obs.shape[0])
+    output.ruv = calc_ruv(output)
+
+    return output
+
+
+def dict_to_output(results: dict, size: int) -> SingleParOutput:
+    output = SingleParOutput(size)
     for result in results:
         t = result['t']
         output.obs_spends[t] = result['ob_spend']
@@ -47,12 +53,11 @@ def multiple_timesteps(econ_par: float, data: InputData, context: DecisionContex
         output.ref_expected_damages[t] = result['ref_expected_damage']
         output.obs_damages[t] = result['ob_damage']
 
+    return output
+
+
+def calc_ruv(output: SingleParOutput) -> float:
     output.avg_fcst_ex_post = np.nanmean(output.fcst_ex_post)
     output.avg_obs_ex_post = np.nanmean(output.obs_ex_post)
     output.avg_ref_ex_post = np.nanmean(output.ref_ex_post)
-    output.ruv = (output.avg_ref_ex_post - output.avg_fcst_ex_post) / (output.avg_ref_ex_post - output.avg_obs_ex_post)
-
-    if verbose:
-        print('Economic model parameter: %.3f   RUV: %.2f' % (econ_par, output.ruv))
-
-    return output
+    return (output.avg_ref_ex_post - output.avg_fcst_ex_post) / (output.avg_ref_ex_post - output.avg_obs_ex_post)

@@ -18,34 +18,27 @@ import numpy as np
 
 
 # main entry function for RUV calculation
-def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, decision_definition: dict, parallel_nodes: int=4, verbose: bool=False) -> dict:
+def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, decision_definition: dict, parallel_nodes: int=4) -> dict:
     data = InputData(obs, fcsts, refs)
 
     econ_pars = decision_definition['econ_pars']
-
     damage_fnc_mth = decision_definition['damage_function'][0]
     damage_fnc_params = decision_definition['damage_function'][1]
     damage_function = damage_fnc_mth(damage_fnc_params)
-
     utility_fnc_mth = decision_definition['utility_function'][0]
     utility_fnc_params = decision_definition['utility_function'][1]
     utility_function = utility_fnc_mth(utility_fnc_params)
-
     decision_thresholds = decision_definition['decision_thresholds']
-
     economic_model, analytical_spend = decision_definition['economic_model']
-
     crit_prob_thres = decision_definition['critical_probability_threshold'] if 'critical_probability_threshold' in decision_definition.keys() else None
-
     decision_method = decision_definition['decision_method'] if 'decision_method' in decision_definition.keys() else 'optimise_over_forecast_distribution'
     decision_making_fnc = getattr(ruv.decision_methods, decision_method)
-
     event_freq_ref = decision_definition['event_freq_ref'] if 'event_freq_ref' in decision_definition.keys() else False
 
     context = DecisionContext(econ_pars, damage_function, utility_function, decision_thresholds, economic_model, analytical_spend, crit_prob_thres, event_freq_ref)
 
     check_inputs(data, context)
-    results = decision_making_fnc(data, context, parallel_nodes, verbose)    
+    results = decision_making_fnc(data, context, parallel_nodes)
     return to_dict(results)
 
 

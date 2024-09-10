@@ -54,7 +54,6 @@ def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.
             ref_expected_damage = np.dot(ref_likelihoods, context.damage_function(ref))
 
     # TODO: calc and return the ex_ante utilities
-
     return {
         't': t,
         'ob_spend': ob_spend,
