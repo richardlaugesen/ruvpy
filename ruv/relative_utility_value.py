@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ruv.helpers import *
-from ruv.data_classes import *
 import numpy as np
+
+from ruv.helpers import generate_event_freq_ref
+from ruv.data_classes import DecisionContext
 
 
 # main entry function for RUV calculation
@@ -58,13 +59,13 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     if refs is None:
         refs = generate_event_freq_ref(obs)
 
-    check_inputs(obs, fcsts, refs, context)
+    _check_inputs(obs, fcsts, refs, context)
     results = context.decision_making_method(obs, fcsts, refs, context, parallel_nodes)
 
-    return to_dict(results)
+    return results.to_dict()
 
 
-def check_inputs(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext) -> None:
+def _check_inputs(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext) -> None:
     if np.any(np.isnan(fcsts)) or (refs is not None and np.any(np.isnan(refs))):
         raise ValueError('Cannot calculate RUV with missing values in forecasts or references')
 

@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Callable, Optional
-from dataclasses import dataclass
+from typing import Callable
 import numpy as np
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -79,29 +79,28 @@ class MultiParOutput:
     def __init__(self):
         self.data = {}
 
+    def to_dict(self) -> dict:
+        results = {}
+        results['ruv'] = self.get_series('ruv')
 
-def to_dict(outputs: MultiParOutput) -> dict:
-    results = {}
-    results['ruv'] = outputs.get_series('ruv')
+        results['avg_fcst_ex_post'] = self.get_series('avg_fcst_ex_post')
+        results['avg_ref_ex_post'] = self.get_series('avg_ref_ex_post')
+        results['avg_obs_ex_post'] = self.get_series('avg_obs_ex_post')
 
-    results['avg_fcst_ex_post'] = outputs.get_series('avg_fcst_ex_post')
-    results['avg_ref_ex_post'] = outputs.get_series('avg_ref_ex_post')
-    results['avg_obs_ex_post'] = outputs.get_series('avg_obs_ex_post')
+        results['fcst_spends'] = self.get_series('fcst_spends')
+        results['ref_spends'] = self.get_series('ref_spends')
+        results['obs_spends'] = self.get_series('obs_spends')
 
-    results['fcst_spends'] = outputs.get_series('fcst_spends')
-    results['ref_spends'] = outputs.get_series('ref_spends')
-    results['obs_spends'] = outputs.get_series('obs_spends')
+        results['fcst_ex_ante'] = self.get_series('fcst_ex_ante')
+        results['ref_ex_ante'] = self.get_series('ref_ex_ante')
+        results['obs_ex_ante'] = self.get_series('obs_ex_ante')
 
-    results['fcst_ex_ante'] = outputs.get_series('fcst_ex_ante')
-    results['ref_ex_ante'] = outputs.get_series('ref_ex_ante')
-    results['obs_ex_ante'] = outputs.get_series('obs_ex_ante')
+        results['fcst_ex_post'] = self.get_series('fcst_ex_post')
+        results['ref_ex_post'] = self.get_series('ref_ex_post')
+        results['obs_ex_post'] = self.get_series('obs_ex_post')
 
-    results['fcst_ex_post'] = outputs.get_series('fcst_ex_post')
-    results['ref_ex_post'] = outputs.get_series('ref_ex_post')
-    results['obs_ex_post'] = outputs.get_series('obs_ex_post')
+        results['fcst_expected_damages'] = self.get_series('fcst_expected_damages')
+        results['ref_expected_damages'] = self.get_series('ref_expected_damages')
+        results['obs_damages'] = self.get_series('obs_damages')
 
-    results['fcst_expected_damages'] = outputs.get_series('fcst_expected_damages')
-    results['ref_expected_damages'] = outputs.get_series('ref_expected_damages')
-    results['obs_damages'] = outputs.get_series('obs_damages')
-
-    return results
+        return results

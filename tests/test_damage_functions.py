@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ruv.damage_functions import *
+import numpy as np
+
+from ruv.damage_functions import logistic, logistic_zero, binary, linear, user_defined,_user_defined_interpolator
 
 
 def test_logistic():
@@ -67,9 +69,9 @@ def test_user_defined():
         (10, 10000)
     ]
 
-    params = {'interpolator': user_defined_interpolator(points)}
+    params = {'interpolator': _user_defined_interpolator(points)}
     damage_func = user_defined(params)
-    interpolator = user_defined_interpolator(points)
+    interpolator = _user_defined_interpolator(points)
 
     values = np.random.rand(100) * 20000 - 1000
     assert np.array_equal(damage_func(values), interpolator(values))
@@ -89,7 +91,7 @@ def test_user_defined_interpolator():
         (10, 10000)
     ]
 
-    interpolator = user_defined_interpolator(points)
+    interpolator = _user_defined_interpolator(points)
 
     assert np.allclose(
         interpolator(np.array([-1000, 0, 0.5, 1, 3, 4, 8, 10, 15, 1000])),

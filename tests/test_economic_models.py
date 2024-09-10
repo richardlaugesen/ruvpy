@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ruv.economic_models import *
+from ruv.economic_models import cost_loss, cost_loss_analytical_spend
 from ruv.damage_functions import logistic_zero
 
 def test_cost_loss_analytical_spend():

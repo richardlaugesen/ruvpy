@@ -12,17 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from statsmodels.distributions.empirical_distribution import ECDF
 import pytest
+import numpy as np
 
-from ruv.relative_utility_value import *
-from ruv.damage_functions import *
-from ruv.economic_models import *
-from ruv.utility_functions import *
-from ruv.helpers import *
-from ruv.single_timestep import *
-from ruv.data_classes import *
-from ruv.decision_methods import *
+from ruv.single_timestep import _calc_likelihood, _ex_ante_utility, _ex_post_utility, _find_spend_ensemble, single_timestep, _realised_threshold
+from ruv.damage_functions import logistic_zero
+from ruv.economic_models import cost_loss, cost_loss_analytical_spend
+from ruv.utility_functions import cara
+from ruv.data_classes import DecisionContext
+from ruv.decision_methods import optimise_over_forecast_distribution
 
 
 def get_context(decision_thresholds=np.arange(5, 20, 1)):
@@ -43,24 +41,24 @@ def test_ex_ante_utility():
 
     np.random.seed(42)
     ens = np.random.normal(10, 1, 100)
-    probs = calc_likelihood(ens, context.decision_thresholds)
+    probs = _calc_likelihood(ens, context.decision_thresholds)
 
     econ_par = 0.1
     spend = 0.052
     assert np.isclose(
-        ex_ante_utility(econ_par, spend, probs, context),
+        _ex_ante_utility(econ_par, spend, probs, context),
         -3.386, 1e-2)
 
     econ_par = 0.7
     spend = 0.052
     assert np.isclose(
-        ex_ante_utility(econ_par, spend, probs, context),
+        _ex_ante_utility(econ_par, spend, probs, context),
         -3.386, 1e-2)
 
     econ_par = 0.1
     spend = 3
     assert np.isclose(
-        ex_ante_utility(econ_par, spend, probs, context),
+        _ex_ante_utility(econ_par, spend, probs, context),
         -8.199, 1e-2)
 
     econ_par = 0.1
@@ -68,9 +66,9 @@ def test_ex_ante_utility():
 
     context = get_context(np.arange(1, 100000, 1))
     ens = np.random.normal(50000, 10000, 100000)    
-    probs = calc_likelihood(ens, context.decision_thresholds)   # tiny likelihoods
+    probs = _calc_likelihood(ens, context.decision_thresholds)   # tiny likelihoods
     assert np.isclose(
-        ex_ante_utility(econ_par, spend, probs, context),
+        _ex_ante_utility(econ_par, spend, probs, context),
         -8.199, 1e-2)
 
 
@@ -81,21 +79,21 @@ def test_ex_post_utility():
     econ_par = 0.1
     spend = 0.052
     assert np.isclose(
-        ex_post_utility(econ_par, occurred, spend, context),
+        _ex_post_utility(econ_par, occurred, spend, context),
         -3.386, 1e-2)
 
     occurred = context.decision_thresholds[10]
     econ_par = 0.7
     spend = 0.052
     assert np.isclose(
-        ex_post_utility(econ_par, occurred, spend, context),
+        _ex_post_utility(econ_par, occurred, spend, context),
         -3.847, 1e-2)
 
     occurred = context.decision_thresholds[10]
     econ_par = 0.1
     spend = 3
     assert np.isclose(
-        ex_post_utility(econ_par, occurred, spend, context),
+        _ex_post_utility(econ_par, occurred, spend, context),
         -8.199, 1e-2)
 
 
@@ -104,9 +102,9 @@ def test_find_spend_ensemble():
 
     np.random.seed(42)
     ens = np.random.normal(10, 1, 100)
-    probs = calc_likelihood(ens, context.decision_thresholds)
+    probs = _calc_likelihood(ens, context.decision_thresholds)
     econ_par = 0.1
-    assert np.isclose(find_spend_ensemble(econ_par, ens, probs, context), 0.012, 1e-1)
+    assert np.isclose(_find_spend_ensemble(econ_par, ens, probs, context), 0.012, 1e-1)
 
     # Not implemented to work with deterministic forecasts so no need to test for it.
     # Code uses analytical_spend method of economic model instead of find_spend for 
@@ -139,18 +137,18 @@ def test_calc_likelihoods():
     # typical ensemble and range of thresholds
     ens = np.random.normal(10, 1, 100)
     thresholds = np.arange(5, 15, 1)
-    assert np.allclose(calc_likelihood(ens, thresholds), np.array([0, 0, 0.01, 0.16, 0.37, 0.35, 0.11, 0, 0, 0]), 1e-1)
+    assert np.allclose(_calc_likelihood(ens, thresholds), np.array([0, 0, 0.01, 0.16, 0.37, 0.35, 0.11, 0, 0, 0]), 1e-1)
 
     # all in 1 class
     ens = np.random.normal(1000, 1, 100)
     thresholds = [0, 5]
-    assert np.allclose(calc_likelihood(ens, thresholds), np.array([0, 1]), 1e-1)
+    assert np.allclose(_calc_likelihood(ens, thresholds), np.array([0, 1]), 1e-1)
 
     # adds to 1
-    assert np.equal(np.sum(calc_likelihood(ens, thresholds)), 1)
+    assert np.equal(np.sum(_calc_likelihood(ens, thresholds)), 1)
 
     # Continuous decision with 100 member ensemble forecast
-    assert np.array_equal(calc_likelihood(ens, None), np.full(100, 1e-2))
+    assert np.array_equal(_calc_likelihood(ens, None), np.full(100, 1e-2))
 
     # Calculating likelihoods with deterministic forecasts or forecasts with missing 
     # values is not implemented. No exception is raised if this is attempted though
@@ -164,20 +162,20 @@ def test_calc_likelihoods():
 
 def test_realised_threshold():
     thresholds = np.array([0, 3, 6])
-    assert np.equal(realised_threshold(0.5, thresholds), 0)
-    assert np.equal(realised_threshold(3, thresholds), 3)
-    assert np.equal(realised_threshold(3.5, thresholds), 3)
-    assert np.equal(realised_threshold(6, thresholds), 6)
-    assert np.equal(realised_threshold(7, thresholds), 6)
+    assert np.equal(_realised_threshold(0.5, thresholds), 0)
+    assert np.equal(_realised_threshold(3, thresholds), 3)
+    assert np.equal(_realised_threshold(3.5, thresholds), 3)
+    assert np.equal(_realised_threshold(6, thresholds), 6)
+    assert np.equal(_realised_threshold(7, thresholds), 6)
 
     with pytest.raises(ValueError):
-        realised_threshold(0.1, [1, 2, 3])
+        _realised_threshold(0.1, [1, 2, 3])
 
     with pytest.raises(ValueError):
         values = [0.5, 3, 3.5, 6, 7]
-        realised_threshold(values, thresholds)
+        _realised_threshold(values, thresholds)
 
-    assert np.equal(realised_threshold(42, None), 42)
+    assert np.equal(_realised_threshold(42, None), 42)
 
-    assert np.isnan(realised_threshold(np.nan, thresholds))
+    assert np.isnan(_realised_threshold(np.nan, thresholds))
 

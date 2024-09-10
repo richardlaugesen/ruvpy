@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ruv.utility_functions import *
 import pytest
+import numpy as np
+
+from ruv.utility_functions import cara, crra, exponential_utility, isoelastic_utility, hyperbolic_utility
 
 
 def test_cara():

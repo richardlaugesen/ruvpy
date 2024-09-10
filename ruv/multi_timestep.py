@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ruv.single_timestep import *
-from ruv.data_classes import *
-from pathos.multiprocessing import ProcessPool as Pool      # pathos.pools
+import numpy as np
+
+from ruv.single_timestep import single_timestep
+from ruv.data_classes import DecisionContext, SingleParOutput
+from pathos.multiprocessing import ProcessPool as Pool
 
 
 # Calculate RUV for a single economic parameter value, parallelises over timesteps
@@ -33,13 +35,13 @@ def multiple_timesteps(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, eco
         with Pool(nodes=parallel_nodes) as pool:
             results = pool.map(single_timestep, *args, chunksize=(len(obs) // parallel_nodes))
 
-    output = dict_to_output(results, obs.shape[0])
-    output.ruv = calc_ruv(output)
+    output = _dict_to_output(results, obs.shape[0])
+    output.ruv = _calc_ruv(output)
 
     return output
 
 
-def dict_to_output(results: dict, size: int) -> SingleParOutput:
+def _dict_to_output(results: dict, size: int) -> SingleParOutput:
     output = SingleParOutput(size)
     for result in results:
         t = result['t']
@@ -56,7 +58,7 @@ def dict_to_output(results: dict, size: int) -> SingleParOutput:
     return output
 
 
-def calc_ruv(output: SingleParOutput) -> float:
+def _calc_ruv(output: SingleParOutput) -> float:
     output.avg_fcst_ex_post = np.nanmean(output.fcst_ex_post)
     output.avg_obs_ex_post = np.nanmean(output.obs_ex_post)
     output.avg_ref_ex_post = np.nanmean(output.ref_ex_post)

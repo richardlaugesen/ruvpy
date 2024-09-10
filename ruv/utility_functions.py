@@ -41,7 +41,7 @@ def exponential_utility(params: dict) -> Callable:
     return utility
 
 
-def ensure_float(input_data: np.ndarray) -> float:
+def _ensure_float(input_data: np.ndarray) -> float:
     return input_data.astype(float) if isinstance(input_data, np.ndarray) else float(input_data)
 
 
@@ -50,7 +50,7 @@ def isoelastic_utility(params: dict) -> Callable:
     eta = float(params['eta'])
 
     def utility(c: float) -> float:
-        c = ensure_float(c)
+        c = _ensure_float(c)
 
         if eta == 1:
             return np.log(c)

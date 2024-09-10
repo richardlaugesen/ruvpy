@@ -71,7 +71,7 @@ def user_defined(params: dict) -> Callable:
         inter = params['interpolator']
     else:
         points = params['points']
-        inter = user_defined_interpolator(points)
+        inter = _user_defined_interpolator(points)
 
     def damages(magnitude: np.ndarray) -> np.ndarray:
         return inter(magnitude)
@@ -79,7 +79,7 @@ def user_defined(params: dict) -> Callable:
     return damages
 
 
-def user_defined_interpolator(points: List[Tuple]) -> Callable:
+def _user_defined_interpolator(points: List[Tuple]) -> Callable:
     user_flows, user_damages = zip(*points)
     extrapolate_value = user_damages[-1]
     inter = interpolate.interp1d(

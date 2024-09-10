@@ -31,7 +31,7 @@ def generate_event_freq_ref(obs: np.ndarray) -> np.ndarray:
     return np.tile(obs[~np.isnan(obs)], (obs.shape[0], 1))
 
 
-# Around 5 times faster then statsmodels ECDF
+# Around 5 times faster than statsmodels ECDF
 def ecdf(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     ens_sorted = np.sort(ens)
     idx = np.searchsorted(ens_sorted, thresholds)   # 3 times faster then linspace
