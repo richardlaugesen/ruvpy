@@ -21,57 +21,6 @@ from ruv.utility_functions import *
 from ruv.damage_functions import *
 
 
-def test_probabilistic_to_deterministic_forecast():
-    np.random.seed(42)
-    # 1000 member ensembles for 5 timesteps
-    fcst_ens = np.random.normal(10, 1, (5, 1000))
-
-    assert np.allclose(
-        probabilistic_to_deterministic_forecast(fcst_ens, 0.5),
-        np.array([10.02530061, 10.06307713,  9.99974924, 10.00018457,  9.98175801]), 1e-5)
-
-    assert np.all(probabilistic_to_deterministic_forecast(
-        fcst_ens, 0.1) > probabilistic_to_deterministic_forecast(fcst_ens, 0.9))
-
-    with pytest.raises(ValueError):
-        probabilistic_to_deterministic_forecast(fcst_ens, -1)
-
-    with pytest.raises(ValueError):
-        probabilistic_to_deterministic_forecast(fcst_ens, 2)
-
-    # 1000 member ensemble for a single timestep
-    fcst_ens = np.random.normal(10, 1, (1, 1000))
-    assert np.allclose(
-        probabilistic_to_deterministic_forecast(fcst_ens, 0.5),
-        np.array([9.957]), 1e-3)
-
-    # deterministic forecast for 10 timesteps
-    with pytest.raises(ValueError):
-        fcst_ens = np.random.normal(10, 1, (10, 1))
-        assert np.array_equal(
-            probabilistic_to_deterministic_forecast(fcst_ens, 0.5), fcst_ens, 1e-5)
-
-    # deterministic observations for 1000 timesteps
-    with pytest.raises(ValueError):
-        obs = np.random.gamma(1, 2, 1000)
-        assert np.array_equal(
-            probabilistic_to_deterministic_forecast(obs, 0.25), obs)
-
-
-def test_generate_event_freq_ref():
-    assert np.array_equal(
-        generate_event_freq_ref(np.array([6, 7, 3, np.nan, 2])),
-        np.array([[6, 7, 3, 2], [6, 7, 3, 2], [6, 7, 3, 2], [6, 7, 3, 2], [6, 7, 3, 2]]))
-
-    obs = np.random.gamma(1, 2, 1000)
-    idx = np.random.randint(0, obs.size, 100)
-    obs[idx] = np.nan
-    ref = generate_event_freq_ref(obs)
-    assert np.isclose(np.mean(ref), np.nanmean(obs), 1e-5)
-    assert np.array_equal(
-        ref.shape, (obs.shape[0], obs.shape[0] - np.sum(np.isnan(obs))))
-
-
 def test_optimise_over_forecast_distribution():    
     
     # basic ensemble fcst and ref

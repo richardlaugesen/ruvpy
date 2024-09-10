@@ -56,31 +56,3 @@ def check_inputs(data: InputData, context: DecisionContext) -> None:
     if context.decision_thresholds is not None:
         if np.any(data.obs < np.min(context.decision_thresholds)) or np.any(data.fcsts < np.min(context.decision_thresholds)) or (data.refs is not None and np.any(data.refs < np.min(context.decision_thresholds))):
             raise ValueError('One or more values are less than smallest threshold')
-
-
-# TODO: move this to the data classes file
-def to_dict(outputs: MultiParOutput) -> dict:
-    results = {}
-    results['ruv'] = outputs.get_series('ruv')
-
-    results['avg_fcst_ex_post'] = outputs.get_series('avg_fcst_ex_post')
-    results['avg_ref_ex_post'] = outputs.get_series('avg_ref_ex_post')
-    results['avg_obs_ex_post'] = outputs.get_series('avg_obs_ex_post')
-
-    results['fcst_spends'] = outputs.get_series('fcst_spends')
-    results['ref_spends'] = outputs.get_series('ref_spends')
-    results['obs_spends'] = outputs.get_series('obs_spends')
-
-    results['fcst_ex_ante'] = outputs.get_series('fcst_ex_ante')
-    results['ref_ex_ante'] = outputs.get_series('ref_ex_ante')
-    results['obs_ex_ante'] = outputs.get_series('obs_ex_ante')
-
-    results['fcst_ex_post'] = outputs.get_series('fcst_ex_post')
-    results['ref_ex_post'] = outputs.get_series('ref_ex_post')
-    results['obs_ex_post'] = outputs.get_series('obs_ex_post')
-
-    results['fcst_expected_damages'] = outputs.get_series('fcst_expected_damages')
-    results['ref_expected_damages'] = outputs.get_series('ref_expected_damages')
-    results['obs_damages'] = outputs.get_series('obs_damages')
-
-    return results

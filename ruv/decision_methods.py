@@ -14,6 +14,7 @@
 
 from ruv.multi_timestep import *
 from ruv.data_classes import *
+from ruv.helpers import *
 
 # generate event frequency refs if requested, otherwise leave refs as supplied 
 # so impact on value from decision making method depends on forecasts alone
@@ -73,23 +74,3 @@ def critical_probability_threshold_equals_par(data: InputData, context: Decision
     
     return outputs
 
-
-#
-# TODO: move this to helpers.py
-#
-def probabilistic_to_deterministic_forecast(ensembles: np.ndarray, crit_thres: float) -> np.ndarray:
-    if is_deterministic(ensembles[0]):
-        raise ValueError('Cannot convert deterministic forecast to deterministic forecast')   
-    return np.nanquantile(ensembles, 1 - crit_thres, axis=1)
-
-
-# Can reproduce the behaviour of event frequency reference used in REV 
-# using the RUV expected utility approach (optimisation over whole forecast
-# distribution method) with an ensemble for each timestep
-# which is simply the observation record. NA are dropped to simplify
-# calculation of forecast likelihoods
-#
-# TODO: move this to helpers.py
-#
-def generate_event_freq_ref(obs: np.ndarray) -> np.ndarray:
-    return np.tile(obs[~np.isnan(obs)], (obs.shape[0], 1))

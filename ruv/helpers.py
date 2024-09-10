@@ -16,6 +16,21 @@ import numpy as np
 from scipy.optimize import root_scalar
 
 
+def probabilistic_to_deterministic_forecast(ensembles: np.ndarray, crit_thres: float) -> np.ndarray:
+    if is_deterministic(ensembles[0]):
+        raise ValueError('Cannot convert deterministic forecast to deterministic forecast')
+    return np.nanquantile(ensembles, 1 - crit_thres, axis=1)
+
+
+# Can reproduce the behaviour of event frequency reference used in REV
+# using the RUV expected utility approach (optimisation over whole forecast
+# distribution method) with an ensemble for each timestep
+# which is simply the observation record. NA are dropped to simplify
+# calculation of forecast likelihoods
+def generate_event_freq_ref(obs: np.ndarray) -> np.ndarray:
+    return np.tile(obs[~np.isnan(obs)], (obs.shape[0], 1))
+
+
 # Around 5 times faster then statsmodels ECDF
 def ecdf(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     ens_sorted = np.sort(ens)
@@ -82,3 +97,4 @@ def prob_premium_to_risk_aversion_coef(risk_premium_prob: float, gamble_size: fl
         )
 
     return root_scalar(eqn, bracket=[0.0000001, 100]).root
+

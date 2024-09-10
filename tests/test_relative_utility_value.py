@@ -106,11 +106,3 @@ def test_relative_utility_value():
     continuous = relative_utility_value(
         obs, fcsts, refs, decision_definition, parallel_nodes=2)
     assert np.allclose(many_thresholds['ruv'], continuous['ruv'], 0.01)
-
-
-def test_to_dict():
-    pass
-
-
-def test_check_inputs():
-    pass
