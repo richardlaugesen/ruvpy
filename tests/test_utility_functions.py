@@ -124,36 +124,36 @@ def test_hyperbolic_utility():
     g = 0.9999999
     a = 1
     b = 1
-    W = 10
-    assert np.isclose(hyperbolic_utility({'g': g, 'a': a, 'b': b})(W), W, 1e-1)
+    w = 10
+    assert np.isclose(hyperbolic_utility({'g': g, 'a': a, 'b': b})(w), w, 1e-1)
 
     g = -1e10
     a = 0.2
     b = 1
-    W = 16
+    w = 16
     assert np.isclose(hyperbolic_utility({'g': g, 'a': a, 'b': b})(
-        W), exponential_utility({'A': a})(W) * a, 1e-1)
+        w), exponential_utility({'A': a})(w) * a, 1e-1)
 
     g = 0.1
     a = 1 - g
     b = 1
-    W = 16  # W=0 fails
+    w = 16  # w=0 fails
     assert np.isclose(hyperbolic_utility({'g': g, 'a': a, 'b': b})(
-        W), isoelastic_utility({'eta': a})(W) * a, 1e-1)
+        w), isoelastic_utility({'eta': a})(w) * a, 1e-1)
 
     g = 1e-7
     a = 1
     b = 0
-    W = 16
+    w = 16
     assert np.isclose(hyperbolic_utility(
-        {'g': g, 'a': a, 'b': b})(W), np.log(W) + a/g, 1e-1)
+        {'g': g, 'a': a, 'b': b})(w), np.log(w) + a/g, 1e-1)
 
     g = 1e-7
     a = 1
     b = 1
-    W = 16
+    w = 16
     assert np.isclose(hyperbolic_utility({'g': g, 'a': a, 'b': b})(
-        W), np.log(a * W + b) + a/g, 1e-1)
+        w), np.log(a * w + b) + a/g, 1e-1)
 
     outcomes = np.array([0.5, 20, 0.5, 10, 1000])
     g = 1e-5
