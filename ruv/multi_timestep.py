@@ -43,6 +43,7 @@ def multiple_timesteps(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, eco
 
 def _dict_to_output(results: dict, size: int) -> SingleParOutput:
     output = SingleParOutput(size)
+
     for result in results:
         t = result['t']
         output.obs_spends[t] = result['ob_spend']

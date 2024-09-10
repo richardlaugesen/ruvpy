@@ -82,6 +82,7 @@ class MultiParOutput:
     def to_dict(self) -> dict:
         results = {}
         results['ruv'] = self.get_series('ruv')
+        results['economic_model_params'] = np.array(list(self.data.keys()))
 
         results['avg_fcst_ex_post'] = self.get_series('avg_fcst_ex_post')
         results['avg_ref_ex_post'] = self.get_series('avg_ref_ex_post')

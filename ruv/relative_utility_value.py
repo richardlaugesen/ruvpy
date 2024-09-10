@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import numpy as np
+import pandas as pd
 
 from ruv.helpers import generate_event_freq_ref
 from ruv.data_classes import DecisionContext
