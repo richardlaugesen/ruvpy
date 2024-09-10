@@ -18,13 +18,13 @@ from scipy.optimize import root_scalar
 
 def probabilistic_to_deterministic_forecast(ensembles: np.ndarray, crit_thres: float) -> np.ndarray:
     if is_deterministic(ensembles[0]):
-        raise ValueError('Cannot convert deterministic forecast to deterministic forecast')
+        raise ValueError('Forecast is already deterministic')
     return np.nanquantile(ensembles, 1 - crit_thres, axis=1)
 
 
 # Can reproduce the behaviour of event frequency reference used in REV
-# using the RUV expected utility approach (optimisation over whole forecast
-# distribution method) with an ensemble for each timestep
+# using the RUV expected utility approach with optimisation over whole forecast
+# distribution method if an ensemble for each timestep is used
 # which is simply the observation record. NA are dropped to simplify
 # calculation of forecast likelihoods
 def generate_event_freq_ref(obs: np.ndarray) -> np.ndarray:

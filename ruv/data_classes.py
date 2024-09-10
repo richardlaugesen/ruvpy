@@ -18,22 +18,14 @@ import numpy as np
 
 
 @dataclass(frozen=True)
-class InputData:
-    obs: np.ndarray
-    fcsts: np.ndarray
-    refs: np.ndarray
-
-
-@dataclass(frozen=True)
 class DecisionContext:
-    econ_pars: np.ndarray
+    economic_model_params: np.ndarray
     damage_function: Callable
     utility_function: Callable
     decision_thresholds: np.ndarray
     economic_model: Callable
     analytical_spend: Callable
-    crit_prob_thres: Optional[float] = None
-    event_freq_ref: bool = False
+    decision_making_method: Callable
 
 
 @dataclass

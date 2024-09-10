@@ -22,19 +22,28 @@ from ruv.utility_functions import *
 from ruv.helpers import *
 from ruv.single_timestep import *
 from ruv.data_classes import *
+from ruv.decision_methods import *
+
+
+def get_context(decision_thresholds=np.arange(5, 20, 1)):
+    context_fields = {
+        'economic_model_params': None,
+        'damage_function': logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15}),
+        'utility_function': cara({'A': 0.3}),
+        'decision_thresholds': decision_thresholds,
+        'economic_model': cost_loss,
+        'analytical_spend': cost_loss_analytical_spend,
+        'decision_making_method': optimise_over_forecast_distribution
+    }
+    return DecisionContext(**context_fields)
 
 
 def test_ex_ante_utility():
-    thresholds = np.arange(5, 20, 1)
-    economic_model = cost_loss
-    fast_economic_model = cost_loss_analytical_spend
-    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
-    utility_func = cara({'A': 0.3})
+    context = get_context()
+
     np.random.seed(42)
     ens = np.random.normal(10, 1, 100)
-    probs = calc_likelihood(ens, thresholds)
-
-    context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, fast_economic_model)
+    probs = calc_likelihood(ens, context.decision_thresholds)
 
     econ_par = 0.1
     spend = 0.052
@@ -56,57 +65,46 @@ def test_ex_ante_utility():
 
     econ_par = 0.1
     spend = 3
-    thresholds = np.arange(1, 100000, 1)
+
+    context = get_context(np.arange(1, 100000, 1))
     ens = np.random.normal(50000, 10000, 100000)    
-    probs = calc_likelihood(ens, thresholds)   # tiny likelihoods
-    context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, fast_economic_model)
+    probs = calc_likelihood(ens, context.decision_thresholds)   # tiny likelihoods
     assert np.isclose(
         ex_ante_utility(econ_par, spend, probs, context),
         -8.199, 1e-2)
 
 
 def test_ex_post_utility():
-    thresholds = np.arange(5, 20, 1)
-    economic_model = cost_loss
-    fast_economic_model = cost_loss_analytical_spend
-    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
-    utility_func = cara({'A': 0.3})
+    context = get_context()
 
-    context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, fast_economic_model)
-
-    occured = thresholds[10]
+    occurred = context.decision_thresholds[10]
     econ_par = 0.1
     spend = 0.052
     assert np.isclose(
-        ex_post_utility(econ_par, occured, spend, context),
+        ex_post_utility(econ_par, occurred, spend, context),
         -3.386, 1e-2)
 
-    occured = thresholds[10]
+    occurred = context.decision_thresholds[10]
     econ_par = 0.7
     spend = 0.052
     assert np.isclose(
-        ex_post_utility(econ_par, occured, spend, context),
+        ex_post_utility(econ_par, occurred, spend, context),
         -3.847, 1e-2)
 
-    occured = thresholds[10]
+    occurred = context.decision_thresholds[10]
     econ_par = 0.1
     spend = 3
     assert np.isclose(
-        ex_post_utility(econ_par, occured, spend, context),
+        ex_post_utility(econ_par, occurred, spend, context),
         -8.199, 1e-2)
 
 
 def test_find_spend_ensemble():
-    thresholds = np.arange(5, 20, 1)
-    economic_model = cost_loss
-    analytical_spend = cost_loss_analytical_spend
-    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
-    utility_func = cara({'A': 0.3})
-    context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, analytical_spend)
+    context = get_context()
 
     np.random.seed(42)
     ens = np.random.normal(10, 1, 100)
-    probs = calc_likelihood(ens, thresholds)
+    probs = calc_likelihood(ens, context.decision_thresholds)
     econ_par = 0.1
     assert np.isclose(find_spend_ensemble(econ_par, ens, probs, context), 0.012, 1e-1)
 
@@ -120,20 +118,14 @@ def test_single_timestep():
     t = 1
     ob = 10
     econ_par = 0.1
-    thresholds = np.arange(5, 20, 1)
-    economic_model = cost_loss
-    analytical_spend = cost_loss_analytical_spend
-    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
-    utility_func = cara({'A': 0.3})
+
+    context = get_context()
 
     np.random.seed(42)
     fcst = np.random.normal(10, 1, 100)
     ref = np.random.normal(5, 3, 100)
 
     t = 0
-    #data = InputData([ob], [fcst], [ref])
-    context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, analytical_spend)
-    
     result = single_timestep(t, econ_par, ob, fcst, ref, context)
 
     assert np.isclose(result['ob_spend'], 0.0076, 1e-2)
@@ -168,6 +160,7 @@ def test_calc_likelihoods():
     # to the current code. 
     # 
     # Noting here because it could be a source of hard to find bugs in the future.
+
 
 def test_realised_threshold():
     thresholds = np.array([0, 3, 6])

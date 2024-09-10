@@ -71,7 +71,16 @@ def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.
 def find_spend_ensemble(econ_par: float, ens: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:
     if context.decision_thresholds is None:
         # if continuous decision then all members equally likely so thresholds=ens
-        curr_context = DecisionContext(context.econ_pars, context.damage_function, context.utility_function, ens, context.economic_model, context.analytical_spend, context.crit_prob_thres)
+        context_fields = {
+            'economic_model_params': context.economic_model_params,
+            'damage_function': context.damage_function,
+            'utility_function': context.utility_function,
+            'economic_model': context.economic_model,
+            'analytical_spend': context.analytical_spend,
+            'decision_making_method': context.decision_making_method,
+            'decision_thresholds': ens
+        }
+        curr_context = DecisionContext(**context_fields)
     else:
         curr_context = context
 

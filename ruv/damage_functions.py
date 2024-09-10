@@ -30,10 +30,10 @@ def logistic(params: dict) -> Callable:
 
 # Same as logistic with damages pegged to zero for zero flow
 def logistic_zero(params: dict) -> Callable:
-    logistic_curry = logistic(params)
+    logistic_closure = logistic(params)
 
     def damages(magnitude: np.ndarray) -> np.ndarray:
-        damages = logistic_curry(magnitude)
+        damages = logistic_closure(magnitude)
         try:
             damages[magnitude == 0] = 0
         except TypeError:

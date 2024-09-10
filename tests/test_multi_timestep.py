@@ -1,5 +1,5 @@
 # Copyright 2023 Richard Laugesen
-
+import numpy as np
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,15 +21,24 @@ from ruv.utility_functions import *
 from ruv.helpers import *
 from ruv.multi_timestep import *
 from ruv.data_classes import *
+from ruv.decision_methods import *
+
+
+def get_context():
+    context_fields = {
+        'economic_model_params': np.array([0.1]),
+        'damage_function': logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15}),
+        'utility_function': cara({'A': 0.3}),
+        'decision_thresholds': np.arange(0, 20, 1),
+        'economic_model': cost_loss,
+        'analytical_spend': cost_loss_analytical_spend,
+        'decision_making_method': optimise_over_forecast_distribution
+    }
+    return DecisionContext(**context_fields)
 
 
 def test_multiple_timesteps():
-    econ_par = 0.1
-    thresholds = np.arange(0, 20, 1)
-    economic_model = cost_loss
-    analytical_spend = cost_loss_analytical_spend
-    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
-    utility_func = cara({'A': 0.3})
+    context = get_context()
 
     np.random.seed(42)
     num_steps = 20
@@ -40,10 +49,9 @@ def test_multiple_timesteps():
     fcsts = np.random.normal(10, 1, (num_steps, ens_size))
     refs = np.random.normal(5, 3, (num_steps, ens_size))
 
-    data = InputData(obs, fcsts, refs)
-    context = DecisionContext(None, damage_func, utility_func, thresholds, economic_model, analytical_spend)
+    econ_par = context.economic_model_params[0]
 
-    result = multiple_timesteps(econ_par, data, context, 1)
+    result = multiple_timesteps(obs, fcsts, refs, econ_par, context, 1)
 
     assert np.isclose(result.ruv, 0.0445, 1e-2)
     assert np.isclose(result.avg_fcst_ex_post, -3.399, 1e-2)

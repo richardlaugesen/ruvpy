@@ -18,22 +18,22 @@ from pathos.multiprocessing import ProcessPool as Pool      # pathos.pools
 
 
 # Calculate RUV for a single economic parameter value, parallelises over timesteps
-def multiple_timesteps(econ_par: float, data: InputData, context: DecisionContext, parallel_nodes: int) -> SingleParOutput:
+def multiple_timesteps(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, econ_par: float, context: DecisionContext, parallel_nodes: int) -> SingleParOutput:
     if parallel_nodes == 1:
         results = []
-        for t, ob in enumerate(data.obs):
+        for t, ob in enumerate(obs):
             if not np.isnan(ob):    
-                results.append(single_timestep(t, econ_par, ob, data.fcsts[t], data.refs[t], context))
+                results.append(single_timestep(t, econ_par, ob, fcsts[t], refs[t], context))
     else:
         args = []
-        for t, ob in enumerate(data.obs):
+        for t, ob in enumerate(obs):
             if not np.isnan(ob):
-                args.append([t, econ_par, ob, data.fcsts[t], data.refs[t], context])
+                args.append([t, econ_par, ob, fcsts[t], refs[t], context])
         args = list(map(list, zip(*args)))
         with Pool(nodes=parallel_nodes) as pool:
-            results = pool.map(single_timestep, *args, chunksize=(len(data.obs) // parallel_nodes))
+            results = pool.map(single_timestep, *args, chunksize=(len(obs) // parallel_nodes))
 
-    output = dict_to_output(results, data.obs.shape[0])
+    output = dict_to_output(results, obs.shape[0])
     output.ruv = calc_ruv(output)
 
     return output

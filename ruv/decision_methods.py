@@ -17,60 +17,57 @@ from ruv.data_classes import *
 from ruv.helpers import *
 
 
-def optimise_over_forecast_distribution(data: InputData, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
-    refs = process_refs(data, context)
-    updated_data = InputData(data.obs, data.fcsts, refs)
+def optimise_over_forecast_distribution(params: dict) -> Callable:
+    # method has no params
 
-    outputs = MultiParOutput()
-    for econ_par in context.econ_pars:
-        outputs.insert(econ_par, multiple_timesteps(econ_par, updated_data, context, parallel_nodes))
-    return outputs
+    def decision_method(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
+        outputs = MultiParOutput()
+        for econ_par in context.economic_model_params:
+            outputs.insert(econ_par, multiple_timesteps(obs, fcsts, refs, econ_par, context, parallel_nodes))
+        return outputs
 
-
-def critical_probability_threshold_fixed(data: InputData, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
-    refs = process_refs(data, context)
-
-    fcsts = probabilistic_to_deterministic_forecast(data.fcsts, context.crit_prob_thres)
-    updated_data = InputData(data.obs, fcsts, refs)
-
-    outputs = MultiParOutput()
-    for econ_par in context.econ_pars:
-        outputs.insert(econ_par, multiple_timesteps(econ_par, updated_data, context, parallel_nodes))
-    return outputs
+    return decision_method
 
 
-def critical_probability_threshold_max_value(data: InputData, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
-    refs = process_refs(data, context)
+def critical_probability_threshold_fixed(params: dict) -> Callable:
+    crit_prob_thres = params['critical_probability_threshold']
 
-    outputs = MultiParOutput()
-    for econ_par in context.econ_pars:
-        def minimise_this(crit_prob_thres):
-            curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, crit_prob_thres)
-            curr_refs = refs
-            curr_data = InputData(data.obs, curr_fcsts, curr_refs)
-            return -multiple_timesteps(econ_par, curr_data, context, parallel_nodes).ruv
-        max_ruv_thres = minimize_scalar(minimise_this, method='bounded', bounds=(0, 1), options={'disp': False, 'xatol': 0.005}).x        
+    def decision_method(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
+        fcsts = probabilistic_to_deterministic_forecast(fcsts, crit_prob_thres)
+        outputs = MultiParOutput()
+        for econ_par in context.economic_model_params:
+            outputs.insert(econ_par, multiple_timesteps(obs, fcsts, refs, econ_par, context, parallel_nodes))
+        return outputs
 
-        max_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, max_ruv_thres)
-        max_data = InputData(data.obs, max_fcsts, refs)
-        outputs.insert(econ_par, multiple_timesteps(econ_par, max_data, context, parallel_nodes))
-
-    return outputs
+    return decision_method
 
 
-def critical_probability_threshold_equals_par(data: InputData, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
-    refs = process_refs(data, context)
+def critical_probability_threshold_max_value(params: dict) -> Callable:
+    # method has no params
 
-    outputs = MultiParOutput()
-    for econ_par in context.econ_pars:
-        curr_fcsts = probabilistic_to_deterministic_forecast(data.fcsts, econ_par)
-        curr_data = InputData(data.obs, curr_fcsts, refs)
-        outputs.insert(econ_par, multiple_timesteps(econ_par, curr_data, context, parallel_nodes))
-    
-    return outputs
+    def decision_method(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
+        outputs = MultiParOutput()
+        for econ_par in context.economic_model_params:
+            def minimise_this(crit_prob_thres):
+                curr_fcsts = probabilistic_to_deterministic_forecast(fcsts, crit_prob_thres)
+                return -multiple_timesteps(obs, curr_fcsts, refs, econ_par, context, parallel_nodes).ruv
+            max_ruv_thres = minimize_scalar(minimise_this, method='bounded', bounds=(0, 1), options={'disp': False, 'xatol': 0.005}).x
+
+            max_fcsts = probabilistic_to_deterministic_forecast(fcsts, max_ruv_thres)
+            outputs.insert(econ_par, multiple_timesteps(obs, max_fcsts, refs, econ_par, context, parallel_nodes))
+        return outputs
+
+    return decision_method
 
 
-# generate event frequency refs if requested, otherwise leave refs as supplied
-# so impact on value from decision making method depends on forecasts alone
-def process_refs(data, context):
-    return data.refs if not context.event_freq_ref else generate_event_freq_ref(data.obs)
+def critical_probability_threshold_equals_par(params: dict) -> Callable:
+    # method has no params
+
+    def decision_method(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
+        outputs = MultiParOutput()
+        for econ_par in context.economic_model_params:
+            curr_fcsts = probabilistic_to_deterministic_forecast(fcsts, econ_par)
+            outputs.insert(econ_par, multiple_timesteps(obs, curr_fcsts, refs, econ_par, context, parallel_nodes))
+        return outputs
+
+    return decision_method

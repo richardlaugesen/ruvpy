@@ -19,81 +19,101 @@ from ruv.decision_methods import *
 from ruv.economic_models import *
 from ruv.utility_functions import *
 from ruv.damage_functions import *
+from ruv.helpers import *
 
 
-def test_optimise_over_forecast_distribution():    
-    
+def get_data(ref_equals_fcst=False, event_freq_ref=False):
+    np.random.seed(42)
+
+    fcsts = np.random.normal(10, 1, (20, 100))  # (timesteps, ens_members)
+    fcsts[fcsts < 0] = 0
+
+    if ref_equals_fcst:
+        refs = fcsts
+    else:
+        refs = np.random.normal(5, 3, (20, 100))
+        refs[refs < 0] = 0
+
+    obs = np.random.gamma(1, 5, (20, 1))
+    obs[obs < 0] = 0
+
+    # TODO: gen obs first, move this into if block above, and update all assert values below
+    if event_freq_ref:
+        refs = generate_event_freq_ref(obs)
+
+    return obs, fcsts, refs
+
+
+def get_context(decision_making_method, decision_making_method_params, risk_aversion=0.3):
+    context_params = {
+        'economic_model_params': np.array([0.001, 0.25, 0.5, 0.75, 0.999]),
+        'utility_function': cara({'A': risk_aversion}),
+        'damage_function': logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15}),
+        'decision_thresholds': np.arange(0, 20, 3),
+        'economic_model': cost_loss,
+        'analytical_spend': cost_loss_analytical_spend,
+        'decision_making_method': decision_making_method(decision_making_method_params)
+    }
+    return DecisionContext(**context_params)
+
+
+def test_optimise_over_forecast_distribution():
+
+    context = get_context(optimise_over_forecast_distribution, None)
+
     # basic ensemble fcst and ref
-    data = get_data()
-    context = get_context()
-    result = optimise_over_forecast_distribution(data, context, 1)
+    obs, fcsts, refs = get_data()
+    result = context.decision_making_method(obs, fcsts, refs, context, 1)
     assert np.allclose(result.get_series('ruv'), [0.3101, -0.22249, -1.093606, -3.50433, -262.69065], 1e-3)
 
     # event freq ref
-    context = get_context(event_freq_ref=True)
-    result = optimise_over_forecast_distribution(data, context, 1)
+    obs, fcsts, refs = get_data(event_freq_ref=True)
+    result = context.decision_making_method(obs, fcsts, refs, context, 1)
     assert np.allclose(result.get_series('ruv'), [-34.6425, -0.265098, -1.1084778, -3.67724, -262.69065], 1e-3)
 
     # ref equals fcst
-    data = get_data(ref_equals_fcst=True)
-    context = get_context()
-    result = optimise_over_forecast_distribution(data, context, 1)
+    obs, fcsts, refs = get_data(ref_equals_fcst=True)
+    result = context.decision_making_method(obs, fcsts, refs, context, 1)
     assert np.allclose(result.get_series('ruv'), [0, 0, 0, 0, 0], 1e-3)
 
 
 def test_critical_probability_threshold_equals_par():
-    data = get_data()
-    context = get_context(risk_aversion=0)
-    econ_par_result = critical_probability_threshold_equals_par(data, context, 1)
-    optim_result = optimise_over_forecast_distribution(data, context, 1)
+    obs, fcsts, refs = get_data()
+
+    context = get_context(critical_probability_threshold_equals_par, None, 0)
+    econ_par_result = context.decision_making_method(obs, fcsts, refs, context, 1)
+    context = get_context(optimise_over_forecast_distribution, None, 0)
+    optim_result = context.decision_making_method(obs, fcsts, refs, context, 1)
     assert np.allclose(econ_par_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
 
-    data = get_data()
-    context = get_context(risk_aversion=0.1)
-    econ_par_result = critical_probability_threshold_equals_par(data, context, 1)
-    optim_result = optimise_over_forecast_distribution(data, context, 1)
+    context = get_context(critical_probability_threshold_equals_par, None, 0.1)
+    econ_par_result = context.decision_making_method(obs, fcsts, refs, context, 1)
+    context = get_context(optimise_over_forecast_distribution, None, 0.1)
+    optim_result = context.decision_making_method(obs, fcsts, refs, context, 1)
     assert np.allclose(econ_par_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
 
-    data = get_data()
-    context = get_context(risk_aversion=5)
-    econ_par_result = critical_probability_threshold_equals_par(data, context, 1)
-    optim_result = optimise_over_forecast_distribution(data, context, 1)
+    context = get_context(critical_probability_threshold_equals_par, None, 5)
+    econ_par_result = context.decision_making_method(obs, fcsts, refs, context, 1)
+    context = get_context(optimise_over_forecast_distribution, None, 5)
+    optim_result = context.decision_making_method(obs, fcsts, refs, context, 1)
     assert not np.allclose(econ_par_result.get_series('ruv'), optim_result.get_series('ruv'), 1e-3)
 
 
 def test_critical_probability_threshold_fixed():
-    data = get_data()
-    context = get_context(crit_prob_thres=0.5)
-    result = critical_probability_threshold_fixed(data, context, 1)
+    obs, fcsts, refs = get_data()
+    context = get_context(critical_probability_threshold_fixed, {'critical_probability_threshold': 0.5})
+    result = context.decision_making_method(obs, fcsts, refs, context, 1)
     assert np.allclose(result.get_series('ruv'), [0.00398, -0.22249, -1.093606, -3.50433, -1271.97656], 1e-3)
 
 
 def test_critical_probability_threshold_max_value():
-    data = get_data()
-    context = get_context()
-    max_result = critical_probability_threshold_max_value(data, context, 1)
+    obs, fcsts, refs = get_data()
+    context = get_context(critical_probability_threshold_max_value, None)
+    max_result = context.decision_making_method(obs, fcsts, refs, context, 1)
     assert np.allclose(max_result.get_series('ruv'), [0.00398, 0, -0.18472, -0.66092, -262.6907], 1e-3)
 
-    econ_par_result = critical_probability_threshold_equals_par(data, context, 1)
+    context = get_context(critical_probability_threshold_equals_par, None)
+    econ_par_result = context.decision_making_method(obs, fcsts, refs, context, 1)
     assert np.all(max_result.get_series('ruv')[1:] >= econ_par_result.get_series('ruv')[1:])   # ignore first value because economic parameter value is extremely small
 
 
-def get_data(ref_equals_fcst=False):    
-    np.random.seed(42)
-    fcsts = np.random.normal(10, 1, (20, 100))  # (timesteps, ens_members)
-    fcsts[fcsts < 0] = 0
-    refs = np.random.normal(5, 3, (20, 100)) if not ref_equals_fcst else fcsts
-    refs[refs < 0] = 0
-    obs = np.random.gamma(1, 5, (20, 1))
-    obs[obs < 0] = 0    
-    return InputData(obs, fcsts, refs)
-
-
-def get_context(event_freq_ref=False, crit_prob_thres=None, risk_aversion=0.3):
-    econ_pars = np.array([0.001, 0.25, 0.5, 0.75, 0.999])
-    thresholds = np.arange(0, 20, 3)
-    economic_model = cost_loss
-    analytical_spend = cost_loss_analytical_spend
-    damage_func = logistic_zero({'A': 1, 'k': 0.5, 'threshold': 15})
-    utility_func = cara({'A': risk_aversion})
-    return DecisionContext(econ_pars, damage_func, utility_func, thresholds, economic_model, analytical_spend, crit_prob_thres=crit_prob_thres, event_freq_ref=event_freq_ref)
