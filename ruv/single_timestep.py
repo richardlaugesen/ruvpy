@@ -99,7 +99,6 @@ def _calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     if thresholds is None:
         return np.full(ens.shape, 1/ens.shape[0])   # continuous decision limit is 1/num_classes
 
-    # TODO: this could probably be done in place somehow
     probs_above = ecdf(ens, thresholds)
     adjustment = np.roll(probs_above, -1)
     adjustment[-1] = 0.0
