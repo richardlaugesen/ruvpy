@@ -17,7 +17,7 @@ import numpy as np
 from dataclasses import dataclass
 
 
-@dataclass(frozen=True)
+@dataclass
 class DecisionContext:
     economic_model_params: np.ndarray
     damage_function: Callable

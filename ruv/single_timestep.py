@@ -1,4 +1,5 @@
 # Copyright 2023 Richard Laugesen
+import copy
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,31 +25,31 @@ from ruv.data_classes import DecisionContext
 def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.array, context: DecisionContext) -> dict[str, np.ndarray]:
     ob_threshold = _realised_threshold(ob, context.decision_thresholds)
     ob_spend = context.analytical_spend(econ_par, ob_threshold, context.damage_function)
-    ob_damage = context.damage_function(ob_threshold)
+    ob_damage = _calc_damages(ob_threshold, context.damage_function)
 
     if is_deterministic(fcst):
         fcst_threshold = _realised_threshold(fcst, context.decision_thresholds)
         fcst_spend = context.analytical_spend(econ_par, fcst_threshold, context.damage_function)
-        fcst_expected_damage = context.damage_function(fcst_threshold)
+        fcst_expected_damage = _calc_damages(fcst_threshold, context.damage_function)
     else:
         fcst_likelihoods = _calc_likelihood(fcst, context.decision_thresholds)               # not pre-calculating likelihoods because code becomes
         fcst_spend = _find_spend_ensemble(econ_par, fcst, fcst_likelihoods, context)        # difficult to maintain even though it is 30% speedup
         if context.decision_thresholds is not None:
-            fcst_expected_damage = np.dot(fcst_likelihoods, context.damage_function(context.decision_thresholds))
+            fcst_expected_damage = _calc_damages(context.decision_thresholds, context.damage_function, fcst_likelihoods)
         else:
-            fcst_expected_damage = np.dot(fcst_likelihoods, context.damage_function(fcst))
+            fcst_expected_damage = _calc_damages(fcst, context.damage_function, fcst_likelihoods)
 
     if is_deterministic(ref):
         ref_threshold = _realised_threshold(ref, context.decision_thresholds)
         ref_spend = context.analytical_spend(econ_par, ref_threshold, context.damage_function)
-        ref_expected_damage = context.damage_function(ref_threshold)
+        ref_expected_damage = _calc_damages(ref_threshold, context.damage_function)
     else:
         ref_likelihoods = _calc_likelihood(ref, context.decision_thresholds)
         ref_spend = _find_spend_ensemble(econ_par, ref, ref_likelihoods, context)
         if context.decision_thresholds is not None:
-            ref_expected_damage = np.dot(ref_likelihoods, context.damage_function(context.decision_thresholds))
+            ref_expected_damage = _calc_damages(context.decision_thresholds, context.damage_function, ref_likelihoods)
         else:
-            ref_expected_damage = np.dot(ref_likelihoods, context.damage_function(ref))
+            ref_expected_damage = _calc_damages(ref, context.damage_function, ref_likelihoods)
 
     # TODO: calc and return the ex_ante utilities
     return {
@@ -65,24 +66,20 @@ def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.
     }
 
 
+# deterministic if likelihoods is None
+def _calc_damages(values, damage_function, likelihoods=None):
+    return damage_function(values) if likelihoods is None else np.dot(likelihoods, damage_function(values))
+
+
 def _find_spend_ensemble(econ_par: float, ens: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:
+
+    # if continuous decision then all members are equally likely so thresholds=ens
     if context.decision_thresholds is None:
-        # if continuous decision then all members equally likely so thresholds=ens
-        context_fields = {
-            'economic_model_params': context.economic_model_params,
-            'damage_function': context.damage_function,
-            'utility_function': context.utility_function,
-            'economic_model': context.economic_model,
-            'analytical_spend': context.analytical_spend,
-            'decision_making_method': context.decision_making_method,
-            'decision_thresholds': ens
-        }
-        curr_context = DecisionContext(**context_fields)
-    else:
-        curr_context = context
+        context = copy.deepcopy(context)
+        context.decision_thresholds = ens
 
     def minimise_this(spend):
-        return -_ex_ante_utility(econ_par, spend, likelihoods, curr_context)
+        return -_ex_ante_utility(econ_par, spend, likelihoods, context)
 
     return minimize_scalar(minimise_this, method='brent').x
 
