@@ -23,5 +23,5 @@ def cost_loss(alpha: float, values: np.ndarray, spend: float, damage_function: c
     return benefits - damages - spend
 
 
-def cost_loss_analytical_spend(alpha: float, threshold: float, damage_function: callable) -> float:
-    return damage_function(threshold) * alpha
+def cost_loss_analytical_spend(alpha: float, values: float, damage_function: callable) -> float:
+    return damage_function(values) * alpha
