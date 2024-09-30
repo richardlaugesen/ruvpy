@@ -18,7 +18,7 @@ from ruv.relative_utility_value import relative_utility_value
 from ruv.damage_functions import logistic_zero
 from ruv.economic_models import cost_loss, cost_loss_analytical_spend
 from ruv.utility_functions import cara
-from ruv.decision_methods import optimise_over_forecast_distribution, critical_probability_threshold_equals_par, critical_probability_threshold_fixed
+from ruv.decision_rules import optimise_over_forecast_distribution, critical_probability_threshold_equals_par, critical_probability_threshold_fixed
 
 
 def test_relative_utility_value():
@@ -42,21 +42,21 @@ def test_relative_utility_value():
         'utility_function': [cara, {'A': 0.3}],
         'economic_model': [cost_loss, cost_loss_analytical_spend, np.array([0.001, 0.25, 0.5, 0.75, 0.999])],
         'decision_thresholds': np.arange(0, 20, 3),
-        'decision_making_method': [optimise_over_forecast_distribution, None],
+        'decision_rule': [optimise_over_forecast_distribution, None],
     }
 
     results = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
     assert np.allclose(results['ruv'],[0.184053111, -0.0742971672, -0.467401918, -1.65026591, -117.108686], 1e-3)
 
-    decision_definition['decision_making_method'] = [critical_probability_threshold_equals_par, None]
+    decision_definition['decision_rule'] = [critical_probability_threshold_equals_par, None]
     results = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
     assert np.allclose(results['ruv'],[0.184053111, -0.0742971672, -0.467401918, -1.65026591, -117.108686], 1e-3)
 
-    decision_definition['decision_making_method'] = [critical_probability_threshold_fixed, {'critical_probability_threshold': 0.1}]
+    decision_definition['decision_rule'] = [critical_probability_threshold_fixed, {'critical_probability_threshold': 0.1}]
     results = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
     assert np.allclose(results['ruv'], [-0.182290404, -0.0742971673, -0.467401918, -1.65026591, -616.302376], 1e-3)
 
-    decision_definition['decision_making_method'] = [critical_probability_threshold_equals_par, None]
+    decision_definition['decision_rule'] = [critical_probability_threshold_equals_par, None]
     decision_definition['event_freq_ref'] = True
     results = relative_utility_value(obs, fcsts, None, decision_definition, parallel_nodes=2)
     assert np.allclose(results['ruv'],[-74.0584681, -0.0742971679, -0.472369878, -1.71864364, -117.108684], 1e-3)
@@ -66,7 +66,7 @@ def test_relative_utility_value():
         'utility_function': [cara, {'A': 0.3}],
         'economic_model': [cost_loss, cost_loss_analytical_spend, np.array([0.001, 0.25, 0.5, 0.75, 0.999])],
         'decision_thresholds': np.arange(0, 20, 3),
-        'decision_making_method': [optimise_over_forecast_distribution, None],
+        'decision_rule': [optimise_over_forecast_distribution, None],
     }
 
     max_val = np.max([np.nanmax(obs), np.nanmax(fcsts), np.nanmax(refs)])

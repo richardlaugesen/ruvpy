@@ -20,36 +20,35 @@ from ruv.multi_timestep import multiple_timesteps
 from ruv.data_classes import MultiParOutput, DecisionContext
 from ruv.helpers import probabilistic_to_deterministic_forecast
 
-
 def optimise_over_forecast_distribution(params: dict) -> Callable:
     # method has no params
 
-    def decision_method(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
+    def decision_rule(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
         outputs = MultiParOutput()
         for econ_par in context.economic_model_params:
             outputs.insert(econ_par, multiple_timesteps(obs, fcsts, refs, econ_par, context, parallel_nodes))
         return outputs
 
-    return decision_method
+    return decision_rule
 
 
 def critical_probability_threshold_fixed(params: dict) -> Callable:
     crit_prob_thres = params['critical_probability_threshold']
 
-    def decision_method(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
+    def decision_rule(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
         fcsts = probabilistic_to_deterministic_forecast(fcsts, crit_prob_thres)
         outputs = MultiParOutput()
         for econ_par in context.economic_model_params:
             outputs.insert(econ_par, multiple_timesteps(obs, fcsts, refs, econ_par, context, parallel_nodes))
         return outputs
 
-    return decision_method
+    return decision_rule
 
 
 def critical_probability_threshold_max_value(params: dict) -> Callable:
     # method has no params
 
-    def decision_method(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
+    def decision_rule(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
         outputs = MultiParOutput()
         for econ_par in context.economic_model_params:
             def minimise_this(crit_prob_thres):
@@ -61,17 +60,17 @@ def critical_probability_threshold_max_value(params: dict) -> Callable:
             outputs.insert(econ_par, multiple_timesteps(obs, max_fcsts, refs, econ_par, context, parallel_nodes))
         return outputs
 
-    return decision_method
+    return decision_rule
 
 
 def critical_probability_threshold_equals_par(params: dict) -> Callable:
     # method has no params
 
-    def decision_method(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
+    def decision_rule(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
         outputs = MultiParOutput()
         for econ_par in context.economic_model_params:
             curr_fcsts = probabilistic_to_deterministic_forecast(fcsts, econ_par)
             outputs.insert(econ_par, multiple_timesteps(obs, curr_fcsts, refs, econ_par, context, parallel_nodes))
         return outputs
 
-    return decision_method
+    return decision_rule

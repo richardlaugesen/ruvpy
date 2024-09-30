@@ -25,7 +25,7 @@ class DecisionContext:
     decision_thresholds: np.ndarray
     economic_model: Callable
     analytical_spend: Callable
-    decision_making_method: Callable
+    decision_rule: Callable
 
 
 @dataclass

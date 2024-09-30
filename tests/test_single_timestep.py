@@ -20,7 +20,7 @@ from ruv.damage_functions import logistic_zero
 from ruv.economic_models import cost_loss, cost_loss_analytical_spend
 from ruv.utility_functions import cara
 from ruv.data_classes import DecisionContext
-from ruv.decision_methods import optimise_over_forecast_distribution
+from ruv.decision_rules import optimise_over_forecast_distribution
 
 
 def get_context(decision_thresholds=np.arange(5, 20, 1)):
@@ -31,7 +31,7 @@ def get_context(decision_thresholds=np.arange(5, 20, 1)):
         'decision_thresholds': decision_thresholds,
         'economic_model': cost_loss,
         'analytical_spend': cost_loss_analytical_spend,
-        'decision_making_method': optimise_over_forecast_distribution
+        'decision_rule': optimise_over_forecast_distribution
     }
     return DecisionContext(**context_fields)
 

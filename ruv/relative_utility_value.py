@@ -26,9 +26,9 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     decision_thresholds = decision_definition['decision_thresholds']
 
     # decision-making method
-    decision_making_method = decision_definition['decision_making_method'][0]
-    decision_making_method_params = decision_definition['decision_making_method'][1]
-    decision_making_method_fnc = decision_making_method(decision_making_method_params)
+    decision_rule = decision_definition['decision_rule'][0]
+    decision_rule_params = decision_definition['decision_rule'][1]
+    decision_rule_fnc = decision_rule(decision_rule_params)
 
     # damage function
     damage_fnc_mth = decision_definition['damage_function'][0]
@@ -43,7 +43,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     # economic model
     economic_model_fnc = decision_definition['economic_model'][0]
     economic_model_analytical_spend_fnc = decision_definition['economic_model'][1]
-    economic_model_params = decision_definition['economic_model'][2]    # used by some decision_methods so cant use closure approach
+    economic_model_params = decision_definition['economic_model'][2]
 
     context_fields = {
         'economic_model_params': economic_model_params,
@@ -52,7 +52,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
         'decision_thresholds': decision_thresholds,
         'economic_model': economic_model_fnc,
         'analytical_spend': economic_model_analytical_spend_fnc,
-        'decision_making_method': decision_making_method_fnc
+        'decision_rule': decision_rule_fnc
     }
     context = DecisionContext(**context_fields)
 
@@ -61,7 +61,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
         refs = generate_event_freq_ref(obs)
 
     _check_inputs(obs, fcsts, refs, context)
-    results = context.decision_making_method(obs, fcsts, refs, context, parallel_nodes)
+    results = context.decision_rule(obs, fcsts, refs, context, parallel_nodes)
 
     return results.to_dict()
 

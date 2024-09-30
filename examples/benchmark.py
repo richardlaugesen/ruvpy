@@ -12,7 +12,7 @@ from ruv.damage_functions import *
 from ruv.economic_models import *
 from ruv.utility_functions import *
 from ruv.helpers import *
-from ruv.decision_methods import *
+from ruv.decision_rules import *
 
 def load_data(awrc, start_lt, end_lt, area, scenario='muthre', input_path='../../muthre_results/muthre_csv'):
     print('Loading data')
@@ -152,7 +152,7 @@ decision_definition = {
     'utility_function': [cara, {'A': adjusted_risk_aversion}],
     'economic_model': [cost_loss, cost_loss_analytical_spend, alphas],
     'decision_thresholds': np.arange(0, 20, 2),
-    'decision_making_method': [optimise_over_forecast_distribution, None],
+    'decision_rule': [optimise_over_forecast_distribution, None],
 }
 
 results = {}
