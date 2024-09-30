@@ -29,7 +29,6 @@ def decision_rule_template(params: dict) -> Callable:
 
     # extract parameters from the dictionary if needed
     decision_rule_param_1 = params['decision_rule_param_1']
-    decision_rule_param_2 = params['decision_rule_param_2']
     # ...
 
     # define the actual decision rule
@@ -37,7 +36,6 @@ def decision_rule_template(params: dict) -> Callable:
 
         # do something with the parameters, perhaps adjust the forecast and reference
         fcsts = probabilistic_to_deterministic_forecast(fcsts, decision_rule_param_1)
-        refs = decision_rule_param_2
 
         # create object to hold results from RUV implementation
         outputs = MultiParOutput()
