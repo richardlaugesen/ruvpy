@@ -45,7 +45,7 @@ These are all implemented as Jupyter notebooks in the `examples` directory.
 
 ## Templates
 
-RUV is designed to be tailored to the decision between evaluated. 
+RUV is designed to be tailored to the decision being evaluated. 
 This may require the development of custom components to define the decision context. 
 A set of templates to help the user get started is included in `templates` directory.
 
