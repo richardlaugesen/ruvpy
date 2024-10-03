@@ -8,7 +8,7 @@
 [Open Science](https://en.wikipedia.org/wiki/Open_science) infrastructure written in [Python](https://python.org/).
 
 RUV is used to quantify the value of forecast information for decision-making. 
-It is very flexible way and can accomodate a wide range of decisions. 
+It is very flexible and can accomodate a wide range of decisions. 
 This package is a reference implementation of the RUV method.
 
 It includes a set of commonly used decision rules, utility functions, damage functions, and economic models.
