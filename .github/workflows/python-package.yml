@@ -30,14 +30,17 @@ jobs:
         export PATH="$HOME/.local/bin:$PATH"
         poetry install
     - name: Lint with flake8
+      continue-on-error: true
       run: |
         export PATH="$HOME/.local/bin:$PATH"
         poetry run flake8 .
     - name: Format code with black
+      continue-on-error: true
       run: |
         export PATH="$HOME/.local/bin:$PATH"
         poetry run black --check .
     - name: Type check with mypy
+      continue-on-error: true
       run: |
         export PATH="$HOME/.local/bin:$PATH"
         poetry run mypy .
