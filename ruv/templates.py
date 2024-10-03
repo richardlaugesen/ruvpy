@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from typing import Callable
-from scipy.optimize import minimize_scalar
 import numpy as np
 
 from ruv.multi_timestep import multiple_timesteps

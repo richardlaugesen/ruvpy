@@ -15,7 +15,6 @@
 from typing import Callable
 import numpy as np
 
-# TODO: these occasionally overflow when c is large, could use float128 but not available on windows
 
 # Constant Absolute Risk Aversion utility function
 def cara(params: dict) -> Callable:
@@ -39,10 +38,6 @@ def exponential_utility(params: dict) -> Callable:
             return (-1 - np.expm1(-A * c)) / A
 
     return utility
-
-
-def _ensure_float(input_data: np.ndarray) -> float:
-    return input_data.astype(float) if isinstance(input_data, np.ndarray) else float(input_data)
 
 
 # Isoelastic utility function (https://en.wikipedia.org/wiki/Isoelastic_utility)
@@ -80,3 +75,7 @@ def hyperbolic_utility(params: dict) -> Callable:
         return ((1 - g) / g) * np.power(((a * W) / (1 - g) + b), g)
 
     return utility
+
+
+def _ensure_float(input_data: np.ndarray) -> float:
+    return input_data.astype(float) if isinstance(input_data, np.ndarray) else float(input_data)

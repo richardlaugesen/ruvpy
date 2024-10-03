@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Callable
+from typing import Callable, Optional
 import numpy as np
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -22,11 +22,15 @@ class DecisionContext:
     economic_model_params: np.ndarray
     damage_function: Callable
     utility_function: Callable
-    decision_thresholds: np.ndarray
     economic_model: Callable
     analytical_spend: Callable
     decision_rule: Callable
+    decision_thresholds: Optional[np.ndarray] = field(default=None)
 
+    def validate_fields(self):
+        for field_name, value in self.__dict__.items():
+            if field_name != 'decision_thresholds' and value is None:
+                raise ValueError(f"The field '{field_name}' cannot be None")
 
 @dataclass
 class SingleParOutput:

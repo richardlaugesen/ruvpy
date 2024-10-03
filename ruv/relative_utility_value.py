@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import numpy as np
-import pandas as pd
 
 from ruv.helpers import generate_event_freq_ref
 from ruv.data_classes import DecisionContext
@@ -67,6 +66,9 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
 
 
 def _check_inputs(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext) -> None:
+
+    context.validate_fields()
+
     if np.any(np.isnan(fcsts)) or (refs is not None and np.any(np.isnan(refs))):
         raise ValueError('Cannot calculate RUV with missing values in forecasts or references')
 
@@ -77,4 +79,3 @@ def _check_inputs(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context:
     if len(obs) != len(fcsts) or (refs is not None and len(obs) != len(refs)):
         raise ValueError('Lengths of obs, fcsts and refs must be the same')
 
-    # TODO: check that all required keys and params are present in decision_definition

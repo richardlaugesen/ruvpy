@@ -1,20 +1,20 @@
 [tool.poetry]
 name = "relative-utility-value"
-version = "0.1.0"
-description = "Relative Utility Value reference implementation"
+version = "1.0.0"
+description = "Reference implementation for the Relative Utility Value forecast value method."
 authors = ["Richard Laugesen <ruv@laugesen.com.au>"]
 license = "Apache 2"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = ">=3.11"
-numpy = ">=1.25.0"
-scipy = ">=1.10.0"
-pathos = ">=0.3.2"
-statsmodels = ">=0.14.0"
+python = ">=3.8"
+numpy = ">=1.24.4"
+scipy = ">=1.9.3"
+pathos = ">=0.3.0"
+statsmodels = ">=0.13.5"
 jupyter = ">=1.0.0"
-matplotlib = ">=3.8.0"
-pandas = ">=2.1.0"
+matplotlib = ">=3.7.2"
+pandas = ">=2.0.3"
 
 [tool.poetry.dev-dependencies]
 pytest = ">=7.4.0"

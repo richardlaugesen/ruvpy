@@ -1,5 +1,4 @@
 # Copyright 2023 Richard Laugesen
-import copy
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,12 +13,12 @@ import copy
 # limitations under the License.
 
 import numpy as np
+import copy
 from scipy.optimize import minimize_scalar
 
 from ruv.helpers import is_deterministic, ecdf
 from ruv.data_classes import DecisionContext
 
-# TODO: lots of this could be done in place or without creating new variables
 
 # Calculate RUV for a single economic parameter and single timestep
 def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.array, context: DecisionContext) -> dict[str, np.ndarray]:
@@ -51,7 +50,6 @@ def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.
         else:
             ref_expected_damage = _calc_damages(ref, context.damage_function, ref_likelihoods)
 
-    # TODO: calc and return the ex_ante utilities
     return {
         't': t,
         'ob_spend': ob_spend,
