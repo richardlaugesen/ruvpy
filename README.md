@@ -12,7 +12,7 @@ It is very flexible and can accomodate a wide range of decisions.
 This package is a reference implementation of the RUV method.
 
 It includes a set of commonly used decision rules, utility functions, damage functions, and economic models.
-The implementation is reasonably computationally efficient and parallelises timesteps over available CPU cores but the primary focus is on clarity and flexibility.
+The implementation is sufficiently computationally efficient for most situations and parallelises timesteps over available CPU cores. The primary focus is on clarity and flexibility.
 
 The scope is intentionally narrow and does not include any figure generation, data loading and saving, other metrics, or analysis functionality. 
 These functions are intended to be implemented in a larger workflow or analysis pipeline which calls the main entry point of this library. 
