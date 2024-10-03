@@ -43,6 +43,14 @@ The package includes a set of examples which loosely correspond with figures in 
 
 These are all implemented as Jupyter notebooks in the `examples` directory.
 
+## Templates
+
+RUV is designed to be tailored to the decision between evaluated. 
+This may require the development of custom components to define the decision context. 
+A set of templates to help the user get started is included in `templates` directory.
+
+Please consider contributing your new components to the repository to help others.
+
 ## Code of conduct
 
 We encourage you to contribute! Everyone interacting with this project is expected to follow the [Code of Conduct](code_of_conduct.md). 
