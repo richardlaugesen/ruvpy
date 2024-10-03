@@ -7,10 +7,15 @@
 
 [Open Science](https://en.wikipedia.org/wiki/Open_science) infrastructure written in [Python](https://python.org/).
 
-RUV is a library to quantify the value of forecast information for decision-making using the Relative Utility Value metric. 
-This reference implementation is reasonably computationally efficient and parallelises timesteps over available CPU cores. 
-The software includes a small library of standard decision rules, utility functions, damage functions, and economic models. 
-The scope is intentionally narrow and does not include any figure generation, data loading and saving, other metrics, or analysis functionality.
+RUV is used to quantify the value of forecast information for decision-making. 
+It is very flexible way and can accomodate a wide range of decisions. 
+This package is a reference implementation of the RUV method.
+
+It includes a set of commonly used decision rules, utility functions, damage functions, and economic models.
+The implementation is reasonably computationally efficient and parallelises timesteps over available CPU cores but the primary focus is on clarity and flexibility.
+
+The scope is intentionally narrow and does not include any figure generation, data loading and saving, other metrics, or analysis functionality. 
+These functions are intended to be implemented in a larger workflow or analysis pipeline which calls the main entry point of this library. 
 
 ## Publications
 
