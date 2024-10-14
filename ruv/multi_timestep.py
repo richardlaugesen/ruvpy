@@ -54,9 +54,6 @@ def _dict_to_output(results: dict, size: int) -> SingleParOutput:
         output.fcst_ex_post[t] = result['fcst_ex_post']
         output.ref_spends[t] = result['ref_spend']
         output.ref_ex_post[t] = result['ref_ex_post']
-        output.fcst_expected_damages[t] = result['fcst_expected_damage']
-        output.ref_expected_damages[t] = result['ref_expected_damage']
-        output.obs_damages[t] = result['ob_damage']
 
     return output
 

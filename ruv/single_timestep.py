@@ -24,31 +24,20 @@ from ruv.data_classes import DecisionContext
 def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.array, context: DecisionContext) -> dict[str, np.ndarray]:
     ob_threshold = _realised_threshold(ob, context.decision_thresholds)
     ob_spend = context.analytical_spend(econ_par, ob_threshold, context.damage_function)
-    ob_damage = _calc_damages(ob_threshold, context.damage_function)
 
     if is_deterministic(fcst):
         fcst_threshold = _realised_threshold(fcst, context.decision_thresholds)
         fcst_spend = context.analytical_spend(econ_par, fcst_threshold, context.damage_function)
-        fcst_expected_damage = _calc_damages(fcst_threshold, context.damage_function)
     else:
-        fcst_likelihoods = _calc_likelihood(fcst, context.decision_thresholds)               # not pre-calculating likelihoods because code becomes
-        fcst_spend = _find_spend_ensemble(econ_par, fcst, fcst_likelihoods, context)        # difficult to maintain even though it is 30% speedup
-        if context.decision_thresholds is not None:
-            fcst_expected_damage = _calc_damages(context.decision_thresholds, context.damage_function, fcst_likelihoods)
-        else:
-            fcst_expected_damage = _calc_damages(fcst, context.damage_function, fcst_likelihoods)
-
+        fcst_likelihoods = _calc_likelihood(fcst, context.decision_thresholds)              # not pre-calculating likelihoods because code becomes
+        fcst_spend = _find_spend_ensemble(econ_par, fcst, fcst_likelihoods, context)        # difficult to read and maintain even though it is
+                                                                                            # 30% speedup
     if is_deterministic(ref):
         ref_threshold = _realised_threshold(ref, context.decision_thresholds)
         ref_spend = context.analytical_spend(econ_par, ref_threshold, context.damage_function)
-        ref_expected_damage = _calc_damages(ref_threshold, context.damage_function)
     else:
         ref_likelihoods = _calc_likelihood(ref, context.decision_thresholds)
         ref_spend = _find_spend_ensemble(econ_par, ref, ref_likelihoods, context)
-        if context.decision_thresholds is not None:
-            ref_expected_damage = _calc_damages(context.decision_thresholds, context.damage_function, ref_likelihoods)
-        else:
-            ref_expected_damage = _calc_damages(ref, context.damage_function, ref_likelihoods)
 
     return {
         't': t,
@@ -57,16 +46,8 @@ def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.
         'fcst_spend': fcst_spend,
         'fcst_ex_post': _ex_post_utility(econ_par, ob_threshold, fcst_spend, context),
         'ref_spend': ref_spend,
-        'ref_ex_post': _ex_post_utility(econ_par, ob_threshold, ref_spend, context),
-        'fcst_expected_damage': fcst_expected_damage,
-        'ref_expected_damage': ref_expected_damage,
-        'ob_damage': ob_damage,
+        'ref_ex_post': _ex_post_utility(econ_par, ob_threshold, ref_spend, context)
     }
-
-
-# deterministic if likelihoods is None
-def _calc_damages(values, damage_function, likelihoods=None):
-    return damage_function(values) if likelihoods is None else np.dot(likelihoods, damage_function(values))
 
 
 def _find_spend_ensemble(econ_par: float, ens: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:
@@ -83,11 +64,13 @@ def _find_spend_ensemble(econ_par: float, ens: np.ndarray, likelihoods: np.ndarr
 
 
 def _ex_ante_utility(econ_par: float, spend: float, likelihoods: np.ndarray, context: DecisionContext) -> float:
-    return np.dot(likelihoods, context.utility_function(context.economic_model(econ_par, context.decision_thresholds, spend, context.damage_function)))
+    net_outcome = context.economic_model(econ_par, context.decision_thresholds, spend, context.damage_function)
+    return np.dot(likelihoods, context.utility_function(net_outcome))
 
 
 def _ex_post_utility(econ_par: float, occured: float, spend: float, context: DecisionContext) -> float:
-    return context.utility_function(context.economic_model(econ_par, occured, spend, context.damage_function))
+    net_outcome = context.economic_model(econ_par, occured, spend, context.damage_function)
+    return context.utility_function(net_outcome)
 
 
 def _calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:

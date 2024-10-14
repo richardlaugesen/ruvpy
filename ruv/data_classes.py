@@ -52,10 +52,6 @@ class SingleParOutput:
     obs_ex_ante: np.ndarray
     ref_ex_ante: np.ndarray
 
-    fcst_expected_damages: np.ndarray
-    ref_expected_damages: np.ndarray
-    obs_damages: np.ndarray
-
     def __init__(self, obs_size: int):
         self.ruv = np.nan
         self.avg_fcst_ex_post = np.nan
@@ -64,7 +60,6 @@ class SingleParOutput:
         self.fcst_spends, self.obs_spends, self.ref_spends = np.full((3, obs_size), np.nan)
         self.fcst_ex_ante, self.obs_ex_ante, self.ref_ex_ante = np.full((3, obs_size), np.nan)
         self.fcst_ex_post, self.obs_ex_post, self.ref_ex_post = np.full((3, obs_size), np.nan)
-        self.fcst_expected_damages, self.ref_expected_damages, self.obs_damages = np.full((3, obs_size), np.nan)
 
 
 @dataclass
@@ -103,9 +98,5 @@ class MultiParOutput:
         results['fcst_ex_post'] = self.get_series('fcst_ex_post')
         results['ref_ex_post'] = self.get_series('ref_ex_post')
         results['obs_ex_post'] = self.get_series('obs_ex_post')
-
-        results['fcst_expected_damages'] = self.get_series('fcst_expected_damages')
-        results['ref_expected_damages'] = self.get_series('ref_expected_damages')
-        results['obs_damages'] = self.get_series('obs_damages')
 
         return results
