@@ -68,8 +68,8 @@ def _ex_ante_utility(econ_par: float, spend: float, likelihoods: np.ndarray, con
     return np.dot(likelihoods, context.utility_function(net_outcome))
 
 
-def _ex_post_utility(econ_par: float, occured: float, spend: float, context: DecisionContext) -> float:
-    net_outcome = context.economic_model(econ_par, occured, spend, context.damage_function)
+def _ex_post_utility(econ_par: float, occurred: float, spend: float, context: DecisionContext) -> float:
+    net_outcome = context.economic_model(econ_par, occurred, spend, context.damage_function)
     return context.utility_function(net_outcome)
 
 
