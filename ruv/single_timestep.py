@@ -1,4 +1,4 @@
-# Copyright 2023 Richard Laugesen
+# Copyright 2024 Richard Laugesen
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.
     else:
         fcst_likelihoods = _calc_likelihood(fcst, context.decision_thresholds)              # not pre-calculating likelihoods because code becomes
         fcst_spend = _find_spend_ensemble(econ_par, fcst, fcst_likelihoods, context)        # difficult to read and maintain even though it is
-                                                                                            # 30% speedup
+                                                                                            # an approximately 30% speedup
     if is_deterministic(ref):
         ref_threshold = _realised_threshold(ref, context.decision_thresholds)
         ref_spend = context.analytical_spend(econ_par, ref_threshold, context.damage_function)

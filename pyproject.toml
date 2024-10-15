@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "relative-utility-value"
+name = "ruvpy"
 version = "1.0.0"
 description = "Reference implementation for the Relative Utility Value forecast value method."
-authors = ["Richard Laugesen <ruv@laugesen.com.au>"]
+authors = ["Richard Laugesen <richard@laugesen.com.au>"]
 license = "Apache 2"
 package-mode = false
 

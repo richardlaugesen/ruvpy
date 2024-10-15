@@ -1,4 +1,4 @@
-# Relative Utility Value (RUV)
+# RUVPY
 
 [![Tests](https://github.com/richardlaugesen/relative-utility-value/actions/workflows/python-package.yml/badge.svg)](https://github.com/richardlaugesen/relative-utility-value/actions/workflows/python-package.yml)
 ![Coverage](https://img.shields.io/badge/dynamic/json?color=green&label=Coverage&query=$.files[%27coverage.json%27].content&url=https://api.github.com/gists/a08622619e06b2157bee092f47e404d9)
@@ -7,12 +7,12 @@
 
 [Open Science](https://en.wikipedia.org/wiki/Open_science) infrastructure written in [Python](https://python.org/).
 
-RUV is used to quantify the value of forecast information for decision-making. 
-It is very flexible and can accomodate a wide range of decisions. 
-This package is a reference implementation of the RUV method.
+RUVPY can be used to quantify the value of forecast information for decision-making.
+It is a reference implementation of the Relative Utility Value (RUV) method, which is very flexible and can accommodate a wide range of decisions.
 
 It includes a set of commonly used decision rules, utility functions, damage functions, and economic models.
-The implementation is sufficiently computationally efficient for most situations and parallelises timesteps over available CPU cores. The primary focus is on clarity and flexibility.
+The implementation is sufficiently computationally efficient for most situations and parallelises timesteps over available CPU cores. 
+The primary focus is of this implementation is clarity and flexibility.
 
 The scope is intentionally narrow and does not include any figure generation, data loading and saving, other metrics, or analysis functionality. 
 These functions are intended to be implemented in a larger workflow or analysis pipeline which calls the main entry point of this library. 
@@ -57,4 +57,4 @@ We encourage you to contribute! Everyone interacting with this project is expect
 
 ## Contact
 
-Richard Laugesen - [Web](https://laugesen.com.au) / [Email](mailto://ruv@laugesen.com.au)
+Richard Laugesen - [Email](mailto://richard@laugesen.com.au) / [Web](https://laugesen.com.au)
