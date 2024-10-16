@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite the following paper."
+authors:
+  - family-names: "Laugesen"
+    given-names: "Richard"
+  - family-names: "Thyer"
+    given-names: "Mark"
+  - family-names: "McInerney"
+    given-names: "David"
+  - family-names: "Kavetski"
+    given-names: "Dmitri"
+title: "Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts"
+journal: "Hydrology and Earth System Sciences"
+volume: "27"
+number: "4"
+pages: "873-893"
+note: "HESS"
+year: "2023"
+doi: "10.5194/hess-27-873-2023"
+url: "https://hess.copernicus.org/articles/27/873/2023/"
+issn: "1607-7938"
+type: article
