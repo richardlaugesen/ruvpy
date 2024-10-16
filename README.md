@@ -32,7 +32,11 @@ The package is available on PyPI and can be installed using pip:
 
     pip install ruvpy
 
-## Example
+## Documentation
+
+Generated documentation is available at [docs/ruvpy/index.html](docs/ruvpy/index.html).
+
+## Examples
 
 The package includes a set of examples corresponding to each figure in the publications noted above. 
 These are all implemented as Jupyter notebooks in the `examples` directory.
@@ -47,15 +51,29 @@ Please consider contributing your new components to the repository to help other
 
 ## Development
 
-The main package requires Python (>=3.8), NumPy, SciPy, and Pathos. The examples additionally require XArray, Pandas, Jupyter, and Matplotlib, and the tests require Pytest and Statsmodels.
+The main package requires Python (>=3.8), NumPy, SciPy, and Pathos.
+The examples additionally require XArray, Pandas, Jupyter, and Matplotlib, the tests require Pytest and Statsmodels, 
+and generating docs requires pdoc3.
 
-All dependencies are defined in an included pyproject.toml file ready for use with [Poetry](https://python-poetry.org/) or Setuptools.
+All dependencies are defined in an included pyproject.toml file ready for use with [Poetry](https://python-poetry.org/) 
+or Setuptools.
 
-For example, the following commands can be used once Poetry is installed to set the environment up and run the tests:
+For example, the following commands can be used once Poetry is installed to set the environment up:
 
     poetry install
     poetry shell
-    poetry run pytest
+
+And then to run the unit tests use: 
+
+    pytest
+
+To run examples use:
+
+    jupyter notebook
+
+Regenerate documentation using:
+
+    pdoc --html --output-dir docs ruvpy --force
 
 ## Code of conduct
 
