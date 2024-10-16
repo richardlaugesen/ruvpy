@@ -24,33 +24,41 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     Calculate the Relative Utility Value (RUV) for a set of observations, forecasts, and references using
     specified decision-context.
 
-    This entry function to RUVPY calculates RUV by evaluating the utility of forecasts through a simulation of decision-making under uncertainty.
-    RUV quantifies the value of forecasts relative to a reference scenario (e.g., climatology) and is often applied in settings such as
-    streamflow forecasting or weather forecasting, where decisions are made based on forecast probabilities.
-    It is typically used with probabilistic forecasts but can also handle deterministic forecasts (single ensemble member for fcsts and refs).
+    This entry function to RUVPY calculates RUV by evaluating the utility of forecasts through a simulation of
+    decision-making under uncertainty. RUV quantifies the value of forecasts relative to a reference scenario
+    (e.g., climatology) and is often applied in settings such as streamflow forecasting or weather forecasting,
+    where decisions are made based on forecast probabilities. It is typically used with probabilistic forecasts but
+    can also handle deterministic forecasts (single ensemble member for fcsts and refs).
 
-    The RUV method and RUVPY software package are introduced in detail in the following publications. We suggest reading these to understand the context and motivation for the software.
+    The RUV method and RUVPY software package are introduced in detail in the following publications. We suggest
+    reading these to understand the context and motivation for the software.
 
-        **Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27, 873–893, https://doi.org/10.5194/hess-27-873-2023, 2023.**
+    *Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range
+    of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27,
+    873–893, https://doi.org/10.5194/hess-27-873-2023, 2023.*
 
-        **Laugesen, R., Thyer, M., McInerney, D., Kavetski, D. (2024). Software to quantify the value of forecasts for decision-making: sensitivity to damages case study. Manuscript submitted for publication in Environmental Modelling & Software.**
+    *Laugesen, R., Thyer, M., McInerney, D., Kavetski, D. (2024). Software to quantify the value of forecasts for
+    decision-making: sensitivity to damages case study. Manuscript submitted for publication in Environmental
+    Modelling & Software.*
 
     Parameters
     ----------
     obs : np.ndarray
         1D array of observed values, representing the actual outcomes.
     fcsts : np.ndarray
-        2D array of forecast values, where each column is an ensemble member and each row corresponds to a forecast at a given time.
+        2D array of forecast values, where each column is an ensemble member and each row corresponds to a forecast at
+        a given time.
     refs : np.ndarray
-        2D array of reference values (e.g., climatology ensemble), where each column is an ensemble member and each row corresponds to a time period.
-        If None, a reference climatology will be generated based on the observations, reproduces the observed frequency of events as in REV.
+        2D array of reference values (e.g., climatology ensemble), where each column is an ensemble member and each row
+        corresponds to a time period. If None, a reference climatology will be generated based on the observations,
+        reproduces the observed frequency of events as in REV.
     decision_context : dict
         Dictionary defining the decision-context. The dictionary must contain:
-        - 'decision_thresholds': A 1D array specifying thresholds used to define decisions based on forecast values.
-        - 'decision_rule': A list with the decision-making function as the first element, and its parameters as the second.
-        - 'damage_function': A list with the damage function method as the first element, and its parameters as the second.
-        - 'utility_function': A list with the utility function method as the first element, and its parameters as the second.
-        - 'economic_model': A list with the economic model function, its analytical spend function, and a list of parameter values (e.g. alpha).
+        - 'decision_thresholds': 1D array specifying thresholds of the forecast variable.
+        - 'decision_rule': List with the decision-making function and a dictionary of its parameters.
+        - 'damage_function': List with the damage function method and a dictionary of its parameters.
+        - 'utility_function': List with the utility function method and a dictionary of its parameters.
+        - 'economic_model': List with the economic model function, analytical function, and list of parameter values.
     parallel_nodes : int, optional
         The number of parallel processes used for computation. Defaults to 4.
 
@@ -61,16 +69,15 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
         The dictionary includes:
         - 'ruv': A 2D array of RUV values for each economic model parameter.
         - 'economic_model_params': The economic model parameters used in the calculation for convenience.
-        - 'avg_fcst_ex_post', 'avg_ref_ex_post', 'avg_obs_ex_post': Average ex post results for forecasts, references, and observations, respectively.
-        - 'fcst_spends', 'ref_spends', 'obs_spends': Spending values for forecasts, references, and observations.
-        - 'fcst_ex_ante', 'ref_ex_ante', 'obs_ex_ante': Ex ante (expected) results for forecasts, references, and observations.
-        - 'fcst_ex_post', 'ref_ex_post', 'obs_ex_post': Ex post (actual) results for forecasts, references, and observations.
+        - 'fcst_spends', 'ref_spends', 'obs_spends': Amount spent after decision optimisation at each timestep.
+        - 'fcst_ex_ante', 'ref_ex_ante', 'obs_ex_ante': Expected utility before event occurred (ex ante).
+        - 'fcst_ex_post', 'ref_ex_post', 'obs_ex_post': Utility after event occurred (ex post).
+        - 'avg_fcst_ex_post', 'avg_ref_ex_post', 'avg_obs_ex_post': Average ex post utility.
 
     Raises
     ------
     ValueError
-        If inputs contain missing values, or if thresholds are violated (e.g., forecast or observation values are less than the smallest decision threshold).
-        Also raised if the lengths of `obs`, `fcsts`, and `refs` do not match.
+        If inputs contain missing values, invalid thresholds provided, or input data lengths do not match.
 
     Examples
     --------
@@ -84,7 +91,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
             'damage_function': [logistic, {'k': 0.2, 'A': 1, 'threshold': 20}]
         }
 
-    Complete examples reproducing figures from related research are included as Jupyter notebooks in the *examples* directory.
+    Examples reproducing figures from related research are included as Jupyter notebooks in the *examples* directory.
 
     Included decision context functions
     ----------------------------------------
@@ -92,7 +99,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     **Decision rules**:
     - `optimise_over_forecast_distribution`: Optimises decision-making based on whole forecast distribution.
     - `critical_probability_threshold_fixed`: Uses a fixed critical probability threshold for decision-making.
-    - `critical_probability_threshold_max_value`: Selects the decision threshold which leads to the maximum forecast value.
+    - `critical_probability_threshold_max_value`: Selects the decision threshold leading to the maximum forecast value.
     - `critical_probability_threshold_equals_par`: Matches the decision threshold to the economic parameter.
 
     **Damage functions**:
