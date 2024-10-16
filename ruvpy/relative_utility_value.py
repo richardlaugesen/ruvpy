@@ -19,30 +19,30 @@ from ruvpy.data_classes import DecisionContext
 
 
 # main entry function for RUV calculation
-def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, decision_definition: dict, parallel_nodes: int=4) -> dict:
+def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, decision_context: dict, parallel_nodes: int=4) -> dict:
 
     # decision type
-    decision_thresholds = decision_definition['decision_thresholds']
+    decision_thresholds = decision_context['decision_thresholds']
 
     # decision-making method
-    decision_rule = decision_definition['decision_rule'][0]
-    decision_rule_params = decision_definition['decision_rule'][1]
+    decision_rule = decision_context['decision_rule'][0]
+    decision_rule_params = decision_context['decision_rule'][1]
     decision_rule_fnc = decision_rule(decision_rule_params)
 
     # damage function
-    damage_fnc_mth = decision_definition['damage_function'][0]
-    damage_fnc_params = decision_definition['damage_function'][1]
+    damage_fnc_mth = decision_context['damage_function'][0]
+    damage_fnc_params = decision_context['damage_function'][1]
     damage_function = damage_fnc_mth(damage_fnc_params)
 
     # utility function
-    utility_fnc_mth = decision_definition['utility_function'][0]
-    utility_fnc_params = decision_definition['utility_function'][1]
+    utility_fnc_mth = decision_context['utility_function'][0]
+    utility_fnc_params = decision_context['utility_function'][1]
     utility_function = utility_fnc_mth(utility_fnc_params)
 
     # economic model
-    economic_model_fnc = decision_definition['economic_model'][0]
-    economic_model_analytical_spend_fnc = decision_definition['economic_model'][1]
-    economic_model_params = decision_definition['economic_model'][2]
+    economic_model_fnc = decision_context['economic_model'][0]
+    economic_model_analytical_spend_fnc = decision_context['economic_model'][1]
+    economic_model_params = decision_context['economic_model'][2]
 
     context_fields = {
         'economic_model_params': economic_model_params,
