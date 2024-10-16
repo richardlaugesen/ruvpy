@@ -28,7 +28,7 @@ The method and software package are introduced in detail in the following public
 
 ## Installation
 
-The main package requires Python (>=3.8), NumPy, and SciPy. The examples additionally require XArray, Pandas, Jupyter, and Matplotlib, andtThe tests require Pytest and Statsmodels.
+The main package requires Python (>=3.8), NumPy, and SciPy. The examples additionally require XArray, Pandas, Jupyter, and Matplotlib, and the tests require Pytest and Statsmodels.
 
 A good way to set up the environment is to use the [Poetry](https://python-poetry.org/) dependency management system with the included pyproject.toml file. 
 After installing Poetry run the following commands to install dependencies and run the unit tests:
