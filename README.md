@@ -3,11 +3,11 @@
 [![Tests](https://github.com/richardlaugesen/ruvpy/actions/workflows/python-package.yml/badge.svg)](https://github.com/richardlaugesen/ruvpy/actions/workflows/python-package.yml)
 ![Coverage](https://img.shields.io/badge/dynamic/json?color=green&label=Coverage&query=$.files[%27coverage.json%27].content&url=https://api.github.com/gists/a08622619e06b2157bee092f47e404d9)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT)
 
 [Open Science](https://en.wikipedia.org/wiki/Open_science) infrastructure written in [Python](https://python.org/).
 
-RUVPY can be used to quantify the value of forecast information for decision-making.
+RUVPY is a library which can be used in your software to quantify the value of forecast information for decision-making.
 
 It is a reference implementation of the Relative Utility Value (RUV) method, which is very flexible and can accommodate a wide range of decisions.
 
@@ -34,7 +34,7 @@ The package is available on PyPI and can be installed using pip:
 
 ## Documentation
 
-Generated documentation is available at [docs/ruvpy/index.html](docs/ruvpy/index.html).
+Generated documentation is available at https://richardlaugesen.github.io/ruvpy/.
 
 ## Examples
 
@@ -47,7 +47,7 @@ RUV is designed to be tailored to the decision being evaluated.
 This may require the development of custom components to define the decision context in RUVPY. 
 A set of templates to help you get started is included in `templates` directory.
 
-Please consider contributing your new components to the repository to help others.
+Please consider [contributing](CONTIBUTING.md) your new components to the repository to help others.
 
 ## Development
 
@@ -75,9 +75,20 @@ Regenerate documentation using:
 
     pdoc --html --output-dir docs ruvpy --force
 
+## Attribution
+
+This project is licensed under the [Apache License 2.0](LICENSE), which allows for free use, modification, 
+and distribution of the code under the terms of the license.
+
+We would like to acknowledge and thank the [RUVPY developers](AUTHORS) for their efforts in maintaining and improving 
+this project. Please see the [AUTHORS](AUTHORS) file for a full list of contributors.
+
+For proper citation of this project, please refer to the [CITATION.cff](CITATION.cff) file, which provides guidance on 
+how to cite the software and relevant publications.
+
 ## Code of conduct
 
-We encourage you to contribute! Everyone interacting with this project is expected to follow the [Code of Conduct](code_of_conduct.md).
+We encourage you to contribute! Everyone interacting with this project is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Contact
 

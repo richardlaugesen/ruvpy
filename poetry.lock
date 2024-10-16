@@ -2278,6 +2278,22 @@ six = "*"
 test = ["pytest", "pytest-cov", "scipy"]
 
 [[package]]
+name = "pdoc"
+version = "15.0.0"
+description = "API Documentation for Python Projects"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "pdoc-15.0.0-py3-none-any.whl", hash = "sha256:151b0187a25eaf827099e981d6dbe3a4f68aeb18d0d637c24edcab788d5540f1"},
+    {file = "pdoc-15.0.0.tar.gz", hash = "sha256:b761220d3ba129cd87e6da1bb7b62c8e799973ab9c595de7ba1a514850d86da5"},
+]
+
+[package.dependencies]
+Jinja2 = ">=2.11.0"
+MarkupSafe = ">=1.1.1"
+pygments = ">=2.12.0"
+
+[[package]]
 name = "pdoc3"
 version = "0.11.1"
 description = "Auto-generate API documentation for Python projects."
@@ -3486,4 +3502,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9"
-content-hash = "90b0958de3c77d088a191cdc16caa711d1aef0eed16f60dee46c3c98f0229bc7"
+content-hash = "ac4c05f8177b47612c3b11ec44a8027d6bcc05ea4ba1394b5e4c9c6850d8fc5b"
