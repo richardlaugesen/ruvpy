@@ -28,16 +28,9 @@ The method and software package are introduced in detail in the following public
 
 ## Installation
 
-The main package requires Python (>=3.8), NumPy, and SciPy. The examples additionally require XArray, Pandas, Jupyter, and Matplotlib, and the tests require Pytest and Statsmodels.
+The package is available on PyPI and can be installed using pip:
 
-A good way to set up the environment is to use the [Poetry](https://python-poetry.org/) dependency management system with the included pyproject.toml file. 
-After installing Poetry run the following commands to install dependencies and run the unit tests:
-
-    poetry install
-
-    poetry shell
-
-    poetry run pytest
+    pip install ruvpy
 
 ## Example
 
@@ -48,13 +41,25 @@ These are all implemented as Jupyter notebooks in the `examples` directory.
 
 RUV is designed to be tailored to the decision being evaluated. 
 This may require the development of custom components to define the decision context in RUVPY. 
-A set of templates to help the user get started is included in `templates` directory.
+A set of templates to help you get started is included in `templates` directory.
 
 Please consider contributing your new components to the repository to help others.
 
+## Development
+
+The main package requires Python (>=3.8), NumPy, SciPy, and Pathos. The examples additionally require XArray, Pandas, Jupyter, and Matplotlib, and the tests require Pytest and Statsmodels.
+
+All dependencies are defined in an included pyproject.toml file ready for use with [Poetry](https://python-poetry.org/) or Setuptools.
+
+For example, the following commands can be used once Poetry is installed to set the environment up and run the tests:
+
+    poetry install
+    poetry shell
+    poetry run pytest
+
 ## Code of conduct
 
-We encourage you to contribute! Everyone interacting with this project is expected to follow the [Code of Conduct](code_of_conduct.md). 
+We encourage you to contribute! Everyone interacting with this project is expected to follow the [Code of Conduct](code_of_conduct.md).
 
 ## Contact
 
