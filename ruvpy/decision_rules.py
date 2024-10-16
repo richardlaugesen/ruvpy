@@ -16,9 +16,9 @@ from typing import Callable
 from scipy.optimize import minimize_scalar
 import numpy as np
 
-from ruv.multi_timestep import multiple_timesteps
-from ruv.data_classes import MultiParOutput, DecisionContext
-from ruv.helpers import probabilistic_to_deterministic_forecast
+from ruvpy.multi_timestep import multiple_timesteps
+from ruvpy.data_classes import MultiParOutput, DecisionContext
+from ruvpy.helpers import probabilistic_to_deterministic_forecast
 
 
 def optimise_over_forecast_distribution(params: dict) -> Callable:

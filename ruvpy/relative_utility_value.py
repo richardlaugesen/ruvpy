@@ -14,8 +14,8 @@
 
 import numpy as np
 
-from ruv.helpers import generate_event_freq_ref
-from ruv.data_classes import DecisionContext
+from ruvpy.helpers import generate_event_freq_ref
+from ruvpy.data_classes import DecisionContext
 
 
 # main entry function for RUV calculation

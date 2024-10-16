@@ -15,12 +15,12 @@
 import pytest
 import numpy as np
 
-from ruv.single_timestep import _calc_likelihood, _ex_ante_utility, _ex_post_utility, _find_spend_ensemble, single_timestep, _realised_threshold
-from ruv.damage_functions import logistic_zero
-from ruv.economic_models import cost_loss, cost_loss_analytical_spend
-from ruv.utility_functions import cara
-from ruv.data_classes import DecisionContext
-from ruv.decision_rules import optimise_over_forecast_distribution
+from ruvpy.single_timestep import _calc_likelihood, _ex_ante_utility, _ex_post_utility, _find_spend_ensemble, single_timestep, _realised_threshold
+from ruvpy.damage_functions import logistic_zero
+from ruvpy.economic_models import cost_loss, cost_loss_analytical_spend
+from ruvpy.utility_functions import cara
+from ruvpy.data_classes import DecisionContext
+from ruvpy.decision_rules import optimise_over_forecast_distribution
 
 
 def get_context(decision_thresholds=np.arange(5, 20, 1)):

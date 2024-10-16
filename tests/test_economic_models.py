@@ -14,8 +14,8 @@
 
 import numpy as np
 
-from ruv.economic_models import cost_loss, cost_loss_analytical_spend
-from ruv.damage_functions import logistic_zero
+from ruvpy.economic_models import cost_loss, cost_loss_analytical_spend
+from ruvpy.damage_functions import logistic_zero
 
 def test_cost_loss_analytical_spend():
 

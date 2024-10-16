@@ -16,8 +16,8 @@ import numpy as np
 import copy
 from scipy.optimize import minimize_scalar
 
-from ruv.helpers import is_deterministic, ecdf
-from ruv.data_classes import DecisionContext
+from ruvpy.helpers import is_deterministic, ecdf
+from ruvpy.data_classes import DecisionContext
 
 
 # Calculate RUV for a single economic parameter and single timestep

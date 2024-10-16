@@ -14,12 +14,12 @@
 
 import numpy as np
 
-from ruv.data_classes import DecisionContext
-from ruv.economic_models import cost_loss, cost_loss_analytical_spend
-from ruv.utility_functions import cara
-from ruv.damage_functions import logistic_zero
-from ruv.helpers import generate_event_freq_ref
-from ruv.decision_rules import optimise_over_forecast_distribution, critical_probability_threshold_equals_par, critical_probability_threshold_fixed, critical_probability_threshold_max_value
+from ruvpy.data_classes import DecisionContext
+from ruvpy.economic_models import cost_loss, cost_loss_analytical_spend
+from ruvpy.utility_functions import cara
+from ruvpy.damage_functions import logistic_zero
+from ruvpy.helpers import generate_event_freq_ref
+from ruvpy.decision_rules import optimise_over_forecast_distribution, critical_probability_threshold_equals_par, critical_probability_threshold_fixed, critical_probability_threshold_max_value
 
 
 def get_data(ref_equals_fcst=False, event_freq_ref=False):

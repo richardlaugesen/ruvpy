@@ -15,7 +15,7 @@
 import pytest
 import numpy as np
 
-from ruv.utility_functions import cara, crra, exponential_utility, isoelastic_utility, hyperbolic_utility
+from ruvpy.utility_functions import cara, crra, exponential_utility, isoelastic_utility, hyperbolic_utility
 
 
 def test_cara():

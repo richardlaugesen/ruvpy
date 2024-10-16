@@ -14,12 +14,12 @@
 
 import numpy as np
 
-from ruv.multi_timestep import multiple_timesteps
-from ruv.data_classes import DecisionContext
-from ruv.damage_functions import logistic_zero
-from ruv.economic_models import cost_loss, cost_loss_analytical_spend
-from ruv.decision_rules import optimise_over_forecast_distribution
-from ruv.utility_functions import cara
+from ruvpy.multi_timestep import multiple_timesteps
+from ruvpy.data_classes import DecisionContext
+from ruvpy.damage_functions import logistic_zero
+from ruvpy.economic_models import cost_loss, cost_loss_analytical_spend
+from ruvpy.decision_rules import optimise_over_forecast_distribution
+from ruvpy.utility_functions import cara
 
 def get_context():
     context_fields = {

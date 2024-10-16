@@ -14,8 +14,8 @@
 
 import numpy as np
 
-from ruv.single_timestep import single_timestep
-from ruv.data_classes import DecisionContext, SingleParOutput
+from ruvpy.single_timestep import single_timestep
+from ruvpy.data_classes import DecisionContext, SingleParOutput
 from pathos.multiprocessing import ProcessPool as Pool
 
 

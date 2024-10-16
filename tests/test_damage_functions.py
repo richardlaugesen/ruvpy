@@ -14,7 +14,7 @@
 
 import numpy as np
 
-from ruv.damage_functions import logistic, logistic_zero, binary, linear, user_defined,_user_defined_interpolator
+from ruvpy.damage_functions import logistic, logistic_zero, binary, linear, user_defined,_user_defined_interpolator
 
 
 def test_logistic():
