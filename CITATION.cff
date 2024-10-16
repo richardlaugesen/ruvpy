@@ -11,11 +11,13 @@ authors:
     given-names: "David"
   - family-names: "Kavetski"
     given-names: "Dmitri"
-year: "2023"
+year: 2023
 journal: "Hydrology and Earth System Sciences"
-volume: "27"
-issue: "4"
+volume: 27
+issue: 4
 pages: "873-893"
-doi: "10.5194/hess-27-873-2023"
+identifiers:
+  - type: doi
+    value: "10.5194/hess-27-873-2023"
 url: "https://hess.copernicus.org/articles/27/873/2023/"
 type: "article"
