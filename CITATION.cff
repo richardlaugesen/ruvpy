@@ -1,23 +1,32 @@
 cff-version: 1.2.0
-message: "If you use this work, please cite the following paper."
-title: "Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts"
+message: "If you use this software, please cite both the software and the associated method paper as below."
+title: "Reference implementation of the Relative Utility Value metric for forecast value assessment"
+version: v0.9.0
+date-released: 2024-10-16
 authors:
   - family-names: "Laugesen"
     given-names: "Richard"
     orcid: "https://orcid.org/0000-0002-3811-5845"
-  - family-names: "Thyer"
-    given-names: "Mark"
-  - family-names: "McInerney"
-    given-names: "David"
-  - family-names: "Kavetski"
-    given-names: "Dmitri"
-year: 2023
-journal: "Hydrology and Earth System Sciences"
-volume: 27
-issue: 4
-pages: "873-893"
-identifiers:
-  - type: doi
-    value: "10.5194/hess-27-873-2023"
-url: "https://hess.copernicus.org/articles/27/873/2023/"
-type: "article"
+
+references:
+  - type: article
+    title: "Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts"
+    authors:
+      - family-names: "Laugesen"
+        given-names: "Richard"
+        orcid: "https://orcid.org/0000-0002-3811-5845"
+      - family-names: "Thyer"
+        given-names: "Mark"
+      - family-names: "McInerney"
+        given-names: "David"
+      - family-names: "Kavetski"
+        given-names: "Dmitri"
+    year: 2023
+    journal: "Hydrology and Earth System Sciences"
+    volume: 27
+    issue: 4
+    pages: "873-893"
+    identifiers:
+      - type: doi
+        value: "10.5194/hess-27-873-2023"
+    url: "https://hess.copernicus.org/articles/27/873/2023/"

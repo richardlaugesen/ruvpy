@@ -4,6 +4,7 @@
 ![Coverage](https://img.shields.io/badge/dynamic/json?color=green&label=Coverage&query=$.files[%27coverage.json%27].content&url=https://api.github.com/gists/a08622619e06b2157bee092f47e404d9)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT)
+[![Zenodo](https://zenodo.org/badge/DOI/10.5281/zenodo.13939199.svg)](https://doi.org/10.5281/zenodo.13939199)
 
 [Open Science](https://en.wikipedia.org/wiki/Open_science) infrastructure written in [Python](https://python.org/).
 
