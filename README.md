@@ -8,11 +8,12 @@
 [Open Science](https://en.wikipedia.org/wiki/Open_science) infrastructure written in [Python](https://python.org/).
 
 RUVPY can be used to quantify the value of forecast information for decision-making.
+
 It is a reference implementation of the Relative Utility Value (RUV) method, which is very flexible and can accommodate a wide range of decisions.
 
 It includes a set of commonly used decision rules, utility functions, damage functions, and economic models.
 The implementation is sufficiently computationally efficient for most situations and parallelises timesteps over available CPU cores. 
-The primary focus is of this implementation is clarity and flexibility.
+The primary focus of this implementation is clarity and flexibility.
 
 The scope is intentionally narrow and does not include any figure generation, data loading and saving, other metrics, or analysis functionality. 
 These functions are intended to be implemented in a larger workflow or analysis pipeline which calls the main entry point of this library. 
@@ -27,9 +28,10 @@ The method and software package are introduced in detail in the following public
 
 ## Installation
 
-The package requires Python (>=3.8) and a few dependencies. The dependencies are defined in the (pyproject.toml) file for [Poetry](https://python-poetry.org/) dependency management.
+The main package requires Python (>=3.8), NumPy, and SciPy. The examples additionally require XArray, Pandas, Jupyter, and Matplotlib, andtThe tests require Pytest and Statsmodels.
 
-Install the required dependencies using Poetry and then run the unit tests with the following commands:
+A good way to set up the environment is to use the [Poetry](https://python-poetry.org/) dependency management system with the included pyproject.toml file. 
+After installing Poetry run the following commands to install dependencies and run the unit tests:
 
     poetry install
 
@@ -39,14 +41,13 @@ Install the required dependencies using Poetry and then run the unit tests with 
 
 ## Example
 
-The package includes a set of examples which loosely correspond with figures in the publications noted above. 
-
+The package includes a set of examples corresponding to each figure in the publications noted above. 
 These are all implemented as Jupyter notebooks in the `examples` directory.
 
 ## Templates
 
 RUV is designed to be tailored to the decision being evaluated. 
-This may require the development of custom components to define the decision context. 
+This may require the development of custom components to define the decision context in RUVPY. 
 A set of templates to help the user get started is included in `templates` directory.
 
 Please consider contributing your new components to the repository to help others.
@@ -57,4 +58,4 @@ We encourage you to contribute! Everyone interacting with this project is expect
 
 ## Contact
 
-Richard Laugesen - [Email](mailto://richard@laugesen.com.au) / [Web](https://laugesen.com.au)
+Richard Laugesen ([richard@laugesen.com.au](mailto://richard@laugesen.com.au))
