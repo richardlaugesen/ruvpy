@@ -25,7 +25,7 @@ The method and software package are introduced in detail in the following public
 
 *Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27, 873–893, https://doi.org/10.5194/hess-27-873-2023, 2023.*
 
-*Laugesen, R., Thyer, M., McInerney, D., Kavetski, D. (2024). Software to quantify the value of forecasts for decision-making: sensitivity to damages case study. Manuscript submitted for publication in Environmental Modelling & Software.*
+*Laugesen, R., Thyer, M., McInerney, D., Kavetski, D. (2024). Software library to quantify the value of forecasts for decision-making: Case study on sensitivity to damages (under review).*
 
 ## Installation
 

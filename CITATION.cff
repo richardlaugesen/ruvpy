@@ -1,12 +1,27 @@
-cff-version: 1.2.0
-message: "If you use this software, please cite both the software and the associated method paper as below."
-title: "Reference implementation of the Relative Utility Value metric for forecast value assessment"
-version: v0.9.0
-date-released: 2024-10-16
+
+abstract: Initial software release for peer review with associated journal paper
 authors:
-  - family-names: "Laugesen"
-    given-names: "Richard"
-    orcid: "https://orcid.org/0000-0002-3811-5845"
+- family-names: Laugesen
+  given-names: Richard
+  orcid: 0000-0002-3811-5845
+- family-names: Thyer
+  given-names: Mark
+- family-names: McInerney
+  given-names: David
+- family-names: Kavetski
+  given-names: Dmitri
+cff-version: 1.2.0
+date-released: '2024-10-16'
+doi: 10.5281/zenodo.13939199
+license:
+- apache-2.0
+repository-code: https://github.com/richardlaugesen/ruvpy/tree/v0.9.0
+title: RUVPY software library to quantify the value of forecasts for decision-making
+  using RUV
+type: software
+version: v0.9.0
+
+message: "If you use this software, please cite both the software and the associated method paper as below."
 
 references:
   - type: article
