@@ -89,7 +89,7 @@ how to cite the software and relevant publications.
 
 ## Code of conduct
 
-We encourage you to contribute! Everyone interacting with this project is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+We encourage you to [contribute](CONTRIBUTING.md)! Everyone interacting with this project is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Contact
 
