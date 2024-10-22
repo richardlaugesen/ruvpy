@@ -16,44 +16,52 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        export PATH="$HOME/.local/bin:$PATH"
-    - name: Install dependencies
-      run: |
-        export PATH="$HOME/.local/bin:$PATH"
-        poetry install
-    - name: Lint with flake8
-      continue-on-error: true
-      run: |
-        export PATH="$HOME/.local/bin:$PATH"
-        poetry run flake8 .
-    - name: Format code with black
-      continue-on-error: true
-      run: |
-        export PATH="$HOME/.local/bin:$PATH"
-        poetry run black --check .
-    - name: Type check with mypy
-      continue-on-error: true
-      run: |
-        export PATH="$HOME/.local/bin:$PATH"
-        poetry run mypy .
-    - name: Run unit tests and generate coverage report
-      run: |
-        export PATH="$HOME/.local/bin:$PATH"
-        poetry run pytest --cov=./ --cov-report=term-missing --cov-report=xml
-    - name: Parse coverage report
-      run: |
-        python -c "import xml.etree.ElementTree as ET; coverage = float(ET.parse('coverage.xml').getroot().get('line-rate')) * 100; print(f'{round(coverage)}%')" > coverage.txt
-    - name: Update gist
-      run: |
-        echo "{\"files\": {\"coverage.json\": {\"content\": \"$(cat coverage.txt)\"}}}" > coverage.json
-        curl -X PATCH -H "Authorization: token ${{ secrets.COVERAGE_GIST_TOKEN }}" \
-              -d @coverage.json \
-              "https://api.github.com/gists/${{ secrets.COVERAGE_GIST_ID }}"
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          export PATH="$HOME/.local/bin:$PATH"
+
+      - name: Install dependencies
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          poetry install --with dev 
+
+      - name: Lint with flake8
+        continue-on-error: true
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          poetry run flake8 .
+
+      - name: Format code with black
+        continue-on-error: true
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          poetry run black --check .
+
+      - name: Type check with mypy
+        continue-on-error: true
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          poetry run mypy .
+
+      - name: Run unit tests and generate coverage report
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          poetry run pytest --cov=./ --cov-report=term-missing --cov-report=xml
+
+      - name: Parse coverage report
+        run: |
+          python -c "import xml.etree.ElementTree as ET; coverage = float(ET.parse('coverage.xml').getroot().get('line-rate')) * 100; print(f'{round(coverage)}%')" > coverage.txt
+
+      - name: Update gist
+        run: |
+          echo "{\"files\": {\"coverage.json\": {\"content\": \"$(cat coverage.txt)\"}}}" > coverage.json
+          curl -X PATCH -H "Authorization: token ${{ secrets.COVERAGE_GIST_TOKEN }}" \
+                -d @coverage.json \
+                "https://api.github.com/gists/${{ secrets.COVERAGE_GIST_ID }}"
