@@ -1,25 +1,24 @@
 abstract: Initial software release for peer review with associated journal paper
 authors:
-- family-names: Laugesen
-  given-names: Richard
-  orcid: 0000-0002-3811-5845
-- family-names: Thyer
-  given-names: Mark
-- family-names: McInerney
-  given-names: David
-- family-names: Kavetski
-  given-names: Dmitri
+  - family-names: Laugesen
+    given-names: Richard
+    orcid: 0000-0002-3811-5845
+  - family-names: Thyer
+    given-names: Mark
+  - family-names: McInerney
+    given-names: David
+  - family-names: Kavetski
+    given-names: Dmitri
 cff-version: 1.2.0
 date-released: '2024-10-16'
 doi: 10.5281/zenodo.13939199
 license: Apache-2.0
 repository-code: https://github.com/richardlaugesen/ruvpy/tree/v0.9.1
-title: RUVPY software library to quantify the value of forecasts for decision-making
-  using RUV
+title: RUVPY software library to quantify the value of forecasts for decision-making using RUV
 type: software
 version: v0.9.1
 
-message: "If you use this software, please cite both the software and the associated method paper as below."
+message: "If you use this software, please cite both the software and the associated method papers as below."
 
 references:
   - type: article
@@ -43,3 +42,21 @@ references:
       - type: doi
         value: "10.5194/hess-27-873-2023"
     url: "https://hess.copernicus.org/articles/27/873/2023/"
+  - type: article
+    title: "Software Library to Quantify the Value of Forecasts for Decision-Making: Case Study on Sensitivity to Damages"
+    authors:
+      - family-names: "Laugesen"
+        given-names: "Richard"
+        orcid: "0000-0002-3811-5845"
+      - family-names: "Thyer"
+        given-names: "Mark"
+      - family-names: "McInerney"
+        given-names: "David"
+      - family-names: "Kavetski"
+        given-names: "Dmitri"
+    year: 2024
+    journal: "SSRN"
+    identifiers:
+      - type: doi
+        value: "10.2139/ssrn.5001881"
+    url: "https://ssrn.com/abstract=5001881"
