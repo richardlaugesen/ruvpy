@@ -35,7 +35,7 @@ The package is available on PyPI and can be installed using pip:
 
 ## Documentation
 
-Generated documentation is available at https://richardlaugesen.github.io/ruvpy/.
+Generated documentation is available at https://richardlaugesen.github.io/ruvpy/ruvpy/.
 
 ## Examples
 
