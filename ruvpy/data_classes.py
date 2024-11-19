@@ -15,6 +15,7 @@
 from typing import Callable, Optional
 import numpy as np
 from dataclasses import dataclass, field
+from ruvpy.probability_weight_functions import linear_weights
 
 
 @dataclass
@@ -25,11 +26,13 @@ class DecisionContext:
     economic_model: Callable
     analytical_spend: Callable
     decision_rule: Callable
-    decision_thresholds: Optional[np.ndarray] = field(default=None)
+    probability_weight_function: Callable
+    reference_point: float
+    decision_thresholds: np.ndarray
 
     def validate_fields(self):
         for field_name, value in self.__dict__.items():
-            if field_name != 'decision_thresholds' and value is None:
+            if value is None and field_name != 'decision_thresholds' and field_name != 'reference_point':
                 raise ValueError(f"The field '{field_name}' cannot be None")
 
 @dataclass

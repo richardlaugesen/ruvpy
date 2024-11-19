@@ -27,6 +27,7 @@ def optimise_over_forecast_distribution(params: dict) -> Callable:
     def decision_rule(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
         outputs = MultiParOutput()
         for econ_par in context.economic_model_params:
+            #print(econ_par)
             outputs.insert(econ_par, multiple_timesteps(obs, fcsts, refs, econ_par, context, parallel_nodes))
         return outputs
 

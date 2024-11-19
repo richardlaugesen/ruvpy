@@ -13,9 +13,11 @@
 # limitations under the License.
 
 import numpy as np
+from scipy.optimize import linearmixing
 
 from ruvpy.helpers import generate_event_freq_ref
 from ruvpy.data_classes import DecisionContext
+from ruvpy.probability_weight_functions import linear_weights
 
 
 def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, decision_context: dict, parallel_nodes: int=4) -> dict:
@@ -117,37 +119,50 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     - 'Continuous decision': `None`.
     """
 
-    # decision type
+    # TODO: update docstrings, README, tests, TODO, and templates following CPT implementation
+
+    # add in decision context defaults needed for EUT with CPT implementation
+    if 'probability_weight_function' not in decision_context:
+        decision_context['probability_weight_function'] = [linear_weights, None]
+
+    if 'reference_point' not in decision_context:
+        decision_context['reference_point'] = None
+
+    # build decision context object
     decision_thresholds = decision_context['decision_thresholds']
 
-    # decision-making method
     decision_rule = decision_context['decision_rule'][0]
     decision_rule_params = decision_context['decision_rule'][1]
     decision_rule_fnc = decision_rule(decision_rule_params)
 
-    # damage function
     damage_fnc_mth = decision_context['damage_function'][0]
     damage_fnc_params = decision_context['damage_function'][1]
-    damage_function = damage_fnc_mth(damage_fnc_params)
+    damage_fnc = damage_fnc_mth(damage_fnc_params)
 
-    # utility function
     utility_fnc_mth = decision_context['utility_function'][0]
     utility_fnc_params = decision_context['utility_function'][1]
-    utility_function = utility_fnc_mth(utility_fnc_params)
+    utility_fnc = utility_fnc_mth(utility_fnc_params)
 
-    # economic model
     economic_model_fnc = decision_context['economic_model'][0]
     economic_model_analytical_spend_fnc = decision_context['economic_model'][1]
     economic_model_params = decision_context['economic_model'][2]
 
+    probability_weight_fnc_mth = decision_context['probability_weight_function'][0]
+    probability_weight_fnc_params = decision_context['probability_weight_function'][1]
+    probability_weight_fnc = probability_weight_fnc_mth(probability_weight_fnc_params)
+
+    reference_point = decision_context['reference_point']
+
     context_fields = {
         'economic_model_params': economic_model_params,
-        'damage_function': damage_function,
-        'utility_function': utility_function,
+        'damage_function': damage_fnc,
+        'utility_function': utility_fnc,
         'decision_thresholds': decision_thresholds,
         'economic_model': economic_model_fnc,
         'analytical_spend': economic_model_analytical_spend_fnc,
-        'decision_rule': decision_rule_fnc
+        'decision_rule': decision_rule_fnc,
+        'probability_weight_function': probability_weight_fnc,
+        'reference_point': reference_point
     }
     context = DecisionContext(**context_fields)
 

@@ -1,3 +1,5 @@
+
+
 # Copyright 2024 RUVPY Developers
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,14 +45,20 @@ def exponential_utility(params: dict) -> Callable:
 # Isoelastic utility function (https://en.wikipedia.org/wiki/Isoelastic_utility)
 def isoelastic_utility(params: dict) -> Callable:
     eta = float(params['eta'])
+    symmetric = params.get('symmetric', False)
 
     def utility(c: float) -> float:
         c = _ensure_float(c)
 
+        # CARA with negative values if symmetric
+        val = np.abs(c) if symmetric else c
+
         if eta == 1:
-            return np.log(c)
+            result = np.log(val)
         else:
-            return np.power(c, 1 - eta) / (1 - eta)
+            result = (np.power(val, 1 - eta) - 1) / (1 - eta)
+
+        return np.sign(c) * result
 
     return utility
 
@@ -76,6 +84,26 @@ def hyperbolic_utility(params: dict) -> Callable:
 
     return utility
 
+
+# Cumulative Prospect Theory value function from Tversky & Kahneman (1992)
+def power_value(params: dict) -> callable:
+    alpha, beta, lambda_ = params['alpha'], params['beta'], params['lambda']
+
+    def value(c: float) -> float:
+        c = np.asarray(c)
+        result = np.empty_like(c, dtype=float)
+
+        mask = c >= 0
+
+        result[mask] = np.power(c[mask], alpha)
+        result[~mask] = -lambda_ * np.power(-c[~mask], beta)
+
+        return result if result.size > 1 else result.item()
+
+    return value
+
+
+# TODO: the types on the inner functions are wrong, could be np.array or float
 
 def _ensure_float(input_data: np.ndarray) -> float:
     return input_data.astype(float) if isinstance(input_data, np.ndarray) else float(input_data)
