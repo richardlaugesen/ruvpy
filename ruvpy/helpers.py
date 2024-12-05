@@ -31,8 +31,13 @@ def generate_event_freq_ref(obs: np.ndarray) -> np.ndarray:
     return np.tile(obs[~np.isnan(obs)], (obs.shape[0], 1))
 
 
-# Around 5 times faster than statsmodels ECDF
+# Up to 5 times faster than statsmodels ECDF
 def ecdf(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
+    if len(thresholds) == 0:
+        return thresholds
+    if len(ens) == 0:
+        return np.full(thresholds, np.nan)
+    
     ens_sorted = np.sort(ens)
     idx = np.searchsorted(ens_sorted, thresholds)   # 3 times faster then linspace
     probs = np.arange(len(ens) + 1)/float(len(ens))
@@ -63,7 +68,7 @@ def risk_premium_to_risk_aversion_coef(risk_premium: float, gamble_size: float) 
     def eqn(A):
         return np.log(0.5 * (np.exp(-A * gamble_size) + np.exp(A * gamble_size))) / (A * gamble_size) - risk_premium
 
-    return root_scalar(eqn, bracket=[0.0000001, 100]).root
+    return root_scalar(eqn, bracket=[1e-9, 70]).root
 
 
 # Calculate CARA probability premium from risk premium (Babcock, 1993. Eq 9)
@@ -77,7 +82,7 @@ def risk_premium_to_prob_premium(risk_premium: float) -> float:
     def eqn(prob):
         return np.log((1 + 4 * np.power(prob, 2)) / (1 - 4 * np.power(prob, 2))) / np.log((1 + 2 * prob) / (1 - 2 * prob)) - risk_premium
 
-    return root_scalar(eqn, bracket=[0.0000001, 0.49999]).root
+    return root_scalar(eqn, bracket=[1e-9, 0.49999]).root
 
 
 # Calculate CARA risk aversion coefficient from probability premium (Babcock, 1993. Eq 4, 9)
@@ -96,5 +101,5 @@ def prob_premium_to_risk_aversion_coef(risk_premium_prob: float, gamble_size: fl
             np.log(0.5 * (np.exp(-A * gamble_size) + np.exp(A * gamble_size))) / (A * gamble_size)
         )
 
-    return root_scalar(eqn, bracket=[0.0000001, 100]).root
+    return root_scalar(eqn, bracket=[1e-9, 100]).root
 

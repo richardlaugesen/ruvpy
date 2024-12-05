@@ -14,6 +14,7 @@
 
 from statsmodels.distributions.empirical_distribution import ECDF
 import numpy as np
+import timeit
 import pytest
 
 from ruvpy.helpers import probabilistic_to_deterministic_forecast, generate_event_freq_ref, ecdf, is_deterministic, risk_premium_to_prob_premium, risk_aversion_coef_to_risk_premium, risk_premium_to_risk_aversion_coef, prob_premium_to_risk_aversion_coef
@@ -94,6 +95,17 @@ def test_ecdf():
 
     assert np.array_equal(ecdf([5], thresholds), ecdf(np.array([5]), thresholds))
 
+    # benchmark
+    def bench_custom(ens, thresholds):
+        ecdf(ens, thresholds)
+    def bench_statsmodels(ens, thresholds):
+        ECDF(ens, 'left')(thresholds)
+    ens = np.random.normal(10, 1, 1000)
+    thresholds = np.arange(5, 15, 1)       
+    custom_times = timeit.timeit(lambda: bench_custom(ens, thresholds), number=100)
+    statsmodels_times = timeit.timeit(lambda: bench_statsmodels(ens, thresholds), number=100)
+    assert np.all(custom_times < statsmodels_times)
+    
 
 def test_is_deterministic_timestep():
     np.random.seed(42)

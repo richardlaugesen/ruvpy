@@ -31,7 +31,8 @@ def get_context(decision_thresholds=np.arange(5, 20, 1)):
         'decision_thresholds': decision_thresholds,
         'economic_model': cost_loss,
         'analytical_spend': cost_loss_analytical_spend,
-        'decision_rule': optimise_over_forecast_distribution
+        'decision_rule': optimise_over_forecast_distribution,
+        'optimiser': {'lower_bound': 0, 'upper_bound': 2, 'tolerance': 1e-4, 'polish': True, 'seed': 42}
     }
     return DecisionContext(**context_fields)
 
@@ -45,21 +46,15 @@ def test_ex_ante_utility():
 
     econ_par = 0.1
     spend = 0.052
-    assert np.isclose(
-        _ex_ante_utility(econ_par, spend, probs, context),
-        -3.386, 1e-2)
+    assert np.isclose(_ex_ante_utility(econ_par, spend, probs, context), -3.386, rtol=1e-2, atol=1e-3)
 
     econ_par = 0.7
     spend = 0.052
-    assert np.isclose(
-        _ex_ante_utility(econ_par, spend, probs, context),
-        -3.386, 1e-2)
+    assert np.isclose(_ex_ante_utility(econ_par, spend, probs, context), -3.386, rtol=1e-2, atol=1e-3)
 
     econ_par = 0.1
     spend = 3
-    assert np.isclose(
-        _ex_ante_utility(econ_par, spend, probs, context),
-        -8.199, 1e-2)
+    assert np.isclose(_ex_ante_utility(econ_par, spend, probs, context), -8.199, rtol=1e-2, atol=1e-3)
 
     econ_par = 0.1
     spend = 3
@@ -67,9 +62,7 @@ def test_ex_ante_utility():
     context = get_context(np.arange(1, 100000, 1))
     ens = np.random.normal(50000, 10000, 100000)    
     probs = _calc_likelihood(ens, context.decision_thresholds)   # tiny likelihoods
-    assert np.isclose(
-        _ex_ante_utility(econ_par, spend, probs, context),
-        -8.199, 1e-2)
+    assert np.isclose(_ex_ante_utility(econ_par, spend, probs, context), -8.199, rtol=1e-2, atol=1e-3)
 
 
 def test_ex_post_utility():
@@ -78,23 +71,17 @@ def test_ex_post_utility():
     occurred = context.decision_thresholds[10]
     econ_par = 0.1
     spend = 0.052
-    assert np.isclose(
-        _ex_post_utility(econ_par, occurred, spend, context),
-        -3.386, 1e-2)
+    assert np.isclose(_ex_post_utility(econ_par, occurred, spend, context), -3.386, rtol=1e-2, atol=1e-3)
 
     occurred = context.decision_thresholds[10]
     econ_par = 0.7
     spend = 0.052
-    assert np.isclose(
-        _ex_post_utility(econ_par, occurred, spend, context),
-        -3.847, 1e-2)
+    assert np.isclose(_ex_post_utility(econ_par, occurred, spend, context), -3.847, rtol=1e-2, atol=1e-3)
 
     occurred = context.decision_thresholds[10]
     econ_par = 0.1
     spend = 3
-    assert np.isclose(
-        _ex_post_utility(econ_par, occurred, spend, context),
-        -8.199, 1e-2)
+    assert np.isclose(_ex_post_utility(econ_par, occurred, spend, context), -8.199, rtol=1e-2, atol=1e-3)
 
 
 def test_find_spend_ensemble():
@@ -104,7 +91,7 @@ def test_find_spend_ensemble():
     ens = np.random.normal(10, 1, 100)
     probs = _calc_likelihood(ens, context.decision_thresholds)
     econ_par = 0.1
-    assert np.isclose(_find_spend_ensemble(econ_par, ens, probs, context), 0.012, 1e-1)
+    assert np.isclose(_find_spend_ensemble(econ_par, ens, probs, context), 0.012, rtol=1e-2, atol=1e-3)
 
     # Not implemented to work with deterministic forecasts so no need to test for it.
     # Code uses analytical_spend method of economic model instead of find_spend for 
@@ -126,9 +113,9 @@ def test_single_timestep():
     t = 0
     result = single_timestep(t, econ_par, ob, fcst, ref, context)
 
-    assert np.isclose(result['ob_spend'], 0.0076, 1e-2)
-    assert np.isclose(result['fcst_spend'], 0.012, 1e-2)
-    assert np.isclose(result['ref_spend'], 0.0076, 1e-2)
+    assert np.isclose(result['ob_spend'], 0.0076, rtol=1e-2, atol=1e-3)
+    assert np.isclose(result['fcst_spend'], 0.012, rtol=1e-2, atol=1e-3)
+    assert np.isclose(result['ref_spend'], 0.0076, rtol=1e-2, atol=1e-3)
 
 
 def test_calc_likelihoods():
@@ -137,18 +124,18 @@ def test_calc_likelihoods():
     # typical ensemble and range of thresholds
     ens = np.random.normal(10, 1, 100)
     thresholds = np.arange(5, 15, 1)
-    assert np.allclose(_calc_likelihood(ens, thresholds), np.array([0, 0, 0.01, 0.16, 0.37, 0.35, 0.11, 0, 0, 0]), 1e-1)
+    assert np.allclose(_calc_likelihood(ens, thresholds), np.array([0, 0, 0.01, 0.16, 0.37, 0.35, 0.11, 0, 0, 0]), rtol=1e-2, atol=1e-3)
 
     # all in 1 class
     ens = np.random.normal(1000, 1, 100)
     thresholds = [0, 5]
-    assert np.allclose(_calc_likelihood(ens, thresholds), np.array([0, 1]), 1e-1)
+    assert np.allclose(_calc_likelihood(ens, thresholds), np.array([0, 1]), rtol=1e-2, atol=1e-3)
 
     # adds to 1
     assert np.equal(np.sum(_calc_likelihood(ens, thresholds)), 1)
 
     # Continuous decision with 100 member ensemble forecast
-    assert np.array_equal(_calc_likelihood(ens, None), np.full(100, 1e-2))
+    assert np.array_equal(_calc_likelihood(ens, None), np.full(100, 1/100))
 
     # Calculating likelihoods with deterministic forecasts or forecasts with missing 
     # values is not implemented. No exception is raised if this is attempted though

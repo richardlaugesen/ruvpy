@@ -25,8 +25,13 @@ class DecisionContext:
     economic_model: Callable
     analytical_spend: Callable
     decision_rule: Callable
-    decision_thresholds: Optional[np.ndarray] = field(default=None)
-
+    decision_thresholds: np.ndarray = field(default=None)        
+    optimiser: dict = field(default_factory={'lower_bound': None,
+                                             'upper_bound': None,
+                                             'tolerance': 1E-4,
+                                             'polish': True,
+                                             'seed': None})
+    
     def validate_fields(self):
         for field_name, value in self.__dict__.items():
             if field_name != 'decision_thresholds' and value is None:

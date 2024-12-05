@@ -30,12 +30,10 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
 
     The RUV method and RUVPY software package are introduced in the following publications:
 
+    - Laugesen, Richard and Thyer, Mark and McInerney, David and Kavetski, Dmitri, Software Library to Quantify the Value of Forecasts for Decision-Making: Case Study on Sensitivity to Damages. http://dx.doi.org/10.2139/ssrn.5001881 (under review)
     - Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range
       of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27,
       873–893, https://doi.org/10.5194/hess-27-873-2023, 2023.
-    - Laugesen, R., Thyer, M., McInerney, D., Kavetski, D. (2024). Software to quantify the value of forecasts for
-      decision-making: sensitivity to damages case study. Manuscript submitted for publication in Environmental
-      Modelling & Software.
 
     Args:
         obs (np.ndarray): 1D array of observed values representing the actual outcomes.
@@ -50,6 +48,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
             - 'damage_function' (list): Damage function method and a dictionary of its parameters.
             - 'utility_function' (list): Utility function method and a dictionary of its parameters.
             - 'economic_model' (list): Economic model function, analytical function, and list of parameter values.
+            - 'optimiser' (dict, optional): Optional dictionary specifing key/value pairs to tune the numerical optimiser (lower_bound, upper_bound, tolerance, polish, seed), all keys are required.
         parallel_nodes (int, optional): Number of parallel processes used for computation. Defaults to 4.
 
     Returns:
@@ -140,6 +139,21 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     economic_model_analytical_spend_fnc = decision_context['economic_model'][1]
     economic_model_params = decision_context['economic_model'][2]
 
+    # numerical optimiser
+    if 'optimiser' in decision_context:
+        lower_bound = decision_context['optimiser']['lower_bound']
+        upper_bound = decision_context['optimiser']['upper_bound']
+        tolerance = decision_context['optimiser']['tolerance']
+        polish = decision_context['optimiser']['polish']
+        seed = decision_context['optimiser']['seed']
+    else:
+        lower_bound = 0
+        upper_bound = 2 * np.max([damage_function(v) for v in np.linspace(0, 1e6, int(1e4))])
+        print(f'\033[1;31mInferred upper_bound: {upper_bound:.2f}\033[0m')        
+        tolerance = 1E-4
+        polish = True
+        seed = None
+
     context_fields = {
         'economic_model_params': economic_model_params,
         'damage_function': damage_function,
@@ -147,7 +161,12 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
         'decision_thresholds': decision_thresholds,
         'economic_model': economic_model_fnc,
         'analytical_spend': economic_model_analytical_spend_fnc,
-        'decision_rule': decision_rule_fnc
+        'decision_rule': decision_rule_fnc,
+        'optimiser': {'lower_bound': lower_bound,
+                      'upper_bound': upper_bound,
+                      'tolerance': tolerance,
+                      'polish': polish,
+                      'seed': seed}
     }
     context = DecisionContext(**context_fields)
 

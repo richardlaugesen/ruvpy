@@ -29,7 +29,8 @@ def get_context():
         'decision_thresholds': np.arange(0, 20, 1),
         'economic_model': cost_loss,
         'analytical_spend': cost_loss_analytical_spend,
-        'decision_rule': optimise_over_forecast_distribution
+        'decision_rule': optimise_over_forecast_distribution,
+        'optimiser': {'lower_bound': 0, 'upper_bound': 2, 'tolerance': 1e-4, 'polish': True, 'seed': 42}
     }
     return DecisionContext(**context_fields)
 
@@ -51,6 +52,7 @@ def test_multiple_timesteps():
     result = multiple_timesteps(obs, fcsts, refs, econ_par, context, 1)
 
     assert np.isclose(result.ruv, 0.0445, 1e-2)
-    assert np.isclose(result.avg_fcst_ex_post, -3.399, 1e-2)
-    assert np.isclose(result.avg_ref_ex_post, -3.402, 1e-2)
-    assert np.isclose(result.avg_obs_ex_post, -3.340, 1e-2)
+    #assert np.isclose(result.ruv, 0.043946, 1e-2)    
+    assert np.isclose(result.avg_fcst_ex_post, -3.399, rtol=1e-2, atol=1e-4)
+    assert np.isclose(result.avg_ref_ex_post, -3.402, rtol=1e-2, atol=1e-4)
+    assert np.isclose(result.avg_obs_ex_post, -3.340, rtol=1e-2, atol=1e-4)

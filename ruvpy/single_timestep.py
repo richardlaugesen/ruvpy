@@ -1,3 +1,4 @@
+
 # Copyright 2024 RUVPY Developers
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +15,7 @@
 
 import numpy as np
 import copy
-from scipy.optimize import minimize_scalar
+from scipy.optimize import differential_evolution, minimize_scalar
 
 from ruvpy.helpers import is_deterministic, ecdf
 from ruvpy.data_classes import DecisionContext
@@ -60,7 +61,21 @@ def _find_spend_ensemble(econ_par: float, ens: np.ndarray, likelihoods: np.ndarr
     def minimise_this(spend):
         return -_ex_ante_utility(econ_par, spend, likelihoods, context)
 
-    return minimize_scalar(minimise_this, method='brent').x
+    lower_bound = context.optimiser['lower_bound']
+    upper_bound = context.optimiser['upper_bound']
+
+    bounds = [(lower_bound, upper_bound)]
+    result = differential_evolution(minimise_this,
+                                    [(lower_bound, upper_bound)],
+                                    tol=context.optimiser['tolerance'],
+                                    seed = context.optimiser['seed'],
+                                    polish=context.optimiser['polish'])
+    spend = result.x[0]
+    
+    if not result.success:
+        print(f'\033[1;31mDifferential evolution failed: {result.message}\033[0m')
+
+    return spend
 
 
 def _ex_ante_utility(econ_par: float, spend: float, likelihoods: np.ndarray, context: DecisionContext) -> float:
