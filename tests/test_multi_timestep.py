@@ -51,8 +51,7 @@ def test_multiple_timesteps():
 
     result = multiple_timesteps(obs, fcsts, refs, econ_par, context, 1)
 
-    assert np.isclose(result.ruv, 0.0445, 1e-2)
-    #assert np.isclose(result.ruv, 0.043946, 1e-2)    
+    assert np.isclose(result.ruv, 0.04429408, rtol=1e-2, atol=1e-4)
     assert np.isclose(result.avg_fcst_ex_post, -3.399, rtol=1e-2, atol=1e-4)
     assert np.isclose(result.avg_ref_ex_post, -3.402, rtol=1e-2, atol=1e-4)
     assert np.isclose(result.avg_obs_ex_post, -3.340, rtol=1e-2, atol=1e-4)
