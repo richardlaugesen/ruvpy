@@ -26,7 +26,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     This function calculates RUV by evaluating the utility of forecasts through a simulation of decision-making
     under uncertainty. RUV quantifies the value of forecasts relative to a reference scenario (e.g., climatology)
     and is often applied in settings such as streamflow forecasting or weather forecasting. It works with
-    probabilistic forecasts but can also handle deterministic forecasts (single ensemble member for `fcsts` and `refs`).
+    probabilistic forecasts but can also handle deterministic forecasts (single ensemble member for 'fcsts' and 'refs').
 
     The RUV method and RUVPY software package are introduced in the following publications:
 
@@ -40,7 +40,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
         fcsts (np.ndarray): 2D array of forecast values, where each column is an ensemble member and each row
             corresponds to a forecast at a given time.
         refs (np.ndarray): 2D array of reference values (e.g., climatology ensemble), where each column is an ensemble
-            member and each row corresponds to a time period. If `None`, a reference climatology will be generated based
+            member and each row corresponds to a time period. If 'None', a reference climatology will be generated based
             on the observations, reproducing the observed frequency of events.
         decision_context (dict): Dictionary defining the decision context, containing:
             - 'decision_thresholds' (np.ndarray): 1D array specifying thresholds of the forecast variable.
@@ -81,39 +81,40 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
 
     Decision rules:
 
-    - `optimise_over_forecast_distribution`: Optimises decision-making based on the whole forecast distribution.
-    - `critical_probability_threshold_fixed`: Uses a fixed critical probability threshold for decision-making.
-    - `critical_probability_threshold_max_value`: Selects the decision threshold leading to the maximum forecast value.
-    - `critical_probability_threshold_equals_par`: Matches the decision threshold to the economic parameter.
+    - 'optimise_over_forecast_distribution': Optimises decision-making based on the whole forecast distribution.
+    - 'critical_probability_threshold_fixed': Uses a fixed critical probability threshold for decision-making.
+    - 'critical_probability_threshold_max_value': Selects the decision threshold leading to the maximum forecast value.
+    - 'critical_probability_threshold_equals_par': Matches the decision threshold to the economic parameter.
+    - 'forecast_distribution_mode': Use the most likely value from each forecast ensemble
 
     Damage functions:
 
-    - `logistic`: Logistic damage function with defined maximum damages, steepness, and location.
-    - `logistic_zero`: Logistic function with damages pegged to zero for zero flow.
-    - `binary`: Binary loss function with parameters for max and min loss, and location.
-    - `linear`: Linear damage function.
-    - `user_defined`: Damage function interpolated over user-defined points.
+    - 'logistic': Logistic damage function with defined maximum damages, steepness, and location.
+    - 'logistic_zero': Logistic function with damages pegged to zero for zero flow.
+    - 'binary': Binary loss function with parameters for max and min loss, and location.
+    - 'linear': Linear damage function.
+    - 'user_defined': Damage function interpolated over user-defined points.
 
     Utility functions:
 
-    - `cara`: Constant Absolute Risk Aversion (CARA), where absolute risk aversion stays constant regardless of wealth.
-    - `crra`: Constant Relative Risk Aversion (CRRA), where relative risk aversion stays constant regardless of wealth.
-    - `exponential_utility`: Exponential utility function used to model CARA behaviour.
-    - `isoelastic_utility`: Isoelastic utility function used to model CRRA behaviour.
-    - `hyperbolic_utility`: Hyperbolic Absolute Risk Aversion (HARA), generalises both CARA and CRRA behavior.
+    - 'cara': Constant Absolute Risk Aversion (CARA), where absolute risk aversion stays constant regardless of wealth.
+    - 'crra': Constant Relative Risk Aversion (CRRA), where relative risk aversion stays constant regardless of wealth.
+    - 'exponential_utility': Exponential utility function used to model CARA behaviour.
+    - 'isoelastic_utility': Isoelastic utility function used to model CRRA behaviour.
+    - 'hyperbolic_utility': Hyperbolic Absolute Risk Aversion (HARA), generalises both CARA and CRRA behavior.
 
     Economic models:
 
-    - `cost_loss`: Standard cost-loss economic model based on spending to mitigate potential future losses.
-    - `cost_loss_analytical_spend`: Analytical function to compute optimal spending in cost-loss.
+    - 'cost_loss': Standard cost-loss economic model based on spending to mitigate potential future losses.
+    - 'cost_loss_analytical_spend': Analytical function to compute optimal spending in cost-loss.
 
     Decision types:
 
-    Defined by providing a list of thresholds in the `decision_thresholds` key of the decision_context dictionary:
+    Defined by providing a list of thresholds in the 'decision_thresholds' key of the decision_context dictionary:
 
     - 'Binary decision': 1D array with two elements, 0 and the threshold value (e.g., np.array([0, 20])).
     - 'Multi-categorical decision': 1D array with multiple elements, one of which must be 0 (e.g., np.array([0, 5, 15, 25])).
-    - 'Continuous decision': `None`.
+    - 'Continuous decision': 'None'.
     """
 
     # decision type

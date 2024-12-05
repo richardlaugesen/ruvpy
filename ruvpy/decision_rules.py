@@ -18,7 +18,7 @@ import numpy as np
 
 from ruvpy.multi_timestep import multiple_timesteps
 from ruvpy.data_classes import MultiParOutput, DecisionContext
-from ruvpy.helpers import probabilistic_to_deterministic_forecast
+from ruvpy.helpers import probabilistic_to_deterministic_forecast, nanmode
 
 
 def optimise_over_forecast_distribution(params: dict) -> Callable:
@@ -71,6 +71,19 @@ def critical_probability_threshold_equals_par(params: dict) -> Callable:
         outputs = MultiParOutput()
         for econ_par in context.economic_model_params:
             curr_fcsts = probabilistic_to_deterministic_forecast(fcsts, econ_par)
+            outputs.insert(econ_par, multiple_timesteps(obs, curr_fcsts, refs, econ_par, context, parallel_nodes))
+        return outputs
+
+    return decision_rule
+
+
+def forecast_distribution_mode(params: dict) -> Callable:
+    # method has no params
+
+    def decision_rule(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
+        outputs = MultiParOutput()
+        curr_fcsts = nanmode(fcsts, axis=1)
+        for econ_par in context.economic_model_params:
             outputs.insert(econ_par, multiple_timesteps(obs, curr_fcsts, refs, econ_par, context, parallel_nodes))
         return outputs
 
