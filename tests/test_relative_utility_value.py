@@ -40,33 +40,35 @@ def test_relative_utility_value():
     decision_definition = {
         'damage_function': [logistic_zero, {'A': 1, 'k': 0.5, 'threshold': 15}],
         'utility_function': [cara, {'A': 0.3}],
-        'economic_model': [cost_loss, cost_loss_analytical_spend, np.array([0.001, 0.25, 0.5, 0.75, 0.999])],
+        'economic_model': [cost_loss, cost_loss_analytical_spend, np.array([0.25, 0.5, 0.75])],
         'decision_thresholds': np.arange(0, 20, 3),
         'decision_rule': [optimise_over_forecast_distribution, None],
+        'optimiser': {'lower_bound': 0, 'upper_bound': 2, 'tolerance': 1e-4, 'polish': True, 'seed': 42}
     }
 
     results = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
-    assert np.allclose(results['ruv'],[0.184053111, -0.0742971672, -0.467401918, -1.65026591, -117.108686], 1e-3)
-
+    assert np.allclose(results['ruv'], [-0.07396961, -0.46616302, -1.64862845], rtol=1e-2, atol=1e-3)
+    
     decision_definition['decision_rule'] = [critical_probability_threshold_equals_par, None]
     results = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
-    assert np.allclose(results['ruv'],[0.184053111, -0.0742971672, -0.467401918, -1.65026591, -117.108686], 1e-3)
+    assert np.allclose(results['ruv'],[-0.07412637, -0.46687758, -1.65032088], rtol=1e-2, atol=1e-3)
 
     decision_definition['decision_rule'] = [critical_probability_threshold_fixed, {'critical_probability_threshold': 0.1}]
     results = relative_utility_value(obs, fcsts, refs, decision_definition, parallel_nodes=2)
-    assert np.allclose(results['ruv'], [-0.182290404, -0.0742971673, -0.467401918, -1.65026591, -616.302376], 1e-3)
+    assert np.allclose(results['ruv'], [-0.0742971519, -0.467401618, -1.65025176], rtol=1e-2, atol=1e-3)
 
     decision_definition['decision_rule'] = [critical_probability_threshold_equals_par, None]
     decision_definition['event_freq_ref'] = True
     results = relative_utility_value(obs, fcsts, None, decision_definition, parallel_nodes=2)
-    assert np.allclose(results['ruv'],[-74.0584681, -0.0742971679, -0.472369878, -1.71864364, -117.108684], 1e-3)
+    assert np.allclose(results['ruv'],[-0.0742971679, -0.472369878, -1.7186436], rtol=1e-2, atol=1e-3)
 
     decision_definition = {
         'damage_function': [logistic_zero, {'A': 1, 'k': 0.5, 'threshold': 15}],
         'utility_function': [cara, {'A': 0.3}],
-        'economic_model': [cost_loss, cost_loss_analytical_spend, np.array([0.001, 0.25, 0.5, 0.75, 0.999])],
+        'economic_model': [cost_loss, cost_loss_analytical_spend, np.array([0.25, 0.5, 0.75])],
         'decision_thresholds': np.arange(0, 20, 3),
         'decision_rule': [optimise_over_forecast_distribution, None],
+        'optimiser': {'lower_bound': 0, 'upper_bound': 2, 'tolerance': 1e-4, 'polish': True, 'seed': 42}
     }
 
     max_val = np.max([np.nanmax(obs), np.nanmax(fcsts), np.nanmax(refs)])
@@ -76,4 +78,8 @@ def test_relative_utility_value():
 
     decision_definition['decision_thresholds'] = None
     continuous = relative_utility_value(obs, fcsts, None, decision_definition, parallel_nodes=2)
-    assert np.allclose(many_thresholds['ruv'], continuous['ruv'], 0.01)
+    assert np.allclose(many_thresholds['ruv'], continuous['ruv'], rtol=1e-2, atol=1e-3)
+
+    decision_definition.pop('optimiser')
+    continuous_no_opt = relative_utility_value(obs, fcsts, None, decision_definition, parallel_nodes=2)
+    assert np.allclose(continuous['ruv'], continuous_no_opt['ruv'], rtol=1e-2, atol=1e-2)

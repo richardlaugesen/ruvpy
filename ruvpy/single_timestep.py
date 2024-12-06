@@ -1,4 +1,3 @@
-
 # Copyright 2024 RUVPY Developers
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Callable
-import copy
 import numpy as np
+import copy
 from scipy.optimize import differential_evolution, minimize_scalar, brute
 
 from ruvpy.helpers import is_deterministic, ecdf, nanmode
@@ -25,7 +23,7 @@ from ruvpy.data_classes import DecisionContext
 # Calculate RUV for a single economic parameter and single timestep
 def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.array, context: DecisionContext) -> dict[str, np.ndarray]:
     #print(f"-------- NEW TIMESTEP {t} / {econ_par} -----------")
-    
+
     #print('Calculating observation')
     ob_threshold = _realised_threshold(ob, context.decision_thresholds)
     ob_spend = context.analytical_spend(econ_par, ob_threshold, context.damage_function)
@@ -41,7 +39,7 @@ def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.
         # not pre-calculating likelihoods because code becomes difficult to read and maintain even
         # though it is an approximately 30% speedup
 
-    #print('Optimising reference')        
+    #print('Optimising reference')
     if is_deterministic(ref):
         ref_threshold = _realised_threshold(ref, context.decision_thresholds)
         ref_spend = context.analytical_spend(econ_par, ref_threshold, context.damage_function)
@@ -103,10 +101,10 @@ def _find_spend_ensemble_debug(econ_par: float, ens: np.ndarray, likelihoods: np
         )
         de_results.append((result_de.x[0], result_de.fun))
 
-    de_best_result = min(de_results, key=lambda x: x[1])    
+    de_best_result = min(de_results, key=lambda x: x[1])
     de_best_opt_spend = de_best_result[0]
     de_best_opt_value = de_best_result[1]
-        
+
     # Minimize Scalar (Brent method)
     #print('minimize scalar')
 
@@ -118,7 +116,7 @@ def _find_spend_ensemble_debug(econ_par: float, ens: np.ndarray, likelihoods: np
     brent_opt_spend = result_brent.x
     brent_opt_value = result_brent.fun
 
-    # Compare and return the best result    
+    # Compare and return the best result
     all_results = [
         ("Brute-force", brute_opt_spend, -brute_opt_value),
         ("DE Best", de_best_opt_spend, -de_best_opt_value),
@@ -136,14 +134,14 @@ def _find_spend_ensemble_debug(econ_par: float, ens: np.ndarray, likelihoods: np
     if (all_results[0][1] > 1) or ((not de_close_min_scal) and (all_results[0][1] + all_results[1][1] > 0.01)):
 
         plt.hist(ens)
-        for threshold in context.decision_thresholds:    
+        for threshold in context.decision_thresholds:
             plt.axvline(threshold, color='grey', label='thres=%.1f' % threshold)
         plt.title('Forecast ensemble')
         plt.ylabel('Forecast likelihood')
         plt.xlabel('Streamflow (ML/d)')
         #plt.legend()
         plt.show()
-        
+
         spends = np.arange(lower_bound, upper_bound, step_size)
         utilities = [-minimise_this(spend) for spend in spends]
         plt.plot(spends, utilities, label='surface', color='blue')
@@ -158,7 +156,7 @@ def _find_spend_ensemble_debug(econ_par: float, ens: np.ndarray, likelihoods: np
 
         if not de_close_min_scal:
             print('differential_evolution is more than %.2f relative tolerance from minimize_scalar' % rtol)
-       
+
         print('\nRange [%.3f, %.3f], brute_force step_size of %.3f' %(lower_bound, upper_bound, step_size))
 
         for method, spend, utility in all_results:
@@ -167,10 +165,10 @@ def _find_spend_ensemble_debug(econ_par: float, ens: np.ndarray, likelihoods: np
         print('\nDifferential evolution runs:')
         for i, (spend, utility) in enumerate(de_results):
             print(f"DE Run {i+1}: Spend = {spend:.3f}, Utility = {-utility:.3f}")
-        
+
         #import pdb; pdb.set_trace()
 
-    if de_spend > (0.001 * context.max_damages):
+    if de_best_opt_spend > (0.001 * context.max_damages):
         def bench_this(tol, pop, mut, rec, polish):
             de_result = differential_evolution(minimise_this,
                                                [(lower_bound, upper_bound)],
@@ -197,22 +195,22 @@ def _find_spend_ensemble_debug(econ_par: float, ens: np.ndarray, likelihoods: np
                             times = timeit.timeit(lambda: bench_this(tol, pop, mut, rec, polish), number=10)
                             spends[f"{pop}_{tol}_{mut:.2f}_{rec:.2f}_{polish}"] = times
                             print(f"Average time: {times:.2f} seconds")
-                            
+
         for key, val in spends.items():
             print(f"{key} took: {val: .2f} seconds")
 
         def_time = timeit.timeit(lambda: differential_evolution(minimise_this, [(lower_bound, upper_bound)]),number=10)
         print(f"Default time: {def_time:.2f} seconds")
-                
+
         import pdb; pdb.set_trace()
-               
+
     if brute_force_spend > step_size: # avoids false positives
         if not min_scal_close_brute:
             print('minimize_scalar is more than %.2f relative tolerance from brute_force' % rtol)
 
-        if not de_close_brute:            
+        if not de_close_brute:
             print('differential_evolution is more than %.2f relative tolerance from brute force' % rtol)
-            
+
     return brute_force_spend
 
 
@@ -226,12 +224,15 @@ def _find_spend_ensemble(econ_par: float, ens: np.ndarray, likelihoods: np.ndarr
     def minimise_this(spend):
         return -_ex_ante_utility(econ_par, spend, likelihoods, context)
 
-    # TODO: these specific to cost-loss but need to be general
-    lower_bound = 0
-    upper_bound = 2 * context.max_damages
-    bounds = [(lower_bound, upper_bound)]
+    lower_bound = context.optimiser['lower_bound']
+    upper_bound = context.optimiser['upper_bound']
 
-    result = differential_evolution(minimise_this, [(lower_bound, upper_bound)], polish=context.polish)
+    bounds = [(lower_bound, upper_bound)]
+    result = differential_evolution(minimise_this,
+                                    [(lower_bound, upper_bound)],
+                                    tol=context.optimiser['tolerance'],
+                                    seed = context.optimiser['seed'],
+                                    polish=context.optimiser['polish'])
     spend = result.x[0]
 
     if not result.success:
@@ -288,7 +289,7 @@ def _ex_ante_utility(econ_par: float, spend: float, likelihoods: np.ndarray, con
 def _ex_post_utility(econ_par: float, occurred: float, spend: float, context: DecisionContext) -> float:
     net_outcome = context.economic_model(econ_par, occurred, spend, context.damage_function)
 
-    # TODO: use some proper way to choose normative or descriptive    
+    # TODO: use some proper way to choose normative or descriptive
     if context.reference_point is None:
         # Normative decision-maker with expected utility theory
         return context.utility_function(net_outcome)
@@ -319,5 +320,3 @@ def _realised_threshold(value: float, thresholds: np.ndarray) -> float:
 
     vals = np.subtract(value, thresholds)
     return thresholds[np.argmin(vals[vals >= 0.0])]
-
-

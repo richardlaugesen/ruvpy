@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import numpy as np
-from scipy.optimize import linearmixing
 
 from ruvpy.helpers import generate_event_freq_ref
 from ruvpy.data_classes import DecisionContext
@@ -28,10 +27,11 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     This function calculates RUV by evaluating the utility of forecasts through a simulation of decision-making
     under uncertainty. RUV quantifies the value of forecasts relative to a reference scenario (e.g., climatology)
     and is often applied in settings such as streamflow forecasting or weather forecasting. It works with
-    probabilistic forecasts but can also handle deterministic forecasts (single ensemble member for `fcsts` and `refs`).
+    probabilistic forecasts but can also handle deterministic forecasts (single ensemble member for 'fcsts' and 'refs').
 
     The RUV method and RUVPY software package are introduced in the following publications:
 
+    - Laugesen, Richard and Thyer, Mark and McInerney, David and Kavetski, Dmitri, Software Library to Quantify the Value of Forecasts for Decision-Making: Case Study on Sensitivity to Damages. http://dx.doi.org/10.2139/ssrn.5001881 (under review)
     - Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range
       of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27,
       873–893, https://doi.org/10.5194/hess-27-873-2023, 2023.
@@ -44,7 +44,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
         fcsts (np.ndarray): 2D array of forecast values, where each column is an ensemble member and each row
             corresponds to a forecast at a given time.
         refs (np.ndarray): 2D array of reference values (e.g., climatology ensemble), where each column is an ensemble
-            member and each row corresponds to a time period. If `None`, a reference climatology will be generated based
+            member and each row corresponds to a time period. If 'None', a reference climatology will be generated based
             on the observations, reproducing the observed frequency of events.
         decision_context (dict): Dictionary defining the decision context, containing:
             - 'decision_thresholds' (np.ndarray): 1D array specifying thresholds of the forecast variable.
@@ -52,6 +52,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
             - 'damage_function' (list): Damage function method and a dictionary of its parameters.
             - 'utility_function' (list): Utility function method and a dictionary of its parameters.
             - 'economic_model' (list): Economic model function, analytical function, and list of parameter values.
+            - 'optimiser' (dict, optional): Optional dictionary specifing key/value pairs to tune the numerical optimiser (lower_bound, upper_bound, tolerance, polish, seed), all keys are required.
         parallel_nodes (int, optional): Number of parallel processes used for computation. Defaults to 4.
 
     Returns:
@@ -84,39 +85,40 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
 
     Decision rules:
 
-    - `optimise_over_forecast_distribution`: Optimises decision-making based on the whole forecast distribution.
-    - `critical_probability_threshold_fixed`: Uses a fixed critical probability threshold for decision-making.
-    - `critical_probability_threshold_max_value`: Selects the decision threshold leading to the maximum forecast value.
-    - `critical_probability_threshold_equals_par`: Matches the decision threshold to the economic parameter.
+    - 'optimise_over_forecast_distribution': Optimises decision-making based on the whole forecast distribution.
+    - 'critical_probability_threshold_fixed': Uses a fixed critical probability threshold for decision-making.
+    - 'critical_probability_threshold_max_value': Selects the decision threshold leading to the maximum forecast value.
+    - 'critical_probability_threshold_equals_par': Matches the decision threshold to the economic parameter.
+    - 'forecast_distribution_mode': Use the most likely value from each forecast ensemble
 
     Damage functions:
 
-    - `logistic`: Logistic damage function with defined maximum damages, steepness, and location.
-    - `logistic_zero`: Logistic function with damages pegged to zero for zero flow.
-    - `binary`: Binary loss function with parameters for max and min loss, and location.
-    - `linear`: Linear damage function.
-    - `user_defined`: Damage function interpolated over user-defined points.
+    - 'logistic': Logistic damage function with defined maximum damages, steepness, and location.
+    - 'logistic_zero': Logistic function with damages pegged to zero for zero flow.
+    - 'binary': Binary loss function with parameters for max and min loss, and location.
+    - 'linear': Linear damage function.
+    - 'user_defined': Damage function interpolated over user-defined points.
 
     Utility functions:
 
-    - `cara`: Constant Absolute Risk Aversion (CARA), where absolute risk aversion stays constant regardless of wealth.
-    - `crra`: Constant Relative Risk Aversion (CRRA), where relative risk aversion stays constant regardless of wealth.
-    - `exponential_utility`: Exponential utility function used to model CARA behaviour.
-    - `isoelastic_utility`: Isoelastic utility function used to model CRRA behaviour.
-    - `hyperbolic_utility`: Hyperbolic Absolute Risk Aversion (HARA), generalises both CARA and CRRA behavior.
+    - 'cara': Constant Absolute Risk Aversion (CARA), where absolute risk aversion stays constant regardless of wealth.
+    - 'crra': Constant Relative Risk Aversion (CRRA), where relative risk aversion stays constant regardless of wealth.
+    - 'exponential_utility': Exponential utility function used to model CARA behaviour.
+    - 'isoelastic_utility': Isoelastic utility function used to model CRRA behaviour.
+    - 'hyperbolic_utility': Hyperbolic Absolute Risk Aversion (HARA), generalises both CARA and CRRA behavior.
 
     Economic models:
 
-    - `cost_loss`: Standard cost-loss economic model based on spending to mitigate potential future losses.
-    - `cost_loss_analytical_spend`: Analytical function to compute optimal spending in cost-loss.
+    - 'cost_loss': Standard cost-loss economic model based on spending to mitigate potential future losses.
+    - 'cost_loss_analytical_spend': Analytical function to compute optimal spending in cost-loss.
 
     Decision types:
 
-    Defined by providing a list of thresholds in the `decision_thresholds` key of the decision_context dictionary:
+    Defined by providing a list of thresholds in the 'decision_thresholds' key of the decision_context dictionary:
 
     - 'Binary decision': 1D array with two elements, 0 and the threshold value (e.g., np.array([0, 20])).
     - 'Multi-categorical decision': 1D array with multiple elements, one of which must be 0 (e.g., np.array([0, 5, 15, 25])).
-    - 'Continuous decision': `None`.
+    - 'Continuous decision': 'None'.
     """
 
     # TODO: update docstrings, README, tests, TODO, and templates following CPT implementation
@@ -130,7 +132,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
 
     if 'polish' not in decision_context:
         decision_context['polish'] = True
-        
+
     # build decision context object
     decision_thresholds = decision_context['decision_thresholds']
 
@@ -142,13 +144,6 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     damage_fnc_params = decision_context['damage_function'][1]
     damage_fnc = damage_fnc_mth(damage_fnc_params)
 
-    # get max_damages from supplied context or guess it
-    if len(decision_context['damage_function']) == 3:
-        max_damages = decision_context['damage_function'][2]
-    else:
-        max_damages = np.max([damage_fnc(v) for v in np.linspace(0, 1e6, int(1e4))])  # TODO: this is dangerous and probably cost-loss specific
-        print(f'\033[1;31mInferred max_damages: {max_damages:.2f}\033[0m')
-        
     utility_fnc_mth = decision_context['utility_function'][0]
     utility_fnc_params = decision_context['utility_function'][1]
     utility_fnc = utility_fnc_mth(utility_fnc_params)
@@ -163,8 +158,21 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
 
     reference_point = decision_context['reference_point']
 
-    polish = decision_context['polish']
-    
+    # numerical optimiser
+    if 'optimiser' in decision_context:
+        lower_bound = decision_context['optimiser']['lower_bound']
+        upper_bound = decision_context['optimiser']['upper_bound']
+        tolerance = decision_context['optimiser']['tolerance']
+        polish = decision_context['optimiser']['polish']
+        seed = decision_context['optimiser']['seed']
+    else:
+        lower_bound = 0
+        upper_bound = 2 * np.max([damage_fnc(v) for v in np.linspace(0, 1e6, int(1e4))])
+        print(f'\033[1;31mInferred upper_bound: {upper_bound:.2f}\033[0m')
+        tolerance = 1E-4
+        polish = True
+        seed = None
+
     context_fields = {
         'economic_model_params': economic_model_params,
         'damage_function': damage_fnc,
@@ -175,8 +183,11 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
         'decision_rule': decision_rule_fnc,
         'probability_weight_function': probability_weight_fnc,
         'reference_point': reference_point,
-        'max_damages': max_damages,
-        'polish': polish
+        'optimiser': {'lower_bound': lower_bound,
+                      'upper_bound': upper_bound,
+                      'tolerance': tolerance,
+                      'polish': polish,
+                      'seed': seed}
     }
     context = DecisionContext(**context_fields)
 

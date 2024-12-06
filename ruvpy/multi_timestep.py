@@ -27,8 +27,8 @@ def multiple_timesteps(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, eco
         for t, ob in enumerate(obs):
             #print('\033[1;32m------------------------------------------------------\033[0m')
             #print('\033[1;32mTimestep %d\033[0m' % t)
-            #print('\033[1;32m------------------------------------------------------\033[0m')            
-            if not np.isnan(ob):    
+            #print('\033[1;32m------------------------------------------------------\033[0m')
+            if not np.isnan(ob):
                 results.append(single_timestep(t, econ_par, ob, fcsts[t], refs[t], context))
     else:
         args = []
@@ -51,12 +51,13 @@ def _dict_to_output(results: dict, size: int) -> SingleParOutput:
 
     for result in results:
         t = result['t']
-        output.obs_spends[t] = result['ob_spend']
-        output.obs_ex_post[t] = result['ob_ex_post']
-        output.fcst_spends[t] = result['fcst_spend']
-        output.fcst_ex_post[t] = result['fcst_ex_post']
-        output.ref_spends[t] = result['ref_spend']
-        output.ref_ex_post[t] = result['ref_ex_post']
+        output.obs_spends[t] = result['ob_spend'].item()
+        output.obs_ex_post[t] = result['ob_ex_post'].item()
+        output.fcst_spends[t] = result['fcst_spend'].item()
+        output.fcst_ex_post[t] = result['fcst_ex_post'].item()
+        output.ref_spends[t] = result['ref_spend'].item()
+        output.ref_ex_post[t] = result['ref_ex_post'].item()
+
     return output
 
 
