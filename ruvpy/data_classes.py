@@ -29,6 +29,8 @@ class DecisionContext:
     probability_weight_function: Callable
     reference_point: float
     decision_thresholds: np.ndarray
+    max_damages: float
+    polish: bool
 
     def validate_fields(self):
         for field_name, value in self.__dict__.items():

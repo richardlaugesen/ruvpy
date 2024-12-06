@@ -128,6 +128,9 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     if 'reference_point' not in decision_context:
         decision_context['reference_point'] = None
 
+    if 'polish' not in decision_context:
+        decision_context['polish'] = True
+        
     # build decision context object
     decision_thresholds = decision_context['decision_thresholds']
 
@@ -139,6 +142,13 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     damage_fnc_params = decision_context['damage_function'][1]
     damage_fnc = damage_fnc_mth(damage_fnc_params)
 
+    # get max_damages from supplied context or guess it
+    if len(decision_context['damage_function']) == 3:
+        max_damages = decision_context['damage_function'][2]
+    else:
+        max_damages = np.max([damage_fnc(v) for v in np.linspace(0, 1e6, int(1e4))])  # TODO: this is dangerous and probably cost-loss specific
+        print(f'\033[1;31mInferred max_damages: {max_damages:.2f}\033[0m')
+        
     utility_fnc_mth = decision_context['utility_function'][0]
     utility_fnc_params = decision_context['utility_function'][1]
     utility_fnc = utility_fnc_mth(utility_fnc_params)
@@ -153,6 +163,8 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
 
     reference_point = decision_context['reference_point']
 
+    polish = decision_context['polish']
+    
     context_fields = {
         'economic_model_params': economic_model_params,
         'damage_function': damage_fnc,
@@ -162,7 +174,9 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
         'analytical_spend': economic_model_analytical_spend_fnc,
         'decision_rule': decision_rule_fnc,
         'probability_weight_function': probability_weight_fnc,
-        'reference_point': reference_point
+        'reference_point': reference_point,
+        'max_damages': max_damages,
+        'polish': polish
     }
     context = DecisionContext(**context_fields)
 

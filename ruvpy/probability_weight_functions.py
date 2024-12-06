@@ -17,12 +17,36 @@ import numpy as np
 
 # TODO: change from "weights" to "capactities"?
 
+# def power_weights(params: dict) -> Callable:
+#     exponent = params['exponent']
+
+#     def weight(p: np.ndarray) -> np.ndarray:
+#         return np.divide(np.power(p, exponent), np.power(np.add(np.power(p, exponent), np.power(np.subtract(1, p), exponent)), np.divide(1, exponent)))
+
+#     return weight
+
 # Cumulative Prospect Theory probability weight function from Tversky & Kahneman (1992)
 def power_weights(params: dict) -> Callable:
     exponent = params['exponent']
 
     def weight(p: np.ndarray) -> np.ndarray:
-        return np.divide(np.power(p, exponent), np.power(np.add(np.power(p, exponent), np.power(np.subtract(1, p), exponent)), np.divide(1, exponent)))
+        w = np.zeros_like(p)
+
+        # values between 0 and 1
+        mask = (p > 0) & (p < 1)
+        p_masked = p[mask]
+        numerator = np.power(p_masked, exponent)
+        denominator = np.power(
+            np.power(p_masked, exponent) + np.power(1 - p_masked, exponent),
+            1 / exponent
+        )
+        w[mask] = numerator / denominator
+
+        # values <=0 and >=1
+        w[p <= 0] = 0
+        w[p >= 1] = 1
+
+        return w
 
     return weight
 

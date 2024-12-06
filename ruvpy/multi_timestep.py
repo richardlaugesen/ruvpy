@@ -25,6 +25,9 @@ def multiple_timesteps(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, eco
     if parallel_nodes == 1:
         results = []
         for t, ob in enumerate(obs):
+            #print('\033[1;32m------------------------------------------------------\033[0m')
+            #print('\033[1;32mTimestep %d\033[0m' % t)
+            #print('\033[1;32m------------------------------------------------------\033[0m')            
             if not np.isnan(ob):    
                 results.append(single_timestep(t, econ_par, ob, fcsts[t], refs[t], context))
     else:
@@ -54,7 +57,6 @@ def _dict_to_output(results: dict, size: int) -> SingleParOutput:
         output.fcst_ex_post[t] = result['fcst_ex_post']
         output.ref_spends[t] = result['ref_spend']
         output.ref_ex_post[t] = result['ref_ex_post']
-
     return output
 
 

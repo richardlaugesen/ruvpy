@@ -63,7 +63,7 @@ def risk_premium_to_risk_aversion_coef(risk_premium: float, gamble_size: float) 
     def eqn(A):
         return np.log(0.5 * (np.exp(-A * gamble_size) + np.exp(A * gamble_size))) / (A * gamble_size) - risk_premium
 
-    return root_scalar(eqn, bracket=[0.0000001, 100]).root
+    return root_scalar(eqn, bracket=[1E-12, 100]).root
 
 
 # Calculate CARA probability premium from risk premium (Babcock, 1993. Eq 9)
@@ -77,7 +77,7 @@ def risk_premium_to_prob_premium(risk_premium: float) -> float:
     def eqn(prob):
         return np.log((1 + 4 * np.power(prob, 2)) / (1 - 4 * np.power(prob, 2))) / np.log((1 + 2 * prob) / (1 - 2 * prob)) - risk_premium
 
-    return root_scalar(eqn, bracket=[0.0000001, 0.49999]).root
+    return root_scalar(eqn, bracket=[1E-12, 0.49999]).root
 
 
 # Calculate CARA risk aversion coefficient from probability premium (Babcock, 1993. Eq 4, 9)
@@ -96,5 +96,24 @@ def prob_premium_to_risk_aversion_coef(risk_premium_prob: float, gamble_size: fl
             np.log(0.5 * (np.exp(-A * gamble_size) + np.exp(A * gamble_size))) / (A * gamble_size)
         )
 
-    return root_scalar(eqn, bracket=[0.0000001, 100]).root
+    return root_scalar(eqn, bracket=[1E-12, 100]).root
+
+def nanmode(data, axis=None):
+    if axis is None:
+        # Flatten array and remove NaN values
+        non_nan_data = data[~np.isnan(data)]
+        if len(non_nan_data) == 0:
+            return np.nan
+        unique_vals, counts = np.unique(non_nan_data, return_counts=True)
+        return unique_vals[np.argmax(counts)]
+    else:
+        # Compute mode along the specified axis, ignoring NaN
+        def mode_along_axis(subarray):
+            non_nan_data = subarray[~np.isnan(subarray)]
+            if len(non_nan_data) == 0:
+                return np.nan
+            unique_vals, counts = np.unique(non_nan_data, return_counts=True)
+            return unique_vals[np.argmax(counts)]
+        
+        return np.apply_along_axis(mode_along_axis, axis, data)
 
