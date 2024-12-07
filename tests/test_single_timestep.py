@@ -21,6 +21,7 @@ from ruvpy.economic_models import cost_loss, cost_loss_analytical_spend
 from ruvpy.utility_functions import cara
 from ruvpy.data_classes import DecisionContext
 from ruvpy.decision_rules import optimise_over_forecast_distribution
+from ruvpy.probability_weight_functions import linear_weights
 
 
 def get_context(decision_thresholds=np.arange(5, 20, 1)):
@@ -32,6 +33,8 @@ def get_context(decision_thresholds=np.arange(5, 20, 1)):
         'economic_model': cost_loss,
         'analytical_spend': cost_loss_analytical_spend,
         'decision_rule': optimise_over_forecast_distribution,
+        'reference_point': 0,
+        'probability_weight_function': linear_weights(None),
         'optimiser': {'lower_bound': 0, 'upper_bound': 2, 'tolerance': 1e-4, 'polish': True, 'seed': 42}
     }
     return DecisionContext(**context_fields)

@@ -15,15 +15,7 @@
 from typing import Callable
 import numpy as np
 
-# TODO: change from "weights" to "capactities"?
-
-# def power_weights(params: dict) -> Callable:
-#     exponent = params['exponent']
-
-#     def weight(p: np.ndarray) -> np.ndarray:
-#         return np.divide(np.power(p, exponent), np.power(np.add(np.power(p, exponent), np.power(np.subtract(1, p), exponent)), np.divide(1, exponent)))
-
-#     return weight
+# TODO: make these work with a single float as well as an array
 
 # Cumulative Prospect Theory probability weight function from Tversky & Kahneman (1992)
 def power_weights(params: dict) -> Callable:

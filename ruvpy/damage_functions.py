@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, Union
 import numpy as np
 from scipy import interpolate
 
@@ -22,7 +22,7 @@ def logistic(params: dict) -> Callable:
     k = params['k']
     threshold = params['threshold']
 
-    def damages(magnitude: np.ndarray) -> np.ndarray:
+    def damages(magnitude: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
         return A / (1 + np.exp(-k * (magnitude - threshold)))
 
     return damages
@@ -32,7 +32,7 @@ def logistic(params: dict) -> Callable:
 def logistic_zero(params: dict) -> Callable:
     logistic_closure = logistic(params)
 
-    def damages(magnitude: np.ndarray) -> np.ndarray:
+    def damages(magnitude: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
         damages = logistic_closure(magnitude)
         try:
             damages[magnitude == 0] = 0
@@ -46,7 +46,7 @@ def logistic_zero(params: dict) -> Callable:
 def binary(params: dict) -> Callable:
     threshold, max_loss, min_loss = params['threshold'], params['max_loss'], params['min_loss']
 
-    def damages(magnitude: np.ndarray) -> np.ndarray:
+    def damages(magnitude: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
         ge = np.greater_equal(magnitude, threshold)
         damages = np.empty(magnitude.shape)
         damages[ge] = max_loss
@@ -59,7 +59,7 @@ def binary(params: dict) -> Callable:
 def linear(params: dict) -> Callable:
     slope, intercept = params['slope'], params['intercept']
 
-    def damages(magnitude: np.ndarray) -> np.ndarray:
+    def damages(magnitude: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
         return slope * magnitude + intercept
 
     return damages
@@ -73,7 +73,7 @@ def user_defined(params: dict) -> Callable:
         points = params['points']
         inter = _user_defined_interpolator(points)
 
-    def damages(magnitude: np.ndarray) -> np.ndarray:
+    def damages(magnitude: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
         return inter(magnitude)
 
     return damages

@@ -20,6 +20,7 @@ from ruvpy.utility_functions import cara
 from ruvpy.damage_functions import logistic_zero
 from ruvpy.helpers import generate_event_freq_ref
 from ruvpy.decision_rules import optimise_over_forecast_distribution, critical_probability_threshold_equals_par, critical_probability_threshold_fixed, critical_probability_threshold_max_value
+from ruvpy.probability_weight_functions import linear_weights
 
 
 def get_data(ref_equals_fcst=False, event_freq_ref=False):
@@ -52,6 +53,8 @@ def get_context(decision_rule, decision_rule_params, risk_aversion=0.3):
         'economic_model': cost_loss,
         'analytical_spend': cost_loss_analytical_spend,
         'decision_rule': decision_rule(decision_rule_params),
+        'reference_point': 0,
+        'probability_weight_function': linear_weights(None),
         'optimiser': {'lower_bound': 0, 'upper_bound': 2, 'tolerance': 1e-4, 'polish': True, 'seed': 42}
     }
     return DecisionContext(**context_params)

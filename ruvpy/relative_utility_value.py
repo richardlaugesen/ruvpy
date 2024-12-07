@@ -19,7 +19,7 @@ from ruvpy.data_classes import DecisionContext
 from ruvpy.probability_weight_functions import linear_weights
 
 
-def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, decision_context: dict, parallel_nodes: int=4) -> dict:
+def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, decision_context: dict, parallel_nodes: int=1) -> dict:
     """
     Calculate the Relative Utility Value (RUV) for a set of observations, forecasts, and references
     using a specified decision-context.
@@ -31,7 +31,9 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
 
     The RUV method and RUVPY software package are introduced in the following publications:
 
-    - Laugesen, Richard and Thyer, Mark and McInerney, David and Kavetski, Dmitri, Software Library to Quantify the Value of Forecasts for Decision-Making: Case Study on Sensitivity to Damages. http://dx.doi.org/10.2139/ssrn.5001881 (under review)
+    - Laugesen, Richard and Thyer, Mark and McInerney, David and Kavetski, Dmitri, Software Library to Quantify the
+      Value of Forecasts for Decision-Making: Case Study on Sensitivity to Damages.
+      http://dx.doi.org/10.2139/ssrn.5001881 (under review)
     - Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range
       of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27,
       873–893, https://doi.org/10.5194/hess-27-873-2023, 2023.
@@ -47,13 +49,19 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
             member and each row corresponds to a time period. If 'None', a reference climatology will be generated based
             on the observations, reproducing the observed frequency of events.
         decision_context (dict): Dictionary defining the decision context, containing:
+
             - 'decision_thresholds' (np.ndarray): 1D array specifying thresholds of the forecast variable.
             - 'decision_rule' (list): Decision-making function and a dictionary of its parameters.
             - 'damage_function' (list): Damage function method and a dictionary of its parameters.
             - 'utility_function' (list): Utility function method and a dictionary of its parameters.
             - 'economic_model' (list): Economic model function, analytical function, and list of parameter values.
-            - 'optimiser' (dict, optional): Optional dictionary specifing key/value pairs to tune the numerical optimiser (lower_bound, upper_bound, tolerance, polish, seed), all keys are required.
-        parallel_nodes (int, optional): Number of parallel processes used for computation. Defaults to 4.
+            - 'probability_weight_function' (list, optional): Probability weight function method and a dictionary of its parameters.
+            - 'reference_point' (float, optional): Reference point to subtract from economic outcomes.
+            - 'optimiser' (dict, optional): Optional dictionary specifying key/value pairs to tune the numerical
+                                            optimiser (lower_bound, upper_bound, tolerance, polish, seed), all keys
+                                            are required.
+
+        parallel_nodes (int, optional): Number of parallel processes used for computation. Defaults to 1.
 
     Returns:
         dict: Dictionary containing the calculated Relative Utility Value (RUV) results. Keys include:
@@ -66,7 +74,8 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
             - 'avg_fcst_ex_post', 'avg_ref_ex_post', 'avg_obs_ex_post': Average ex post utility.
 
     Raises:
-        ValueError: If inputs contain missing values, invalid thresholds are provided, or input data lengths do not match.
+        ValueError: If inputs contain missing values, invalid thresholds are provided, input data lengths do not match,
+                    or invalid parameter values are provided for decision context components.
 
     Examples:
         Examples reproducing figures from the research papers can be found as Jupyter notebooks in the *examples* directory.
@@ -81,17 +90,17 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
                 'damage_function': [logistic, {'k': 0.2, 'A': 1, 'threshold': 20}]
             }
 
-    Included decision context functions:
+    **Included decision context functions:**
 
-    Decision rules:
+    **Decision rules:**
 
     - 'optimise_over_forecast_distribution': Optimises decision-making based on the whole forecast distribution.
     - 'critical_probability_threshold_fixed': Uses a fixed critical probability threshold for decision-making.
     - 'critical_probability_threshold_max_value': Selects the decision threshold leading to the maximum forecast value.
     - 'critical_probability_threshold_equals_par': Matches the decision threshold to the economic parameter.
-    - 'forecast_distribution_mode': Use the most likely value from each forecast ensemble
+    - 'forecast_distribution_mode': Use the most likely value from each forecast ensemble.
 
-    Damage functions:
+    **Damage functions:**
 
     - 'logistic': Logistic damage function with defined maximum damages, steepness, and location.
     - 'logistic_zero': Logistic function with damages pegged to zero for zero flow.
@@ -99,39 +108,59 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     - 'linear': Linear damage function.
     - 'user_defined': Damage function interpolated over user-defined points.
 
-    Utility functions:
+    **Utility functions:**
 
     - 'cara': Constant Absolute Risk Aversion (CARA), where absolute risk aversion stays constant regardless of wealth.
     - 'crra': Constant Relative Risk Aversion (CRRA), where relative risk aversion stays constant regardless of wealth.
     - 'exponential_utility': Exponential utility function used to model CARA behaviour.
     - 'isoelastic_utility': Isoelastic utility function used to model CRRA behaviour.
     - 'hyperbolic_utility': Hyperbolic Absolute Risk Aversion (HARA), generalises both CARA and CRRA behavior.
+    - 'power_value': Asymmetric utility function used in Cumulative Prospect Theory.
 
-    Economic models:
+    **Economic models:**
 
     - 'cost_loss': Standard cost-loss economic model based on spending to mitigate potential future losses.
     - 'cost_loss_analytical_spend': Analytical function to compute optimal spending in cost-loss.
 
-    Decision types:
+    **Decision types:**
 
     Defined by providing a list of thresholds in the 'decision_thresholds' key of the decision_context dictionary:
 
     - 'Binary decision': 1D array with two elements, 0 and the threshold value (e.g., np.array([0, 20])).
     - 'Multi-categorical decision': 1D array with multiple elements, one of which must be 0 (e.g., np.array([0, 5, 15, 25])).
     - 'Continuous decision': 'None'.
+
+    **Reference point (optional):**
+
+    Float subtracted from economic outcomes before applying the utility function.
+    Used in Cumulative Prospect Theory to distinguish subjective gains from losses.
+    Default is zero.
+
+    **Probability weight functions (optional):**
+
+    - 'power_weights': Power-based probability weighting used in Cumulative Prospect Theory.
+    - 'linear_weights': Linear probability weights implicit in Expected Utility Theory (default).
+
+    **Numerical optimiser (optional):**
+
+    An optional dictionary to tune the numerical optimiser.
+    If this is not provided then the default values below are used.
+    If provided then all the following keys are required:
+
+    - 'lower_bound': The smallest expected economic action (e.g spend amount for cost-loss). Default is 0.
+    - 'upper_bound': The largest expected economic action. Default is twice inferred max damages.
+    - 'tolerance': Relative numerical tolerance for convergence. Default is 1E-4.
+    - 'polish': Polish the Differential Evolution result with L-BFGS-B or not. Default is True.
+    - 'seed': Seed to initialise random number generator. Default is None.
+
     """
 
-    # TODO: update docstrings, README, tests, TODO, and templates following CPT implementation
-
-    # add in decision context defaults needed for EUT with CPT implementation
+    # add in decision context defaults as needed
     if 'probability_weight_function' not in decision_context:
         decision_context['probability_weight_function'] = [linear_weights, None]
 
     if 'reference_point' not in decision_context:
         decision_context['reference_point'] = None
-
-    if 'polish' not in decision_context:
-        decision_context['polish'] = True
 
     # build decision context object
     decision_thresholds = decision_context['decision_thresholds']

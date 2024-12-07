@@ -19,7 +19,7 @@ from ruvpy.damage_functions import logistic_zero
 from ruvpy.economic_models import cost_loss, cost_loss_analytical_spend
 from ruvpy.utility_functions import cara
 from ruvpy.decision_rules import optimise_over_forecast_distribution, critical_probability_threshold_equals_par, critical_probability_threshold_fixed
-
+from ruvpy.probability_weight_functions import linear_weights
 
 def test_relative_utility_value():
 
@@ -43,6 +43,8 @@ def test_relative_utility_value():
         'economic_model': [cost_loss, cost_loss_analytical_spend, np.array([0.25, 0.5, 0.75])],
         'decision_thresholds': np.arange(0, 20, 3),
         'decision_rule': [optimise_over_forecast_distribution, None],
+        'reference_point': 0,
+        'probability_weight_function': [linear_weights, None],
         'optimiser': {'lower_bound': 0, 'upper_bound': 2, 'tolerance': 1e-4, 'polish': True, 'seed': 42}
     }
 
@@ -68,6 +70,8 @@ def test_relative_utility_value():
         'economic_model': [cost_loss, cost_loss_analytical_spend, np.array([0.25, 0.5, 0.75])],
         'decision_thresholds': np.arange(0, 20, 3),
         'decision_rule': [optimise_over_forecast_distribution, None],
+        'reference_point': 0,
+        'probability_weight_function': [linear_weights, None],
         'optimiser': {'lower_bound': 0, 'upper_bound': 2, 'tolerance': 1e-4, 'polish': True, 'seed': 42}
     }
 

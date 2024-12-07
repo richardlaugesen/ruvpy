@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Union
 import numpy as np
 
 
-def cost_loss(alpha: float, values: np.ndarray, spend: float, damage_function: callable) -> np.ndarray:
+def cost_loss(alpha: float, values: Union[np.ndarray, float], spend: float, damage_function: callable) -> Union[np.ndarray, float]:
     damages = damage_function(values)  
     benefits = np.minimum(spend/alpha, damages)  
     return benefits - damages - spend  
 
 
-def cost_loss_analytical_spend(alpha: float, values: float, damage_function: callable) -> float:
+def cost_loss_analytical_spend(alpha: float, values: Union[np.ndarray, float], damage_function: callable) -> Union[np.ndarray, float]:
     return damage_function(values) * alpha

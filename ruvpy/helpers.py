@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Union
 import numpy as np
 from scipy.optimize import root_scalar
 
@@ -44,7 +45,7 @@ def ecdf(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     return 1 - probs[idx]
 
 
-def is_deterministic(series) -> bool:
+def is_deterministic(series: Union[np.ndarray, float]) -> bool:
     if isinstance(series, np.ndarray) and len(series.shape) > 1:
         raise ValueError(
             'Forecast used for timestep should be a single value (deterministic) or a 1D array (ensemble)')
@@ -104,7 +105,7 @@ def prob_premium_to_risk_aversion_coef(risk_premium_prob: float, gamble_size: fl
     return root_scalar(eqn, bracket=[1e-12, 100]).root
 
 
-def nanmode(data, axis=None):
+def nanmode(data: np.ndarray, axis=None) -> np.ndarray:
     if axis is None:
         # Flatten array and remove NaN values
         non_nan_data = data[~np.isnan(data)]

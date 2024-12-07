@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Callable
+from typing import Callable, Union
 import numpy as np
 
 
@@ -32,7 +32,7 @@ def crra(params: dict) -> Callable:
 def exponential_utility(params: dict) -> Callable:
     A = params['A']
 
-    def utility(c: float) -> float:
+    def utility(c: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
         if A == 0:
             return c
         else:
@@ -43,12 +43,15 @@ def exponential_utility(params: dict) -> Callable:
 
 
 # Isoelastic utility function (https://en.wikipedia.org/wiki/Isoelastic_utility)
-def isoelastic_utility(params: dict) -> Callable:
+def isoelastic_utility(params: dict):
     eta = float(params['eta'])
     symmetric = params.get('symmetric', False)
 
-    def utility(c: float) -> float:
+    def utility(c: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
         c = _ensure_float(c)
+
+        if np.any(c == 0):
+            raise ValueError("Amount cannot be 0 for isoelastic utility")
 
         # CARA with negative values if symmetric
         val = np.abs(c) if symmetric else c
@@ -67,20 +70,21 @@ def isoelastic_utility(params: dict) -> Callable:
 def hyperbolic_utility(params: dict) -> Callable:
     g, a, b = params['g'], params['a'], params['b']
 
-    def utility(W: float) -> float:
-        if g == 0 or g == 1:
-            raise Exception('g cannot be 0 or 1')
+    if a <= 0:
+        raise ValueError("Parameter 'a' must be > 0")
+    if g == 0:
+        raise ValueError("Parameter 'g' cannot be 0")
+    if g == 1:
+        raise ValueError("Parameter 'g' cannot be 1")
 
-        if a <= 0:
-            raise Exception('a > 0')
+    def utility(W: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
 
-        if np.any(W < 0):
-            raise Exception('W must be positive')
+        W = _ensure_float(W)
 
         if np.any(b + (a * W) / (1 - g) <= 0):
-            raise Exception('b + (a * W) / (1 - g) > 0')
+            raise ValueError('b + (a * W) / (1 - g) must be > 0')
 
-        return ((1 - g) / g) * np.power(((a * W) / (1 - g) + b), g)
+        return ((1 - g) / g) * np.power((a * W / (1 - g) + b), g)
 
     return utility
 
@@ -89,7 +93,7 @@ def hyperbolic_utility(params: dict) -> Callable:
 def power_value(params: dict) -> callable:
     alpha, beta, lambda_ = params['alpha'], params['beta'], params['lambda']
 
-    def value(c: float) -> float:
+    def value(c: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
         c = np.asarray(c)
         result = np.empty_like(c, dtype=float)
 
@@ -103,7 +107,5 @@ def power_value(params: dict) -> callable:
     return value
 
 
-# TODO: the types on the inner functions are wrong, could be np.array or float
-
-def _ensure_float(input_data: np.ndarray) -> float:
+def _ensure_float(input_data: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
     return input_data.astype(float) if isinstance(input_data, np.ndarray) else float(input_data)

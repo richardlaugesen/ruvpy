@@ -27,13 +27,13 @@ class DecisionContext:
     analytical_spend: Callable
     decision_rule: Callable
     probability_weight_function: Callable
-    reference_point: float
-    decision_thresholds: np.ndarray = field(default=None)
-    optimiser: dict = field(default_factory={'lower_bound': None,
-                                             'upper_bound': None,
-                                             'tolerance': 1E-4,
-                                             'polish': True,
-                                             'seed': None})
+    reference_point: float = field(default = None)
+    decision_thresholds: np.ndarray = field(default = None)
+    optimiser: dict = field(default_factory = {'lower_bound': None,
+                                               'upper_bound': None,
+                                               'tolerance': 1E-4,
+                                               'polish': True,
+                                               'seed': None})
 
     def validate_fields(self):
         for field_name, value in self.__dict__.items():
