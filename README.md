@@ -69,21 +69,17 @@ and generating docs requires pdoc3.
 All dependencies are defined in an included pyproject.toml file ready for use with [Poetry](https://python-poetry.org/) 
 or Setuptools.
 
-For example, the following commands can be used once Poetry is installed to set the environment up:
+For example, the following commands can be used once Poetry is installed to set the environment up and run the examples:
 
-    poetry install
+    poetry install --with dev
     poetry shell
-
-And then to run the unit tests use: 
-
-    pytest
-
-To run examples use:
-
     jupyter notebook
 
-Regenerate documentation using:
+The development environment can be set up to run tests and regenerate documentation using the following:
 
+    poetry install --with dev
+    poetry shell
+    pytest
     pdoc --html --output-dir docs ruvpy --force
 
 ## Attribution
