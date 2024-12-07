@@ -10,15 +10,19 @@
 
 RUVPY is a library which can be used in your software to quantify the value of forecast information for decision-making.
 
-It is a reference implementation of the Relative Utility Value (RUV) method, which is very flexible and can accommodate a wide range of decisions.
+It is a reference implementation of the Relative Utility Value (RUV) method, which is very flexible and can 
+accommodate a wide range of decisions.
 
 It includes a set of commonly used decision rules, utility functions, damage functions, and economic models. 
 Decision-making can be modelled using normative or descriptive approaches.  
-The implementation is sufficiently computationally efficient for most situations and optionally arallelises timesteps over available CPU cores. 
+The implementation is sufficiently computationally efficient for most situations and (optionally) parallelises timesteps 
+over available CPU cores. 
 The primary focus of this implementation is clarity and flexibility.
 
-The scope is intentionally narrow and does not include any figure generation, data loading and saving, other metrics, or analysis functionality. 
-These functions are intended to be implemented in a larger workflow or analysis pipeline which calls the main entry point of this library. 
+The scope is intentionally narrow and does not include any figure generation, data loading and saving, other metrics, 
+or analysis functionality. 
+These functions are intended to be implemented in a larger workflow or analysis pipeline which calls the main 
+entry point of this library. 
 
 ## Publications
 
