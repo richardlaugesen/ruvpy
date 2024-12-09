@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import numpy as np
+from scipy.optimize import minimize_scalar
 
 from ruvpy.helpers import generate_event_freq_ref
 from ruvpy.data_classes import DecisionContext
@@ -98,7 +99,6 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
     - 'critical_probability_threshold_fixed': Uses a fixed critical probability threshold for decision-making.
     - 'critical_probability_threshold_max_value': Selects the decision threshold leading to the maximum forecast value.
     - 'critical_probability_threshold_equals_par': Matches the decision threshold to the economic parameter.
-    - 'forecast_distribution_mode': Use the most likely value from each forecast ensemble.
 
     **Damage functions:**
 
@@ -195,9 +195,9 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
         polish = decision_context['optimiser']['polish']
         seed = decision_context['optimiser']['seed']
     else:
-        lower_bound = 0
-        upper_bound = 2 * np.max([damage_fnc(v) for v in np.linspace(0, 1e6, int(1e4))])
-        print(f'\033[1;31mInferred upper_bound: {upper_bound:.2f}\033[0m')
+        lower_bound = minimize_scalar(damage_fnc).fun
+        upper_bound = 2 * -minimize_scalar(lambda v: -damage_fnc(v)).fun
+        print(f'\033[1;31mInferred numerical optimiser bounds [{lower_bound:.2f}, {upper_bound:.2f}]\033[0m')
         tolerance = 1E-4
         polish = True
         seed = None
