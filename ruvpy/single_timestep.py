@@ -14,9 +14,10 @@
 
 import numpy as np
 import copy
-from scipy.optimize import differential_evolution, minimize_scalar, brute
+from typing import Union
+from scipy.optimize import differential_evolution
 
-from ruvpy.helpers import is_deterministic, ecdf, nanmode
+from ruvpy.helpers import is_deterministic, ecdf
 from ruvpy.data_classes import DecisionContext
 
 
@@ -150,7 +151,7 @@ def _calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     return likelihoods
 
 
-def _realised_threshold(value: float, thresholds: np.ndarray) -> float:
+def _realised_threshold(value: Union[np.ndarray, float], thresholds: np.ndarray) -> Union[np.ndarray, float]:
     if thresholds is None:
         return value
 
