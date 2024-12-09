@@ -69,7 +69,11 @@ def test_isoelastic_utility():
         isoelastic_utility({'B': 0.1})
 
     with pytest.raises(ValueError):
-        isoelastic_utility({'eta': 0.1})(0)
+        isoelastic_utility({'eta': 1.1})(0)
+
+    assert np.isclose(isoelastic_utility({'eta': 0.1})(0), -1.11111, rtol=1e-2, atol=1e-3)
+    assert np.isclose(isoelastic_utility({'eta': -0.1})(0), -0.9090909, rtol=1e-2, atol=1e-3)
+    assert np.isclose(isoelastic_utility({'eta': 0.1, 'symmetric': True})(0), 0, rtol=1e-2, atol=1e-3)
 
     assert np.isclose(isoelastic_utility({'eta': 0.1})(10), 7.714758163603128, rtol=1e-2, atol=1e-3)
     assert np.isclose(isoelastic_utility({'eta': 0})(10), 9, rtol=1e-2, atol=1e-3)

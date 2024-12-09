@@ -50,10 +50,10 @@ def isoelastic_utility(params: dict):
     def utility(c: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
         c = _ensure_float(c)
 
-        if np.any(c == 0):
-            raise ValueError("Amount cannot be 0 for isoelastic utility")
+        if np.any(c == 0) and eta > 1:
+            raise ValueError("Amount cannot be 0 for isoelastic utility when $\eta$ > 1")
 
-        # CARA with negative values if symmetric
+        # For symmetric CRRA behaviour with negative values
         val = np.abs(c) if symmetric else c
 
         if eta == 1:
@@ -61,7 +61,11 @@ def isoelastic_utility(params: dict):
         else:
             result = (np.power(val, 1 - eta) - 1) / (1 - eta)
 
-        return np.sign(c) * result
+        # For symmetric CRRA behaviour with negative values
+        if symmetric:
+            result *= np.sign(c)
+
+        return result
 
     return utility
 
