@@ -195,8 +195,9 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
         polish = decision_context['optimiser']['polish']
         seed = decision_context['optimiser']['seed']
     else:
-        lower_bound = minimize_scalar(damage_fnc).fun
-        upper_bound = 2 * -minimize_scalar(lambda v: -damage_fnc(v)).fun
+        # TODO: add a test for this inference over a bunch of different damage functions
+        lower_bound = minimize_scalar(damage_fnc, bracket=(1e-15, 1e15)).fun
+        upper_bound = 2 * -minimize_scalar(lambda v: -damage_fnc(v), bracket=(1e-15, 1e15)).fun
         print(f'\033[1;31mInferred numerical optimiser bounds [{lower_bound:.2f}, {upper_bound:.2f}]\033[0m')
         tolerance = 1E-4
         polish = True
