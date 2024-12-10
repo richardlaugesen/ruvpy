@@ -21,6 +21,8 @@ from pathos.multiprocessing import ProcessPool as Pool
 
 # Calculate RUV for a single economic parameter value, parallelises over timesteps
 def multiple_timesteps(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, econ_par: float, context: DecisionContext, parallel_nodes: int) -> SingleParOutput:
+    print(f"Economic model parameter = {econ_par:.2f}")
+
     if parallel_nodes == 1:
         results = []
         for t, ob in enumerate(obs):
