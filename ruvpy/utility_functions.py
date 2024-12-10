@@ -106,7 +106,7 @@ def power_value(params: dict) -> callable:
         result[mask] = np.power(c[mask], alpha)
         result[~mask] = -lambda_ * np.power(-c[~mask], beta)
 
-        return result if result.size > 1 else result.item()
+        return result
 
     return value
 
