@@ -71,13 +71,13 @@ or Setuptools.
 
 For example, the following commands can be used once Poetry is installed to set the environment up and run the examples:
 
-    poetry install
+    poetry install --extras "examples"
     poetry shell
     jupyter notebook
 
 The development environment can be set up to run tests and regenerate documentation using the following:
 
-    poetry install --with dev
+    poetry install --all-extras
     poetry shell
     pytest
     pdoc --html --output-dir docs ruvpy --force

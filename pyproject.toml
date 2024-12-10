@@ -20,7 +20,7 @@ scipy = ">=1.9.3"
 pathos = ">=0.3.0"
 
 [tool.poetry.extras]
-examples = ["matplotlib", "xarray", "pandas", "jupyter"]
+examples = ["matplotlib", "xarray", "pandas", "jupyter", "netcdf4"]
 
 [tool.poetry.dev-dependencies]
 pytest = ">=7.4.0"
