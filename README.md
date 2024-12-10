@@ -71,7 +71,7 @@ or Setuptools.
 
 For example, the following commands can be used once Poetry is installed to set the environment up and run the examples:
 
-    poetry install --with dev
+    poetry install
     poetry shell
     jupyter notebook
 
