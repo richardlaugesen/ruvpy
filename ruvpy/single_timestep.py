@@ -21,8 +21,8 @@ from ruvpy.helpers import is_deterministic, ecdf
 from ruvpy.data_classes import DecisionContext
 
 
-# Calculate RUV for a single economic parameter and single timestep
 def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.array, context: DecisionContext) -> dict[str, np.ndarray]:
+    """Evaluate one timestep of the RUV calculation for a single parameter."""
     ob_threshold = _realised_threshold(ob, context.decision_thresholds)
     ob_spend = context.analytical_spend(econ_par, ob_threshold, context.damage_function)
 
@@ -52,6 +52,7 @@ def single_timestep(t: int, econ_par: float, ob: float, fcst: np.array, ref: np.
 
 
 def _find_spend_ensemble(econ_par: float, ens: np.ndarray, likelihoods: np.ndarray, context: DecisionContext) -> float:
+    """Optimise spend for an ensemble forecast using differential evolution."""
 
     # if continuous decision then all members are equally likely so thresholds=ens
     if context.decision_thresholds is None:
@@ -79,16 +80,19 @@ def _find_spend_ensemble(econ_par: float, ens: np.ndarray, likelihoods: np.ndarr
 
 
 def _ex_ante_utility(econ_par: float, spend: float, likelihoods: np.ndarray, context: DecisionContext) -> float:
+    """Calculate expected utility prior to event realisation."""
     net_outcome = context.economic_model(econ_par, context.decision_thresholds, spend, context.damage_function)
     return np.dot(likelihoods, context.utility_function(net_outcome))
 
 
 def _ex_post_utility(econ_par: float, occurred: float, spend: float, context: DecisionContext) -> float:
+    """Calculate utility after the event has occurred."""
     net_outcome = context.economic_model(econ_par, occurred, spend, context.damage_function)
     return context.utility_function(net_outcome)
 
 
 def _calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
+    """Compute probability of exceeding each threshold."""
     if thresholds is None:
         return np.full(ens.shape, 1/ens.shape[0])   # continuous decision limit is 1/num_classes
 
@@ -102,6 +106,7 @@ def _calc_likelihood(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
 
 
 def _realised_threshold(value: float, thresholds: np.ndarray) -> float:
+    """Return the threshold value realised by ``value``."""
     if thresholds is None:
         return value
 

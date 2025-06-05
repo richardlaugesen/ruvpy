@@ -18,6 +18,7 @@ from scipy import interpolate
 
 
 def logistic(params: dict) -> Callable:
+    """Return a logistic damage function."""
     A = params['A']
     k = params['k']
     threshold = params['threshold']
@@ -28,8 +29,8 @@ def logistic(params: dict) -> Callable:
     return damages
 
 
-# Same as logistic with damages pegged to zero for zero flow
 def logistic_zero(params: dict) -> Callable:
+    """Return the logistic damage function pegged to zero for zero flow."""
     logistic_closure = logistic(params)
 
     def damages(magnitude: np.ndarray) -> np.ndarray:
@@ -44,6 +45,7 @@ def logistic_zero(params: dict) -> Callable:
 
 
 def binary(params: dict) -> Callable:
+    """Return a binary damage function."""
     threshold, max_loss, min_loss = params['threshold'], params['max_loss'], params['min_loss']
 
     def damages(magnitude: np.ndarray) -> np.ndarray:
@@ -57,6 +59,7 @@ def binary(params: dict) -> Callable:
 
 
 def linear(params: dict) -> Callable:
+    """Return a linear damage function."""
     slope, intercept = params['slope'], params['intercept']
 
     def damages(magnitude: np.ndarray) -> np.ndarray:
@@ -65,8 +68,8 @@ def linear(params: dict) -> Callable:
     return damages
 
 
-# Damages by a linear interpolation over a set of points (list of tuples)
 def user_defined(params: dict) -> Callable:
+    """Return a damage function interpolated over user-defined ``(x, y)`` points."""
     if 'interpolator' in params:
         inter = params['interpolator']
     else:
@@ -80,6 +83,7 @@ def user_defined(params: dict) -> Callable:
 
 
 def _user_defined_interpolator(points: List[Tuple]) -> Callable:
+    """Create an interpolation function from a list of ``(x, y)`` points."""
     user_flows, user_damages = zip(*points)
     extrapolate_value = user_damages[-1]
     inter = interpolate.interp1d(

@@ -16,18 +16,21 @@ from typing import Callable
 import numpy as np
 
 
-# Constant Absolute Risk Aversion utility function
 def cara(params: dict) -> Callable:
+    """Constant Absolute Risk Aversion utility function."""
     return exponential_utility(params)
 
 
-# Constant Relative Risk Aversion utility function
 def crra(params: dict) -> Callable:
+    """Constant Relative Risk Aversion utility function."""
     return isoelastic_utility(params)
 
 
-# Exponential utility function (https://en.wikipedia.org/wiki/Exponential_utility)
 def exponential_utility(params: dict) -> Callable:
+    """Exponential utility function used for CARA behaviour.
+
+    See https://en.wikipedia.org/wiki/Exponential_utility for details.
+    """
     A = params['A']
 
     def utility(c: float) -> float:
@@ -40,8 +43,11 @@ def exponential_utility(params: dict) -> Callable:
     return utility
 
 
-# Isoelastic utility function (https://en.wikipedia.org/wiki/Isoelastic_utility)
 def isoelastic_utility(params: dict) -> Callable:
+    """Isoelastic utility function used for CRRA behaviour.
+
+    See https://en.wikipedia.org/wiki/Isoelastic_utility.
+    """
     eta = float(params['eta'])
 
     def utility(c: float) -> float:
@@ -55,8 +61,11 @@ def isoelastic_utility(params: dict) -> Callable:
     return utility
 
 
-# Hyperbolic absolute risk aversion utility function (https://en.wikipedia.org/wiki/Hyperbolic_absolute_risk_aversion)
 def hyperbolic_utility(params: dict) -> Callable:
+    """Hyperbolic Absolute Risk Aversion utility function.
+
+    See https://en.wikipedia.org/wiki/Hyperbolic_absolute_risk_aversion.
+    """
     g, a, b = params['g'], params['a'], params['b']
 
     def utility(W: float) -> float:
@@ -78,4 +87,5 @@ def hyperbolic_utility(params: dict) -> Callable:
 
 
 def _ensure_float(input_data: np.ndarray) -> float:
+    """Cast ``input_data`` to ``float`` regardless of input type."""
     return input_data.astype(float) if isinstance(input_data, np.ndarray) else float(input_data)
