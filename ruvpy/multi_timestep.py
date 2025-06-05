@@ -19,9 +19,11 @@ from ruvpy.data_classes import DecisionContext, SingleParOutput
 from pathos.multiprocessing import ProcessPool as Pool
 
 
-# Calculate RUV for a single economic parameter value, parallelises over timesteps
-
 def multiple_timesteps(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, econ_par: float, context: DecisionContext, parallel_nodes: int) -> SingleParOutput:
+    """Evaluate a single economic parameter over all timesteps.
+
+    The computation can be parallelised across timesteps using ``parallel_nodes``.
+    """
     if parallel_nodes == 1:
         results = []
         for t, ob in enumerate(obs):
@@ -44,6 +46,7 @@ def multiple_timesteps(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, eco
 
 
 def _dict_to_output(results: dict, size: int) -> SingleParOutput:
+    """Convert a list of timestep dictionaries to ``SingleParOutput``."""
     output = SingleParOutput(size)
 
     for result in results:
@@ -59,6 +62,7 @@ def _dict_to_output(results: dict, size: int) -> SingleParOutput:
 
 
 def _calc_ruv(output: SingleParOutput) -> float:
+    """Compute the Relative Utility Value from accumulated results."""
     output.avg_fcst_ex_post = np.nanmean(output.fcst_ex_post)
     output.avg_obs_ex_post = np.nanmean(output.obs_ex_post)
     output.avg_ref_ex_post = np.nanmean(output.ref_ex_post)

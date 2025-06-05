@@ -22,6 +22,7 @@ from ruvpy.helpers import probabilistic_to_deterministic_forecast, nanmode
 
 
 def optimise_over_forecast_distribution(params: dict) -> Callable:
+    """Optimise spending over the entire forecast distribution."""
     # method has no params
 
     def decision_rule(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
@@ -34,6 +35,7 @@ def optimise_over_forecast_distribution(params: dict) -> Callable:
 
 
 def critical_probability_threshold_fixed(params: dict) -> Callable:
+    """Use a fixed critical probability threshold."""
     crit_prob_thres = params['critical_probability_threshold']
 
     def decision_rule(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
@@ -47,6 +49,7 @@ def critical_probability_threshold_fixed(params: dict) -> Callable:
 
 
 def critical_probability_threshold_max_value(params: dict) -> Callable:
+    """Search for the critical probability that maximises RUV."""
     # method has no params
 
     def decision_rule(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
@@ -65,6 +68,7 @@ def critical_probability_threshold_max_value(params: dict) -> Callable:
 
 
 def critical_probability_threshold_equals_par(params: dict) -> Callable:
+    """Set the critical probability equal to the economic parameter."""
     # method has no params
 
     def decision_rule(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:
@@ -78,6 +82,7 @@ def critical_probability_threshold_equals_par(params: dict) -> Callable:
 
 
 def forecast_distribution_mode(params: dict) -> Callable:
+    """Use the mode of the forecast distribution as the decision variable."""
     # method has no params
 
     def decision_rule(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext, parallel_nodes: int) -> MultiParOutput:

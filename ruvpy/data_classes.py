@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class DecisionContext:
+    """Container for all functions and parameters required for an RUV run."""
     economic_model_params: np.ndarray
     damage_function: Callable
     utility_function: Callable
@@ -35,12 +36,14 @@ class DecisionContext:
     })
     
     def validate_fields(self):
+        """Ensure all mandatory fields are set."""
         for field_name, value in self.__dict__.items():
             if field_name != 'decision_thresholds' and value is None:
                 raise ValueError(f"The field '{field_name}' cannot be None")
 
 @dataclass
 class SingleParOutput:
+    """Output data for a single economic parameter value."""
     ruv: float
 
     avg_fcst_ex_post: float
@@ -60,6 +63,7 @@ class SingleParOutput:
     ref_ex_ante: np.ndarray
 
     def __init__(self, obs_size: int):
+        """Create empty arrays for storing results."""
         self.ruv = np.nan
         self.avg_fcst_ex_post = np.nan
         self.avg_obs_ex_post = np.nan
@@ -71,21 +75,27 @@ class SingleParOutput:
 
 @dataclass
 class MultiParOutput:
-    data: dict    # econ_par, results
+    """Container for outputs over multiple economic parameter values."""
 
-    # maintains data ordered by econ_par
+    data: dict    # econ_par, results
     def insert(self, econ_par, output):
+        """Insert results keyed by economic parameter and maintain ordering."""
         self.data[econ_par] = output
         self.data = {econ_par: self.data[econ_par] for econ_par in sorted(self.data)}
 
-    # return either a 1D or 2D numpy array depending on the type of SingleParOutput field that is stored in the data dict
     def get_series(self, field):
-        return np.array([getattr(v, field).tolist() if isinstance(getattr(v, field), np.ndarray) else getattr(v, field) for a, v in self.data.items()])
+        """Return results for ``field`` as a 1D or 2D ``numpy`` array."""
+        return np.array([
+            getattr(v, field).tolist() if isinstance(getattr(v, field), np.ndarray) else getattr(v, field)
+            for a, v in self.data.items()
+        ])
         
     def __init__(self):
+        """Initialise an empty results container."""
         self.data = {}
 
     def to_dict(self) -> dict:
+        """Convert stored results to a dictionary of ``numpy`` arrays."""
         results = {}
         results['ruv'] = self.get_series('ruv')
         results['economic_model_params'] = np.array(list(self.data.keys()))

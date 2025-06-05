@@ -48,7 +48,7 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
             - 'damage_function' (list): Damage function method and a dictionary of its parameters.
             - 'utility_function' (list): Utility function method and a dictionary of its parameters.
             - 'economic_model' (list): Economic model function, analytical function, and list of parameter values.
-            - 'optimiser' (dict, optional): Optional dictionary specifing key/value pairs to tune the numerical optimiser (lower_bound, upper_bound, tolerance, polish, seed), all keys are required.
+            - 'optimiser' (dict, optional): Optional dictionary specifying key/value pairs to tune the numerical optimiser (lower_bound, upper_bound, tolerance, polish, seed), all keys are required.
         parallel_nodes (int, optional): Number of parallel processes used for computation. Defaults to 4.
 
     Returns:
@@ -182,6 +182,8 @@ def relative_utility_value(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray,
 
 
 def _check_inputs(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, context: DecisionContext) -> None:
+
+    """Validate input arrays and decision context before calculation."""
 
     context.validate_fields()
 

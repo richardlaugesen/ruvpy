@@ -48,7 +48,7 @@ RUV is designed to be tailored to the decision being evaluated.
 This may require the development of custom components to define the decision context in RUVPY. 
 A set of templates to help you get started is included in `templates` directory.
 
-Please consider [contributing](CONTIBUTING.md) your new components to the repository to help others.
+Please consider [contributing](CONTRIBUTING.md) your new components to the repository to help others.
 
 ## Development
 
