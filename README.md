@@ -52,29 +52,31 @@ Please consider [contributing](CONTRIBUTING.md) your new components to the repos
 
 ## Development
 
-The main package requires Python (>=3.8), NumPy, SciPy, and Pathos.
-The examples additionally require XArray, Pandas, Jupyter, and Matplotlib, the tests require Pytest and Statsmodels, 
+The main package requires Python (>=3.10), NumPy, SciPy, and Pathos.
+The examples additionally require XArray, Pandas, Jupyter, and Matplotlib; the tests require Pytest and Statsmodels,
 and generating docs requires pdoc3.
 
 All dependencies are defined in an included pyproject.toml file ready for use with [Poetry](https://python-poetry.org/) 
 or Setuptools.
 
-For example, the following commands can be used once Poetry is installed to set the environment up:
+For example, once Poetry is installed you can set up the environment with:
 
-    poetry install
-    poetry shell
+    poetry install --with dev
 
-And then to run the unit tests use: 
+You may spawn a new shell with the virtual environment using ``poetry shell``,
+or simply prefix commands with ``poetry run``. To run the unit tests:
 
-    pytest
+    poetry run pytest
 
-To run examples use:
+To run the examples you'll need the optional ``examples`` dependencies. Install
+them and start Jupyter with:
 
-    jupyter notebook
+    poetry install -E examples
+    poetry run jupyter notebook
 
 Regenerate documentation using:
 
-    pdoc --html --output-dir docs ruvpy --force
+    poetry run pdoc --html --output-dir docs ruvpy --force
 
 ## Attribution
 

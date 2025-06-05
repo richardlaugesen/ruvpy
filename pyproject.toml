@@ -14,7 +14,7 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10"   # Core will run with 3.9, xarray requires 3.10 but is only needed for examples
+python = ">=3.10"  # Core will run with 3.9; xarray requires 3.10 but is only needed for examples
 numpy = ">=1.24.4"
 scipy = ">=1.9.3"
 pathos = ">=0.3.0"
@@ -22,7 +22,10 @@ pathos = ">=0.3.0"
 [tool.poetry.extras]
 examples = ["matplotlib", "xarray", "pandas", "jupyter"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
 pytest = ">=7.4.0"
 pytest-cov = ">=5.0.0"
 statsmodels = ">=0.13.5"
