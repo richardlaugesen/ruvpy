@@ -17,7 +17,7 @@ include = [
 python = ">=3.10"   # Core will run with 3.9, xarray requires 3.10 but is only needed for examples
 numpy = ">=1.24.4"
 scipy = ">=1.9.3"
-pathos = ">=0.3.0"
+dask = "^2025.5.1"
 
 [tool.poetry.extras]
 examples = ["matplotlib", "xarray", "pandas", "jupyter"]
@@ -30,6 +30,7 @@ flake8 = ">=7.0.0"
 black = ">=24.0.0"
 mypy = ">=1.0.0"
 pdoc3 = ">=0.11.1"
+pathos = ">=0.3.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import numpy as np
+from time import perf_counter
 
-from ruvpy.multi_timestep import multiple_timesteps
+from ruvpy.multi_timestep import multiple_timesteps, multiple_timesteps_pathos
 from ruvpy.data_classes import DecisionContext
 from ruvpy.damage_functions import logistic_zero
 from ruvpy.economic_models import cost_loss, cost_loss_analytical_spend
@@ -35,7 +36,8 @@ def get_context():
     return DecisionContext(**context_fields)
 
 
-def test_multiple_timesteps():
+def test_multiple_timesteps_parallel_agrees_with_serial():
+    """Ensure parallel execution produces the same result as serial."""
     context = get_context()
 
     np.random.seed(42)
@@ -49,9 +51,50 @@ def test_multiple_timesteps():
 
     econ_par = context.economic_model_params[0]
 
-    result = multiple_timesteps(obs, fcsts, refs, econ_par, context, 1)
+    serial = multiple_timesteps(obs, fcsts, refs, econ_par, context, 1)
+    parallel = multiple_timesteps(obs, fcsts, refs, econ_par, context, 2)
 
-    # assert np.isclose(result.ruv, 0.04429408, rtol=1e-2, atol=1e-4)
-    # assert np.isclose(result.avg_fcst_ex_post, -3.399, rtol=1e-2, atol=1e-4)
-    # assert np.isclose(result.avg_ref_ex_post, -3.402, rtol=1e-2, atol=1e-4)
-    # assert np.isclose(result.avg_obs_ex_post, -3.340, rtol=1e-2, atol=1e-4)
+    assert np.allclose(serial.fcst_spends, parallel.fcst_spends, equal_nan=True)
+    assert np.allclose(serial.obs_spends, parallel.obs_spends, equal_nan=True)
+    assert np.allclose(serial.ref_spends, parallel.ref_spends, equal_nan=True)
+    assert np.allclose(serial.fcst_ex_post, parallel.fcst_ex_post, equal_nan=True)
+    assert np.allclose(serial.ref_ex_post, parallel.ref_ex_post, equal_nan=True)
+    assert np.allclose(serial.obs_ex_post, parallel.obs_ex_post, equal_nan=True)
+
+
+def test_dask_vs_pathos_benchmark(capsys):
+    """Benchmark Dask and Pathos across core counts."""
+    context = get_context()
+
+    np.random.seed(42)
+    num_steps = 1000
+    ens_size = 10
+
+    obs = np.random.gamma(1, 5, (num_steps, 1))
+    fcsts = np.random.normal(10, 1, (num_steps, ens_size))
+    refs = np.random.normal(5, 3, (num_steps, ens_size))
+
+    econ_par = context.economic_model_params[0]
+
+    cores = [1, 2, 4, 8]
+    backends = {
+        "dask": multiple_timesteps,
+        "pathos": multiple_timesteps_pathos,
+    }
+    timings = {}
+
+    for name, func in backends.items():
+        times = []
+        for n in cores:
+            start = perf_counter()
+            func(obs, fcsts, refs, econ_par, context, n)
+            times.append(perf_counter() - start)
+        timings[name] = times
+
+    with capsys.disabled():
+        for name, times in timings.items():
+            joined = ", ".join(f"{c}:{t:.2f}s" for c, t in zip(cores, times))
+            print(f"{name} -> {joined}")
+
+    for times in timings.values():
+        assert times[1] < times[0]

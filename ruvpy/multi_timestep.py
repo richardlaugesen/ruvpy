@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import numpy as np
+from dask import delayed, compute
+from pathos.multiprocessing import ProcessPool as Pool
 
 from ruvpy.single_timestep import single_timestep
 from ruvpy.data_classes import DecisionContext, SingleParOutput
-from pathos.multiprocessing import ProcessPool as Pool
 
 
 def multiple_timesteps(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, econ_par: float, context: DecisionContext, parallel_nodes: int) -> SingleParOutput:
@@ -24,11 +25,43 @@ def multiple_timesteps(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, eco
 
     The computation can be parallelised across timesteps using ``parallel_nodes``.
     """
+    tasks = []
+    for t, ob in enumerate(obs):
+        if not np.isnan(ob):
+            tasks.append(
+                delayed(single_timestep)(t, econ_par, ob, fcsts[t], refs[t], context)
+            )
+
+    if parallel_nodes == 1:
+        results = [task.compute() for task in tasks]
+    else:
+        results = list(
+            compute(*tasks, scheduler="processes", num_workers=parallel_nodes)
+        )
+
+    output = _dict_to_output(results, obs.shape[0])
+    output.ruv = _calc_ruv(output)
+
+    return output
+
+
+def multiple_timesteps_pathos(
+    obs: np.ndarray,
+    fcsts: np.ndarray,
+    refs: np.ndarray,
+    econ_par: float,
+    context: DecisionContext,
+    parallel_nodes: int,
+) -> SingleParOutput:
+    """Evaluate all timesteps using pathos for parallelism."""
+
     if parallel_nodes == 1:
         results = []
         for t, ob in enumerate(obs):
-            if not np.isnan(ob):    
-                results.append(single_timestep(t, econ_par, ob, fcsts[t], refs[t], context))
+            if not np.isnan(ob):
+                results.append(
+                    single_timestep(t, econ_par, ob, fcsts[t], refs[t], context)
+                )
     else:
         args = []
         for t, ob in enumerate(obs):
@@ -37,7 +70,11 @@ def multiple_timesteps(obs: np.ndarray, fcsts: np.ndarray, refs: np.ndarray, eco
         args = list(map(list, zip(*args)))
 
         with Pool(nodes=parallel_nodes) as pool:
-            results = pool.map(single_timestep, *args, chunksize=(len(obs) // parallel_nodes))
+            results = pool.map(
+                single_timestep,
+                *args,
+                chunksize=(len(obs) // parallel_nodes),
+            )
 
     output = _dict_to_output(results, obs.shape[0])
     output.ruv = _calc_ruv(output)
