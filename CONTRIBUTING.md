@@ -73,27 +73,32 @@ To run the test suite locally, follow these steps:
 1. Ensure you have the required dependencies installed. You can do this by installing the development environment using `Poetry`:
 
     ```bash
-   poetry install
-   poetry shell
+   poetry install --with dev
     ```
 
 2. Run the tests using `pytest`:
 
     ```bash
-    pytest
+    poetry run pytest
     ```
 
-Make sure all tests pass before submitting your contribution. If you’ve added new functionality, write tests for it and verify that they pass.
+3. Regenerate documentation using:
 
-## Getting Added to the AUTHORS File
+    ```bash
+    poetry run pdoc --html --output-dir docs ruvpy --force
+    ```
+   
+Make sure all tests pass before submitting your contribution. If you’ve added new functionality, write tests for it and verify that they pass, and update the documentation.
 
-If you make a significant contribution to the project, we'd love to recognize your work! After your pull request is merged, you are welcome to:
+## Getting Added to the CONTRIBUTORS File
 
-1. Open another pull request to add yourself to the [AUTHORS](AUTHORS) file.
+If you make a contribution to the project, we'd love to recognize your work! After your pull request is merged, you are welcome to:
+
+1. Open another pull request to add yourself to the [CONTRIBUTORS](CONTRIBUTORS) file.
 2. Include your name, email, and affiliation (if applicable) following the format of existing entries.
 
-By adding yourself to the `AUTHORS` file, you're helping ensure that contributors are properly credited for their work.
+By adding yourself to the `CONTRIBUTORS` file, you're helping ensure that contributors are properly credited for their work.
 
 ## License
 
-By contributing to this repository, you agree that your contributions will be licensed under the [Apache License 2.0](LICENSE), which governs the use of this project.
+By contributing to this repository, you agree that your contributions will be licensed under the [GNU Affero General Public License v3.0](LICENSE) and grant the copyright holder a perpetual, irrevocable, worldwide right to relicense it.

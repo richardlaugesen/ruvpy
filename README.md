@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/richardlaugesen/ruvpy/actions/workflows/python-package.yml/badge.svg)](https://github.com/richardlaugesen/ruvpy/actions/workflows/python-package.yml)
 ![Coverage](https://img.shields.io/badge/dynamic/json?color=green&label=Coverage&query=$.files[%27coverage.json%27].content&url=https://api.github.com/gists/a08622619e06b2157bee092f47e404d9)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13939198.svg)](https://doi.org/10.5281/zenodo.13939198)
 
@@ -80,11 +80,9 @@ Regenerate documentation using:
 
 ## Attribution
 
-This project is licensed under the [Apache License 2.0](LICENSE), which allows for free use, modification, 
-and distribution of the code under the terms of the license.
+This project is licensed under the [GNU Affero General Public License v3.0](LICENSE), which allows free use, modification, and distribution of the code under the terms of the license. AGPL ensures that the work remains free and open, even when used to provide services over a network.
 
-We would like to acknowledge and thank the [RUVPY developers](AUTHORS) for their efforts in maintaining and improving 
-this project. Please see the [AUTHORS](AUTHORS) file for a full list of contributors.
+We would like to acknowledge and thank everyone who has help this project in various ways. Please see the [CONTRIBUTORS](CONTRIBUTORS) file for a full list of individuals.
 
 For proper citation of this project, please refer to the [CITATION.cff](CITATION.cff) file, which provides guidance on 
 how to cite the software and relevant publications.

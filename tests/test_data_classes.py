@@ -5,7 +5,6 @@ from ruvpy.utility_functions import cara
 from ruvpy.economic_models import cost_loss, cost_loss_analytical_spend
 from ruvpy.decision_rules import optimise_over_forecast_distribution
 
-
 def test_decision_context_default_optimiser():
     context = DecisionContext(
         economic_model_params=np.array([0.1]),
