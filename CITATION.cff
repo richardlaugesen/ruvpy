@@ -1,24 +1,20 @@
-abstract: Initial software release for peer review with associated journal paper
+cff-version: 1.2.0
+title: RUVPY software library to quantify the value of forecasts for decision-making using RUV
+version: v1.0.0
+message: "If you use this software, please cite both the software and the associated method papers as listed below."
+abstract: |
+  RUVPY is a Python software library for quantifying the decision value of retrospective ensemble forecasts using the Relative Utility Value (RUV) framework. This version corresponds to the final peer-reviewed version accompanying the journal article on forecast value sensitivity to damage functions.
+
 authors:
   - family-names: Laugesen
     given-names: Richard
     orcid: 0000-0002-3811-5845
-  - family-names: Thyer
-    given-names: Mark
-  - family-names: McInerney
-    given-names: David
-  - family-names: Kavetski
-    given-names: Dmitri
-cff-version: 1.2.0
-date-released: '2024-10-16'
-doi: 10.5281/zenodo.13939199
-license: AGPL-3.0-or-later
-repository-code: https://github.com/richardlaugesen/ruvpy/tree/v0.9.1
-title: RUVPY software library to quantify the value of forecasts for decision-making using RUV
-type: software
-version: v0.9.1
 
-message: "If you use this software, please cite both the software and the associated method papers as below."
+date-released: 2025-07-06
+doi: 10.5281/zenodo.YOUR_NEW_DOI_HERE
+license: AGPL-3.0-or-later
+repository-code: https://github.com/richardlaugesen/ruvpy/tree/v1.0.0
+type: software
 
 references:
   - type: article
@@ -37,11 +33,12 @@ references:
     journal: "Hydrology and Earth System Sciences"
     volume: 27
     issue: 4
-    pages: "873-893"
+    pages: "873–893"
     identifiers:
       - type: doi
         value: "10.5194/hess-27-873-2023"
     url: "https://hess.copernicus.org/articles/27/873/2023/"
+
   - type: article
     title: "Software Library to Quantify the Value of Forecasts for Decision-Making: Case Study on Sensitivity to Damages"
     authors:
