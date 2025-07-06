@@ -12,7 +12,7 @@ authors:
 cff-version: 1.2.0
 date-released: '2024-10-16'
 doi: 10.5281/zenodo.13939199
-license: AGPL-3.0-or-later
+license: Apache-2.0
 repository-code: https://github.com/richardlaugesen/ruvpy/tree/v0.9.1
 title: RUVPY software library to quantify the value of forecasts for decision-making using RUV
 type: software
