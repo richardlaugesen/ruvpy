@@ -10,9 +10,9 @@ authors:
     given-names: Richard
     orcid: 0000-0002-3811-5845
 
-date-released: 2025-07-06
+date-released: 2025-07-07
 doi: 10.5281/zenodo.YOUR_NEW_DOI_HERE
-license: AGPL-3.0-or-later
+license: Apache-2.0
 repository-code: https://github.com/richardlaugesen/ruvpy/tree/v1.0.0
 type: software
 

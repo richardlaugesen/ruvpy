@@ -3,7 +3,7 @@ name = "ruvpy"
 version = "1.0.0"
 description = "Reference implementation of the Relative Utility Value method for evaluating probabilistic forecasts."
 authors = ["Richard Laugesen <richard@laugesen.com.au>"]
-license = "AGPL-3.0-or-later"
+license = "Apache-2.0"
 package-mode = true
 readme = "README.md"
 
