@@ -101,4 +101,4 @@ By adding yourself to the `CONTRIBUTORS` file, you're helping ensure that contri
 
 ## License
 
-By contributing to this repository, you agree that your contributions will be licensed under the [GNU Affero General Public License v3.0](LICENSE) and grant the copyright holder a perpetual, irrevocable, worldwide right to relicense it.
+By contributing to this repository, you agree that your contributions will be licensed under the [Apache License 2.0](LICENSE).
