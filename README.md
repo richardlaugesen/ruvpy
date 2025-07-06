@@ -13,7 +13,7 @@ RUVPY is a library which can be used in your software to quantify the value of f
 It is a reference implementation of the Relative Utility Value (RUV) method, which is very flexible and can accommodate a wide range of decisions.
 
 It includes a set of commonly used decision rules, utility functions, damage functions, and economic models.
-The implementation is sufficiently computationally efficient for most situations and parallelises timesteps over available CPU cores. 
+The implementation is sufficiently computationally efficient for most situations and parallelises timesteps over available CPU cores. By default, computations use a single core, but this can be increased via the ``parallel_nodes`` argument.
 The primary focus of this implementation is clarity and flexibility.
 
 The scope is intentionally narrow and does not include any figure generation, data loading and saving, other metrics, or analysis functionality. 

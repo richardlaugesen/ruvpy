@@ -1,10 +1,22 @@
+"""Damage functions used to translate event magnitude into monetary loss.
+
+The functions implemented here cover a range of common shapes and can
+be replaced with bespoke models if needed.  Each factory returns a
+callable that maps event magnitude to damages.
+"""
+
 from typing import Callable, List, Tuple
 import numpy as np
 from scipy import interpolate
 
 
 def logistic(params: dict) -> Callable:
-    """Return a logistic damage function."""
+    """Return a logistic damage function.
+
+    Damages increase sigmoidally toward ``A`` with growth rate ``k``
+    centred on ``threshold``. See
+    https://en.wikipedia.org/wiki/Logistic_function for background.
+    """
     A = params['A']
     k = params['k']
     threshold = params['threshold']
@@ -16,7 +28,11 @@ def logistic(params: dict) -> Callable:
 
 
 def logistic_zero(params: dict) -> Callable:
-    """Return the logistic damage function pegged to zero for zero flow."""
+    """Logistic damage function pegged to zero for zero flow.
+
+    Extends :func:`logistic` by forcing damages to ``0`` when the
+    magnitude is ``0``. Useful where small events cause no loss.
+    """
     logistic_closure = logistic(params)
 
     def damages(magnitude: np.ndarray) -> np.ndarray:
@@ -31,7 +47,11 @@ def logistic_zero(params: dict) -> Callable:
 
 
 def binary(params: dict) -> Callable:
-    """Return a binary damage function."""
+    """Return a binary damage function.
+
+    Losses jump from ``min_loss`` to ``max_loss`` once ``threshold`` is
+    exceeded, representing an on/off type impact.
+    """
     threshold, max_loss, min_loss = params['threshold'], params['max_loss'], params['min_loss']
 
     def damages(magnitude: np.ndarray) -> np.ndarray:
@@ -45,7 +65,11 @@ def binary(params: dict) -> Callable:
 
 
 def linear(params: dict) -> Callable:
-    """Return a linear damage function."""
+    """Return a linear damage function.
+
+    Damages vary linearly with magnitude using ``slope`` and
+    ``intercept`` parameters.
+    """
     slope, intercept = params['slope'], params['intercept']
 
     def damages(magnitude: np.ndarray) -> np.ndarray:
@@ -55,7 +79,11 @@ def linear(params: dict) -> Callable:
 
 
 def user_defined(params: dict) -> Callable:
-    """Return a damage function interpolated over user-defined ``(x, y)`` points."""
+    """Damage function interpolated over user-defined ``(x, y)`` points.
+
+    Allows arbitrary curves by linearly interpolating between supplied
+    points and extrapolating with the last value.
+    """
     if 'interpolator' in params:
         inter = params['interpolator']
     else:
