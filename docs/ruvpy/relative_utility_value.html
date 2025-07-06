@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-<meta name="generator" content="pdoc3 0.11.1">
+<meta name="generator" content="pdoc3 0.11.3">
 <title>ruvpy.relative_utility_value API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
@@ -34,7 +34,7 @@ hljs.highlightAll();
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="ruvpy.relative_utility_value.relative_utility_value"><code class="name flex">
-<span>def <span class="ident">relative_utility_value</span></span>(<span>obs: numpy.ndarray, fcsts: numpy.ndarray, refs: numpy.ndarray, decision_context: dict, parallel_nodes: int = 4) ‑> dict</span>
+<span>def <span class="ident">relative_utility_value</span></span>(<span>obs: numpy.ndarray,<br>fcsts: numpy.ndarray,<br>refs: numpy.ndarray,<br>decision_context: dict,<br>parallel_nodes: int = 1) ‑> dict</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Calculate the Relative Utility Value (RUV) for a set of observations, forecasts, and references
@@ -42,15 +42,14 @@ using a specified decision-context.</p>
 <p>This function calculates RUV by evaluating the utility of forecasts through a simulation of decision-making
 under uncertainty. RUV quantifies the value of forecasts relative to a reference scenario (e.g., climatology)
 and is often applied in settings such as streamflow forecasting or weather forecasting. It works with
-probabilistic forecasts but can also handle deterministic forecasts (single ensemble member for <code>fcsts</code> and <code>refs</code>).</p>
-<p>The RUV method and RUVPY software package are introduced in the following publications:</p>
+probabilistic forecasts but can also handle deterministic forecasts (single ensemble member for 'fcsts' and 'refs').
+The RUV method and RUVPY software package are introduced in the following
+publications:</p>
 <ul>
+<li>Laugesen, Richard and Thyer, Mark and McInerney, David and Kavetski, Dmitri, Software Library to Quantify the Value of Forecasts for Decision-Making: Case Study on Sensitivity to Damages. <a href="http://dx.doi.org/10.2139/ssrn.5001881">http://dx.doi.org/10.2139/ssrn.5001881</a> (under review)</li>
 <li>Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range
 of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27,
 873–893, <a href="https://doi.org/10.5194/hess-27-873-2023,">https://doi.org/10.5194/hess-27-873-2023,</a> 2023.</li>
-<li>Laugesen, R., Thyer, M., McInerney, D., Kavetski, D. (2024). Software to quantify the value of forecasts for
-decision-making: sensitivity to damages case study. Manuscript submitted for publication in Environmental
-Modelling &amp; Software.</li>
 </ul>
 <h2 id="args">Args</h2>
 <dl>
@@ -61,7 +60,7 @@ Modelling &amp; Software.</li>
 corresponds to a forecast at a given time.</dd>
 <dt><strong><code>refs</code></strong> :&ensp;<code>np.ndarray</code></dt>
 <dd>2D array of reference values (e.g., climatology ensemble), where each column is an ensemble
-member and each row corresponds to a time period. If <code>None</code>, a reference climatology will be generated based
+member and each row corresponds to a time period. If 'None', a reference climatology will be generated based
 on the observations, reproducing the observed frequency of events.</dd>
 <dt><strong><code>decision_context</code></strong> :&ensp;<code>dict</code></dt>
 <dd>Dictionary defining the decision context, containing:
@@ -69,7 +68,8 @@ on the observations, reproducing the observed frequency of events.</dd>
 - 'decision_rule' (list): Decision-making function and a dictionary of its parameters.
 - 'damage_function' (list): Damage function method and a dictionary of its parameters.
 - 'utility_function' (list): Utility function method and a dictionary of its parameters.
-- 'economic_model' (list): Economic model function, analytical function, and list of parameter values.</dd>
+- 'economic_model' (list): Economic model function, analytical function, and list of parameter values.
+- 'optimiser' (dict, optional): Optional dictionary specifying key/value pairs to tune the numerical optimiser (lower_bound, upper_bound, tolerance, polish, seed), all keys are required.</dd>
 <dt><strong><code>parallel_nodes</code></strong> :&ensp;<code>int</code>, optional</dt>
 <dd>Number of parallel processes used for computation. Defaults to 1.</dd>
 </dl>
@@ -107,38 +107,39 @@ on the observations, reproducing the observed frequency of events.</dd>
 <p>Included decision context functions:</p>
 <p>Decision rules:</p>
 <ul>
-<li><code>optimise_over_forecast_distribution</code>: Optimises decision-making based on the whole forecast distribution.</li>
-<li><code>critical_probability_threshold_fixed</code>: Uses a fixed critical probability threshold for decision-making.</li>
-<li><code>critical_probability_threshold_max_value</code>: Selects the decision threshold leading to the maximum forecast value.</li>
-<li><code>critical_probability_threshold_equals_par</code>: Matches the decision threshold to the economic parameter.</li>
+<li>'optimise_over_forecast_distribution': Optimises decision-making based on the whole forecast distribution.</li>
+<li>'critical_probability_threshold_fixed': Uses a fixed critical probability threshold for decision-making.</li>
+<li>'critical_probability_threshold_max_value': Selects the decision threshold leading to the maximum forecast value.</li>
+<li>'critical_probability_threshold_equals_par': Matches the decision threshold to the economic parameter.</li>
+<li>'forecast_distribution_mode': Use the most likely value from each forecast ensemble</li>
 </ul>
 <p>Damage functions:</p>
 <ul>
-<li><code>logistic</code>: Logistic damage function with defined maximum damages, steepness, and location.</li>
-<li><code>logistic_zero</code>: Logistic function with damages pegged to zero for zero flow.</li>
-<li><code>binary</code>: Binary loss function with parameters for max and min loss, and location.</li>
-<li><code>linear</code>: Linear damage function.</li>
-<li><code>user_defined</code>: Damage function interpolated over user-defined points.</li>
+<li>'logistic': Logistic damage function with defined maximum damages, steepness, and location.</li>
+<li>'logistic_zero': Logistic function with damages pegged to zero for zero flow.</li>
+<li>'binary': Binary loss function with parameters for max and min loss, and location.</li>
+<li>'linear': Linear damage function.</li>
+<li>'user_defined': Damage function interpolated over user-defined points.</li>
 </ul>
 <p>Utility functions:</p>
 <ul>
-<li><code>cara</code>: Constant Absolute Risk Aversion (CARA), where absolute risk aversion stays constant regardless of wealth.</li>
-<li><code>crra</code>: Constant Relative Risk Aversion (CRRA), where relative risk aversion stays constant regardless of wealth.</li>
-<li><code>exponential_utility</code>: Exponential utility function used to model CARA behaviour.</li>
-<li><code>isoelastic_utility</code>: Isoelastic utility function used to model CRRA behaviour.</li>
-<li><code>hyperbolic_utility</code>: Hyperbolic Absolute Risk Aversion (HARA), generalises both CARA and CRRA behavior.</li>
+<li>'cara': Constant Absolute Risk Aversion (CARA), where absolute risk aversion stays constant regardless of wealth.</li>
+<li>'crra': Constant Relative Risk Aversion (CRRA), where relative risk aversion stays constant regardless of wealth.</li>
+<li>'exponential_utility': Exponential utility function used to model CARA behaviour.</li>
+<li>'isoelastic_utility': Isoelastic utility function used to model CRRA behaviour.</li>
+<li>'hyperbolic_utility': Hyperbolic Absolute Risk Aversion (HARA), generalises both CARA and CRRA behavior.</li>
 </ul>
 <p>Economic models:</p>
 <ul>
-<li><code>cost_loss</code>: Standard cost-loss economic model based on spending to mitigate potential future losses.</li>
-<li><code>cost_loss_analytical_spend</code>: Analytical function to compute optimal spending in cost-loss.</li>
+<li>'cost_loss': Standard cost-loss economic model based on spending to mitigate potential future losses.</li>
+<li>'cost_loss_analytical_spend': Analytical function to compute optimal spending in cost-loss.</li>
 </ul>
 <p>Decision types:</p>
-<p>Defined by providing a list of thresholds in the <code>decision_thresholds</code> key of the decision_context dictionary:</p>
+<p>Defined by providing a list of thresholds in the 'decision_thresholds' key of the decision_context dictionary:</p>
 <ul>
 <li>'Binary decision': 1D array with two elements, 0 and the threshold value (e.g., np.array([0, 20])).</li>
 <li>'Multi-categorical decision': 1D array with multiple elements, one of which must be 0 (e.g., np.array([0, 5, 15, 25])).</li>
-<li>'Continuous decision': <code>None</code>.</li>
+<li>'Continuous decision': 'None'.</li>
 </ul></div>
 </dd>
 </dl>
@@ -165,7 +166,7 @@ on the observations, reproducing the observed frequency of events.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.3</a>.</p>
 </footer>
 </body>
 </html>

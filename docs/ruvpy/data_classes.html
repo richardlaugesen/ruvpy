@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-<meta name="generator" content="pdoc3 0.11.1">
+<meta name="generator" content="pdoc3 0.11.3">
 <title>ruvpy.data_classes API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
@@ -37,25 +37,34 @@ hljs.highlightAll();
 <dl>
 <dt id="ruvpy.data_classes.DecisionContext"><code class="flex name class">
 <span>class <span class="ident">DecisionContext</span></span>
-<span>(</span><span>economic_model_params: numpy.ndarray, damage_function: Callable, utility_function: Callable, economic_model: Callable, analytical_spend: Callable, decision_rule: Callable, decision_thresholds: Optional[numpy.ndarray] = None)</span>
+<span>(</span><span>economic_model_params: numpy.ndarray,<br>damage_function: Callable,<br>utility_function: Callable,<br>economic_model: Callable,<br>analytical_spend: Callable,<br>decision_rule: Callable,<br>decision_thresholds: numpy.ndarray = None,<br>optimiser: dict = &lt;factory&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>DecisionContext(economic_model_params: numpy.ndarray, damage_function: Callable, utility_function: Callable, economic_model: Callable, analytical_spend: Callable, decision_rule: Callable, decision_thresholds: Optional[numpy.ndarray] = None)</p></div>
+<div class="desc"><p>Container for all functions and parameters required for an RUV run.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@dataclass
 class DecisionContext:
+    &#34;&#34;&#34;Container for all functions and parameters required for an RUV run.&#34;&#34;&#34;
     economic_model_params: np.ndarray
     damage_function: Callable
     utility_function: Callable
     economic_model: Callable
     analytical_spend: Callable
     decision_rule: Callable
-    decision_thresholds: Optional[np.ndarray] = field(default=None)
-
+    decision_thresholds: np.ndarray = field(default=None)
+    optimiser: dict = field(default_factory=lambda: {
+        &#39;lower_bound&#39;: None,
+        &#39;upper_bound&#39;: None,
+        &#39;tolerance&#39;: 1E-4,
+        &#39;polish&#39;: True,
+        &#39;seed&#39;: None
+    })
+    
     def validate_fields(self):
+        &#34;&#34;&#34;Ensure all mandatory fields are set.&#34;&#34;&#34;
         for field_name, value in self.__dict__.items():
             if field_name != &#39;decision_thresholds&#39; and value is None:
                 raise ValueError(f&#34;The field &#39;{field_name}&#39; cannot be None&#34;)</code></pre>
@@ -74,7 +83,7 @@ class DecisionContext:
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="ruvpy.data_classes.DecisionContext.decision_thresholds"><code class="name">var <span class="ident">decision_thresholds</span> : Optional[numpy.ndarray]</code></dt>
+<dt id="ruvpy.data_classes.DecisionContext.decision_thresholds"><code class="name">var <span class="ident">decision_thresholds</span> : numpy.ndarray</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -83,6 +92,10 @@ class DecisionContext:
 <div class="desc"></div>
 </dd>
 <dt id="ruvpy.data_classes.DecisionContext.economic_model_params"><code class="name">var <span class="ident">economic_model_params</span> : numpy.ndarray</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="ruvpy.data_classes.DecisionContext.optimiser"><code class="name">var <span class="ident">optimiser</span> : dict</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -97,7 +110,7 @@ class DecisionContext:
 <span>def <span class="ident">validate_fields</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Ensure all mandatory fields are set.</p></div>
 </dd>
 </dl>
 </dd>
@@ -105,28 +118,35 @@ class DecisionContext:
 <span>class <span class="ident">MultiParOutput</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>MultiParOutput()</p></div>
+<div class="desc"><p>Container for outputs over multiple economic parameter values.</p>
+<p>Initialise an empty results container.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@dataclass
 class MultiParOutput:
-    data: dict    # econ_par, results
+    &#34;&#34;&#34;Container for outputs over multiple economic parameter values.&#34;&#34;&#34;
 
-    # maintains data ordered by econ_par
+    data: dict    # econ_par, results
     def insert(self, econ_par, output):
+        &#34;&#34;&#34;Insert results keyed by economic parameter and maintain ordering.&#34;&#34;&#34;
         self.data[econ_par] = output
         self.data = {econ_par: self.data[econ_par] for econ_par in sorted(self.data)}
 
-    # return either a 1D or 2D numpy array depending on the type of SingleParOutput field that is stored in the data dict
     def get_series(self, field):
-        return np.array([getattr(v, field).tolist() if isinstance(getattr(v, field), np.ndarray) else getattr(v, field) for a, v in self.data.items()])
+        &#34;&#34;&#34;Return results for ``field`` as a 1D or 2D ``numpy`` array.&#34;&#34;&#34;
+        return np.array([
+            getattr(v, field).tolist() if isinstance(getattr(v, field), np.ndarray) else getattr(v, field)
+            for a, v in self.data.items()
+        ])
         
     def __init__(self):
+        &#34;&#34;&#34;Initialise an empty results container.&#34;&#34;&#34;
         self.data = {}
 
     def to_dict(self) -&gt; dict:
+        &#34;&#34;&#34;Convert stored results to a dictionary of ``numpy`` arrays.&#34;&#34;&#34;
         results = {}
         results[&#39;ruv&#39;] = self.get_series(&#39;ruv&#39;)
         results[&#39;economic_model_params&#39;] = np.array(list(self.data.keys()))
@@ -162,19 +182,19 @@ class MultiParOutput:
 <span>def <span class="ident">get_series</span></span>(<span>self, field)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return results for <code>field</code> as a 1D or 2D <code>numpy</code> array.</p></div>
 </dd>
 <dt id="ruvpy.data_classes.MultiParOutput.insert"><code class="name flex">
 <span>def <span class="ident">insert</span></span>(<span>self, econ_par, output)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Insert results keyed by economic parameter and maintain ordering.</p></div>
 </dd>
 <dt id="ruvpy.data_classes.MultiParOutput.to_dict"><code class="name flex">
 <span>def <span class="ident">to_dict</span></span>(<span>self) ‑> dict</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Convert stored results to a dictionary of <code>numpy</code> arrays.</p></div>
 </dd>
 </dl>
 </dd>
@@ -183,13 +203,15 @@ class MultiParOutput:
 <span>(</span><span>obs_size: int)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>SingleParOutput(obs_size: int)</p></div>
+<div class="desc"><p>Output data for a single economic parameter value.</p>
+<p>Create empty arrays for storing results.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@dataclass
 class SingleParOutput:
+    &#34;&#34;&#34;Output data for a single economic parameter value.&#34;&#34;&#34;
     ruv: float
 
     avg_fcst_ex_post: float
@@ -209,6 +231,7 @@ class SingleParOutput:
     ref_ex_ante: np.ndarray
 
     def __init__(self, obs_size: int):
+        &#34;&#34;&#34;Create empty arrays for storing results.&#34;&#34;&#34;
         self.ruv = np.nan
         self.avg_fcst_ex_post = np.nan
         self.avg_obs_ex_post = np.nan
@@ -297,6 +320,7 @@ class SingleParOutput:
 <li><code><a title="ruvpy.data_classes.DecisionContext.decision_thresholds" href="#ruvpy.data_classes.DecisionContext.decision_thresholds">decision_thresholds</a></code></li>
 <li><code><a title="ruvpy.data_classes.DecisionContext.economic_model" href="#ruvpy.data_classes.DecisionContext.economic_model">economic_model</a></code></li>
 <li><code><a title="ruvpy.data_classes.DecisionContext.economic_model_params" href="#ruvpy.data_classes.DecisionContext.economic_model_params">economic_model_params</a></code></li>
+<li><code><a title="ruvpy.data_classes.DecisionContext.optimiser" href="#ruvpy.data_classes.DecisionContext.optimiser">optimiser</a></code></li>
 <li><code><a title="ruvpy.data_classes.DecisionContext.utility_function" href="#ruvpy.data_classes.DecisionContext.utility_function">utility_function</a></code></li>
 <li><code><a title="ruvpy.data_classes.DecisionContext.validate_fields" href="#ruvpy.data_classes.DecisionContext.validate_fields">validate_fields</a></code></li>
 </ul>
@@ -334,7 +358,7 @@ class SingleParOutput:
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.3</a>.</p>
 </footer>
 </body>
 </html>
