@@ -1,21 +1,38 @@
+"""Utility functions describing decision-maker preferences.
+
+Each factory returns a callable that converts monetary outcomes to
+utility according to a particular risk preference model.
+"""
+
 from typing import Callable
 import numpy as np
 
 
 def cara(params: dict) -> Callable:
-    """Constant Absolute Risk Aversion utility function."""
+    """Constant Absolute Risk Aversion (CARA).
+
+    Returns an exponential utility function with risk-aversion
+    coefficient ``A``. Absolute risk aversion remains constant
+    regardless of wealth. See
+    https://en.wikipedia.org/wiki/Risk_aversion#Constant_absolute_risk_aversion.
+    """
     return exponential_utility(params)
 
 
 def crra(params: dict) -> Callable:
-    """Constant Relative Risk Aversion utility function."""
+    """Constant Relative Risk Aversion (CRRA).
+
+    Wraps :func:`isoelastic_utility` so relative risk aversion ``eta``
+    remains constant regardless of wealth.
+    """
     return isoelastic_utility(params)
 
 
 def exponential_utility(params: dict) -> Callable:
-    """Exponential utility function used for CARA behaviour.
+    """Exponential utility function implementing CARA behaviour.
 
-    See https://en.wikipedia.org/wiki/Exponential_utility for details.
+    This formulation is common in economics and underpins constant
+    absolute risk aversion.
     """
     A = params['A']
 
@@ -30,9 +47,10 @@ def exponential_utility(params: dict) -> Callable:
 
 
 def isoelastic_utility(params: dict) -> Callable:
-    """Isoelastic utility function used for CRRA behaviour.
+    """Isoelastic (power) utility function for CRRA behaviour.
 
-    See https://en.wikipedia.org/wiki/Isoelastic_utility.
+    Parameter ``eta`` controls relative risk aversion. ``eta=1`` yields
+    logarithmic utility.
     """
     eta = float(params['eta'])
 
@@ -48,9 +66,10 @@ def isoelastic_utility(params: dict) -> Callable:
 
 
 def hyperbolic_utility(params: dict) -> Callable:
-    """Hyperbolic Absolute Risk Aversion utility function.
+    """Hyperbolic Absolute Risk Aversion (HARA) utility function.
 
-    See https://en.wikipedia.org/wiki/Hyperbolic_absolute_risk_aversion.
+    Generalises both CARA and CRRA through parameters ``g``, ``a`` and
+    ``b``.
     """
     g, a, b = params['g'], params['a'], params['b']
 
