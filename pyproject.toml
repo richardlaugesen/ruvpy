@@ -1,46 +1,46 @@
 [tool.poetry]
 name = "ruvpy"
 version = "1.0.0"
-description = "Reference implementation of the Relative Utility Value method for evaluating probabilistic forecasts."
+description = "Reference implementation of Relative Utility Value (RUV) to quantify forecast value"
 authors = ["Richard Laugesen <richard@laugesen.com.au>"]
 license = "Apache-2.0"
 package-mode = true
 readme = "README.md"
+include = [
+    "README.md",
+    "LICENSE",
+    "CONTRIBUTORS",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Decision Science",
+    "Topic :: Scientific/Engineering :: Decision Theory",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Decision Support Systems",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Topic :: Scientific/Engineering :: Climate Science",
+    "Topic :: Scientific/Engineering :: Hydrologic Science",
+    "Topic :: Scientific/Engineering :: Climatology",
+    "Topic :: Scientific/Engineering :: Hydrology",
+    "Topic :: Office/Business :: Financial",
+]
 
 [tool.poetry.urls]
 "Homepage" = "https://github.com/richardlaugesen/ruvpy"
 "Source Code" = "https://github.com/richardlaugesen/ruvpy"
 "Issue Tracker" = "https://github.com/richardlaugesen/ruvpy/issues"
 "Documentation" = "https://github.com/richardlaugesen/ruvpy#readme"
-"Citation" = "https://doi.org/10.5281/zenodo.NEW_ID"
-
-[tool.poetry.classifiers]
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Operating System :: OS Independent",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Information Analysis",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Topic :: Scientific/Engineering :: Decision Support Systems",
-    "Topic :: Scientific/Engineering :: Atmospheric Science",
-    "Topic :: Scientific/Engineering :: Hydrology",
-    "Topic :: Scientific/Engineering :: Hydrologic Sciences",
-    "Topic :: Office/Business :: Financial",
-]
-
-include = [
-    "README.md",
-    "LICENSE",
-    "AUTHORS"
-]
+"Citation" = "https://doi.org/10.5281/zenodo.13939198"
 
 [tool.poetry.dependencies]
-python = ">=3.10"  # Core will run with 3.9; xarray requires 3.10 but is only needed for examples
+python = ">=3.10"
 numpy = ">=1.24.4"
 scipy = ">=1.9.3"
 pathos = ">=0.3.0"

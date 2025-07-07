@@ -1,59 +1,23 @@
 cff-version: 1.2.0
-title: RUVPY software library to quantify the value of forecasts for decision-making using RUV
-version: v1.0.0
-message: "If you use this software, please cite both the software and the associated method papers as listed below."
-abstract: |
-  RUVPY is a Python software library for quantifying the decision value of retrospective ensemble forecasts using the Relative Utility Value (RUV) framework. This version corresponds to the final peer-reviewed version accompanying the journal article on forecast value sensitivity to damage functions.
-
+title: Reference implementation of Relative Utility Value (RUV) to quantify forecast value
+version: 1.0.0
+abstract: >
+    RUVPY is a reference implementation of Relative Utility Value (RUV), a quantitative method for
+    estimating the value forecast information brings to decision-making. RUV is a general method and is designed to be
+    flexible and applicable to a wide range of decision-making scenarios through an explicitly defined decision-context.
+    RUVPY can be used to evaluate the value of retrospective forecasts in various domains, such as hydrology, meteorology,
+    and climate science. The provides an API to calculate the RUV over an input dataset, and a collection of
+    decision-context components ready to be parameterised for the context under evaluation. RUVPY is particularly useful
+    for researchers and practitioners who want to assess the economic or practical benefits of forecast information in
+    decision-making processes. The library is implemented in Python and is available as an open-source package on GitHub.
+    It includes documentation and examples to help users get started.
 authors:
   - family-names: Laugesen
     given-names: Richard
-    orcid: 0000-0002-3811-5845
-
+    orcid: https://orcid.org/0000-0002-3811-5845
+    email: richard@laugesen.com.au
 date-released: 2025-07-07
-doi: 10.5281/zenodo.YOUR_NEW_DOI_HERE
 license: Apache-2.0
-repository-code: https://github.com/richardlaugesen/ruvpy/tree/v1.0.0
+repository-code: https://github.com/richardlaugesen/ruvpy
+url: https://github.com/richardlaugesen/ruvpy/releases/tag/v1.0.0
 type: software
-
-references:
-  - type: article
-    title: "Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts"
-    authors:
-      - family-names: "Laugesen"
-        given-names: "Richard"
-        orcid: "0000-0002-3811-5845"
-      - family-names: "Thyer"
-        given-names: "Mark"
-      - family-names: "McInerney"
-        given-names: "David"
-      - family-names: "Kavetski"
-        given-names: "Dmitri"
-    year: 2023
-    journal: "Hydrology and Earth System Sciences"
-    volume: 27
-    issue: 4
-    pages: "873–893"
-    identifiers:
-      - type: doi
-        value: "10.5194/hess-27-873-2023"
-    url: "https://hess.copernicus.org/articles/27/873/2023/"
-
-  - type: article
-    title: "Software Library to Quantify the Value of Forecasts for Decision-Making: Case Study on Sensitivity to Damages"
-    authors:
-      - family-names: "Laugesen"
-        given-names: "Richard"
-        orcid: "0000-0002-3811-5845"
-      - family-names: "Thyer"
-        given-names: "Mark"
-      - family-names: "McInerney"
-        given-names: "David"
-      - family-names: "Kavetski"
-        given-names: "Dmitri"
-    year: 2024
-    journal: "SSRN"
-    identifiers:
-      - type: doi
-        value: "10.2139/ssrn.5001881"
-    url: "https://ssrn.com/abstract=5001881"
