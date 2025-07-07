@@ -85,7 +85,7 @@ This project is licensed under the [Apache License 2.0](LICENSE), which allows f
 We would like to acknowledge and thank everyone who has help this project in various ways. Please see the [CONTRIBUTORS](CONTRIBUTORS) file for a full list of individuals.
 
 For proper citation of this project, please refer to the [CITATION.cff](CITATION.cff) file, which provides guidance on 
-how to cite the software and relevant publications.
+how to cite the software. Please also consider citing the publications listed above.
 
 ## Code of conduct
 
