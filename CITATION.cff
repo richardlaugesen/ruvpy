@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 title: Reference implementation of Relative Utility Value (RUV) to quantify forecast value
-version: 1.0.0
+version: 1.0.1
 abstract: >
     RUVPY is a reference implementation of Relative Utility Value (RUV), a quantitative method for
     estimating the value forecast information brings to decision-making. RUV is a general method and is designed to be
@@ -16,8 +16,8 @@ authors:
     given-names: Richard
     orcid: https://orcid.org/0000-0002-3811-5845
     email: richard@laugesen.com.au
-date-released: 2025-07-07
+date-released: 2025-07-24
 license: Apache-2.0
 repository-code: https://github.com/richardlaugesen/ruvpy
-url: https://github.com/richardlaugesen/ruvpy/releases/tag/v1.0.0
+url: https://github.com/richardlaugesen/ruvpy/releases/tag/v1.0.1
 type: software

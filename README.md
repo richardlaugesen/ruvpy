@@ -78,6 +78,10 @@ Regenerate documentation using:
 
     poetry run pdoc --html --output-dir docs ruvpy --force
 
+To release a new version. Ensure everything is up to date and docs are built then bump the version in 
+the `pyproject.toml` and `CITATION.cff` file. Commit and push to Github before creating a new version tag and 
+release in the browser. Run `poetry build` and `poetry publish` to push new release to PyPi. 
+
 ## Attribution
 
 This project is licensed under the [Apache License 2.0](LICENSE), which allows free use, modification, and distribution of the code.
