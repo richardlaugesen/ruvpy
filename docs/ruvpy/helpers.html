@@ -55,7 +55,7 @@ el.replaceWith(d);
 <pre><code class="python">def ecdf(ens: np.ndarray, thresholds: np.ndarray) -&gt; np.ndarray:
     &#34;&#34;&#34;Return exceedance probabilities for the supplied thresholds.
 
-    This implementation is up to five times faster than ``statsmodels``&#39; ECDF.
+    In micro-benchmarks this implementation is up to five times faster than the more general ``statsmodels`` ECDF.
     &#34;&#34;&#34;
     if len(thresholds) == 0:
         return thresholds
@@ -68,7 +68,7 @@ el.replaceWith(d);
     return 1 - probs[idx]</code></pre>
 </details>
 <div class="desc"><p>Return exceedance probabilities for the supplied thresholds.</p>
-<p>This implementation is up to five times faster than <code>statsmodels</code>' ECDF.</p></div>
+<p>In micro-benchmarks this implementation is up to five times faster than the more general <code>statsmodels</code> ECDF.</p></div>
 </dd>
 <dt id="ruvpy.helpers.generate_event_freq_ref"><code class="name flex">
 <span>def <span class="ident">generate_event_freq_ref</span></span>(<span>obs: numpy.ndarray) ‑> numpy.ndarray</span>

@@ -12,10 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Economic models representing the cost and benefit structure.
+"""Economic models representing the net outcome of damages and user spending.
 
-These functions provide simple formulations for converting spending
-and damages into a net utility.
+These functions provide a net economic outcome from user spending ``spend`` and
+the damages due to the state of the world ``values`` and the ``damage_function``.
+An economic model will typically be parameterised (single parameter only for
+current RUVPY version).
+
+An additional function can be provided for each economic model to calculate
+the optimal spend amount for deterministic inputs. This significantly speeds
+up the calculation of RUV by avoiding the numerical optimisation required
+with ensemble inputs.
 """
 
 import numpy as np
@@ -36,6 +43,6 @@ def cost_loss_analytical_spend(alpha: float, values: float, damage_function: cal
     """Analytical solution for the optimal spend in a cost-loss model.
 
     Computes the spend that maximises expected profit for a
-    deterministic forecast.
+    deterministic input.
     """
     return damage_function(values) * alpha

@@ -55,7 +55,7 @@ def generate_event_freq_ref(obs: np.ndarray) -> np.ndarray:
 def ecdf(ens: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
     """Return exceedance probabilities for the supplied thresholds.
 
-    This implementation is up to five times faster than ``statsmodels``' ECDF.
+    In micro-benchmarks this implementation is up to five times faster than the more general ``statsmodels`` ECDF.
     """
     if len(thresholds) == 0:
         return thresholds
