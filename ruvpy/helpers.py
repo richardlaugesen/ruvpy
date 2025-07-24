@@ -139,24 +139,3 @@ def prob_premium_to_risk_aversion_coef(risk_premium_prob: float, gamble_size: fl
         )
 
     return root_scalar(eqn, bracket=[1e-12, 100]).root
-
-
-def nanmode(data, axis=None):
-    """Return the mode while ignoring ``NaN`` values."""
-    if axis is None:
-        # Flatten array and remove NaN values
-        non_nan_data = data[~np.isnan(data)]
-        if len(non_nan_data) == 0:
-            return np.nan
-        unique_vals, counts = np.unique(non_nan_data, return_counts=True)
-        return unique_vals[np.argmax(counts)]
-    else:
-        # Compute mode along the specified axis, ignoring NaN
-        def mode_along_axis(subarray):
-            non_nan_data = subarray[~np.isnan(subarray)]
-            if len(non_nan_data) == 0:
-                return np.nan
-            unique_vals, counts = np.unique(non_nan_data, return_counts=True)
-            return unique_vals[np.argmax(counts)]
-        
-        return np.apply_along_axis(mode_along_axis, axis, data)
