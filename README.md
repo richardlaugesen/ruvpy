@@ -23,9 +23,9 @@ These functions are intended to be implemented in a larger workflow or analysis 
 
 The method and software package are introduced in detail in the following publications. We suggest reading these to understand the context and motivation for the software.
 
-*Laugesen, Richard and Thyer, Mark and McInerney, David and Kavetski, Dmitri, Software Library to Quantify the Value of Forecasts for Decision-Making: Case Study on Sensitivity to Damages. http://dx.doi.org/10.2139/ssrn.5001881 (under review)*
+*Laugesen, R., Thyer, M., McInerney, D., & Kavetski, D. (2025), Software Library to Quantify the Value of Forecasts for Decision-Making: Case Study on Sensitivity to Damages, Environmental Modelling and Software, https://doi.org/10.1016/j.envsoft.2025.106697*
 
-*Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D.: Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27, 873–893, https://doi.org/10.5194/hess-27-873-2023, 2023.*
+*Laugesen, R., Thyer, M., McInerney, D., and Kavetski, D. (2023), Flexible forecast value metric suitable for a wide range of decisions: application using probabilistic subseasonal streamflow forecasts, Hydrol. Earth Syst. Sci., 27, 873–893, https://doi.org/10.5194/hess-27-873-2023*
 
 ## Installation
 
